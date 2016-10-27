@@ -1,58 +1,47 @@
-;;;;; Author: Travis Cross <tc@traviscross.com>
-
 [Unit]
-Description=freeswitch
+Description=FreeSwitch - VoIP server
 Wants=network-online.target
 Requires=syslog.socket network.target local-fs.target
 After=syslog.socket network.target network-online.target local-fs.target
+After=postgresql.service postgresql-9.3.service postgresql-9.4.service mysqld.service httpd.service
 
 [Service]
 ; service
-Type=forking
-PIDFile=/run/freeswitch/freeswitch.pid
+Type=simple
+; This allows save core files on folder owned by freeswitch user
+WorkingDirectory=/var/lib/freeswitch
 Environment="DAEMON_OPTS=-nonat"
 EnvironmentFile=-/etc/default/freeswitch
-ExecStartPre=/bin/chown -R freeswitch:freeswitch /var/lib/freeswitch /var/log/freeswitch /etc/freeswitch /usr/share/freeswitch /var/run/freeswitch
-ExecStart=/usr/bin/freeswitch -u freeswitch -g freeswitch -ncwait $DAEMON_OPTS
+ExecStart=/usr/bin/freeswitch -nc -nf $DAEMON_OPTS
+ExecReload=/usr/bin/kill -HUP $MAINPID
+ExecStop=/usr/bin/freeswitch -stop
 TimeoutSec=45s
-Restart=always
+; This allows shutdown daemon via command "fsctl shutdown asap"
+Restart=on-failure
+SuccessExitStatus=255
 ; exec
-User=root
+User=freeswitch
 Group=daemon
 LimitCORE=infinity
-LimitNOFILE=100000
+; For each TCP or TLS endpoint connection is requred file descriptor
+LimitNOFILE=999999
 LimitNPROC=60000
 LimitSTACK=250000
 LimitRTPRIO=infinity
 LimitRTTIME=infinity
 IOSchedulingClass=realtime
 IOSchedulingPriority=2
-CPUSchedulingPolicy=rr
-CPUSchedulingPriority=89
+; Setting normal priority settings
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=1
+Nice=-19
 UMask=0007
 NoNewPrivileges=false
 
-; alternatives which you can enforce by placing a unit drop-in into
-; /etc/systemd/system/freeswitch.service.d/*.conf:
-;
-; User=freeswitch
-; Group=freeswitch
-; ExecStart=
-; ExecStart=/usr/bin/freeswitch -ncwait -nonat -rp
-;
-; empty ExecStart is required to flush the list.
-;
 ; if your filesystem supports extended attributes, execute
 ;   setcap 'cap_net_bind_service,cap_sys_nice=+ep' /usr/bin/freeswitch
-; this will also allow socket binding on low ports
-;
-; otherwise, remove the -rp option from ExecStart and
-; add these lines to give real-time priority to the process:
-;
-; PermissionsStartOnly=true
-; ExecStartPost=/bin/chrt -f -p 1 $MAINPID
-;
-; execute "systemctl daemon-reload" after editing the unit files.
+; this will allow change process scheduling and allow socket binding on low ports
+
 
 [Install]
 WantedBy=multi-user.target
