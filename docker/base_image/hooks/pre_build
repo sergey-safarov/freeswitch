@@ -1,0 +1,8 @@
+#!/bin/bash -e
+echo "=> Build FreeSwitch source code"
+if [ ! -z "$SOURCE_BRANCH" ];then
+    ENV_OPT="-e SOURCE_BRANCH=$SOURCE_BRANCH"
+fi
+
+docker run --volume=`pwd`/../..:/usr/src/freeswitch-debs/freeswitch --volume=`pwd`/build.sh:/build.sh --entrypoint=/build.sh $ENV_OPT debian:jessie
+exit $?

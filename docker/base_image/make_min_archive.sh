@@ -59,6 +59,7 @@ extra_files_debian() {
 /bin
 /bin/busybox
 /usr/bin
+/usr/bin/dumpcap
 /usr/bin/epmd
 /usr/lib
 /usr/lib/erlang
@@ -67,6 +68,8 @@ extra_files_debian() {
 /usr/lib/erlang/erts-6.2
 /usr/lib/erlang/erts-6.2/bin
 /usr/lib/erlang/erts-6.2/bin/epmd
+/usr/sbin
+/usr/sbin/tcpdump
 EOF
 }
 
@@ -149,7 +152,7 @@ make_image_tar() {
     cd $CURDIR
 }
 
-apt-get --assume-yes install busybox patch
+DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install busybox patch tcpdump wireshark-common
 
 clean_build_root
 fs_files_debian > $FILELIST

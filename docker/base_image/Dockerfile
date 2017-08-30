@@ -29,9 +29,9 @@
 FROM scratch
 
 ADD freeswitch_img.tar.gz /
-COPY docker-entrypoint.sh healthcheck.sh sounds_version.txt /
+COPY entrypoint.sh healthcheck.sh sounds_version.txt /
 
 HEALTHCHECK --interval=15s --timeout=5s \
     CMD  /healthcheck.sh
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
