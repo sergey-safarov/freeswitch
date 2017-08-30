@@ -24,7 +24,7 @@ diff -ur a/usr/share/freeswitch/conf/vanilla/vars.xml b/usr/share/freeswitch/con
         WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING 
    -->
    <X-PRE-PROCESS cmd="set" data="default_password=1234"/>
-+  <X-PRE-PROCESS cmd="set" data="disable_system_api_commands=false"/>
++  <X-PRE-PROCESS cmd="set" data="disable_system_api_commands=true"/>
    <!-- Did you change it yet? -->
    <!--
        The following variables are set dynamically - calculated if possible by freeswitch - and 
