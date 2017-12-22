@@ -46,7 +46,7 @@ clean_build_root() {
 fs_files_debian() {
     local PACKAGES
     PACKAGES=$(dpkg-query -f '${binary:Package}\n' -W 'freeswitch*')
-    PACKAGES="libc6 $PACKAGES"
+    PACKAGES="libc6 libpython2.7-minimal libpython2.7-stdlib $PACKAGES"
     for pkg in $PACKAGES
     do
         dpkg-query -L $pkg 2> /dev/null
@@ -56,9 +56,13 @@ fs_files_debian() {
 extra_files_debian() {
     cat << EOF
 /etc
+/etc/ssl
+/etc/ssl/certs
+/etc/ssl/certs/*
 /bin
 /bin/busybox
 /usr/bin
+/usr/bin/curl
 /usr/bin/dumpcap
 /usr/bin/epmd
 /usr/lib
@@ -68,6 +72,8 @@ extra_files_debian() {
 /usr/lib/erlang/erts-6.2
 /usr/lib/erlang/erts-6.2/bin
 /usr/lib/erlang/erts-6.2/bin/epmd
+/usr/lib/ssl
+/usr/lib/ssl/certs
 /usr/sbin
 /usr/sbin/tcpdump
 EOF
@@ -152,7 +158,7 @@ make_image_tar() {
     cd $CURDIR
 }
 
-DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install busybox patch tcpdump wireshark-common
+DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install busybox patch tcpdump wireshark-common curl
 
 clean_build_root
 fs_files_debian > $FILELIST
