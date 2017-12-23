@@ -46,7 +46,7 @@ clean_build_root() {
 fs_files_debian() {
     local PACKAGES
     PACKAGES=$(dpkg-query -f '${binary:Package}\n' -W 'freeswitch*')
-    PACKAGES="libc6 libpython2.7-minimal libpython2.7-stdlib $PACKAGES"
+    PACKAGES="libc6 libpython2.7-minimal libpython2.7-stdlib ca-certificates $PACKAGES"
     for pkg in $PACKAGES
     do
         dpkg-query -L $pkg 2> /dev/null
@@ -142,7 +142,7 @@ tar_files() {
     local TARLIST=/tmp/tarlist
     cat $FILELIST > $TARLIST
     cat $FILELIST_BINARY >> $TARLIST
-    tar -czf $TMP_TAR --no-recursion -T $TARLIST
+    tar -czf $TMP_TAR --no-recursion $(cat $TARLIST)
     rm -f $TARLIST
 }
 
