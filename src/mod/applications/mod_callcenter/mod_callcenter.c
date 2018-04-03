@@ -3017,7 +3017,7 @@ SWITCH_STANDARD_APP(callcenter_function)
 	}
 
 	/* Make sure we answer the channel before getting the switch_channel_time_table_t answer time */
-	switch_channel_answer(member_channel);
+//	switch_channel_answer(member_channel);
 
 	/* Grab the start epoch of a channel */
 	times = switch_channel_get_timetable(member_channel);
