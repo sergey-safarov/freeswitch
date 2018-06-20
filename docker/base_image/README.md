@@ -15,6 +15,7 @@ Used environment variables
 1. ```SOUND_RATES``` - rates of sound files that must be downloaded and installed. Available values ```8000```, ```16000```, ```32000```, ```48000```. May defined multiply values using semicolon as delimiter. Example ```SOUND_RATES=8000:16000```;
 2. ```SOUND_TYPES``` - types of sound files that must be downloaded and installed. Available values music, ```en-us-callie```, ```en-us-allison```, ```ru-RU-elena```, ```en-ca-june```, ```fr-ca-june```, ```pt-BR-karina```, ```sv-se-jakob```, ```zh-cn-sinmei```, ```zh-hk-sinmei```. Example ```SOUND_TYPES=music:en-us-callie```;
 3. ```EPMD``` - start epmd daemon, useful when you use mod_erlang and mod_kazoo FreeSwitch modules. Available values ```true```, ```false```.
+4. ```DUMPCAP``` - start dumpcap daemon, useful when you need PCAP files voip troubleshooting and call monitoring. Available values ```true```, ```false``` or any value if you want define custom options for dumpcap. When used ```true``` value, then dumpcap options is ```-i any -p -t -q -b duration:3600 -b files:48 -w /dumpcap/packets.pcap``` and PCAP files will be wrote to ```/dumpcap``` folder of container.
 
 Usage container
 ---------------
