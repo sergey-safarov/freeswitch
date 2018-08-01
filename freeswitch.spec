@@ -141,7 +141,7 @@ BuildRequires: lzo-devel
 BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: bzip2
-BuildRequires: curl-devel
+BuildRequires: curl-devel >= 7.19
 BuildRequires: gcc-c++
 BuildRequires: gnutls-devel
 BuildRequires: libtool >= 1.5.17
@@ -149,7 +149,7 @@ BuildRequires: ncurses-devel
 BuildRequires: openssl-devel >= 1.0.1e
 BuildRequires: pcre-devel 
 BuildRequires: speex-devel 
-BuildRequires: sqlite-devel
+BuildRequires: sqlite-devel >= 3.6.20
 BuildRequires: libtiff-devel
 BuildRequires: libedit-devel
 BuildRequires: yasm
@@ -177,11 +177,11 @@ BuildRequires: libsndfile-devel
 BuildRequires: libyuv-devel >= 0.0.1280
 Requires: libogg
 Requires: libvorbis
-Requires: curl
+Requires: curl >= 7.19
 Requires: ncurses
 Requires: pcre
 Requires: speex
-Requires: sqlite
+Requires: sqlite >= 3.6.20
 Requires: libtiff
 Requires: libedit
 Requires: openssl >= 1.0.1e
