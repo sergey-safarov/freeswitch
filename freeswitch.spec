@@ -117,12 +117,10 @@ Vendor:       	http://www.freeswitch.org/
 #
 ######################################################################################################################
 Source0:        http://files.freeswitch.org/%{name}-%{version}.tar.bz2
-Source1:	http://files.freeswitch.org/downloads/libs/v8-3.24.14.tar.bz2
-Source2:	http://files.freeswitch.org/downloads/libs/mongo-c-driver-1.1.0.tar.gz
+Source1:	http://files.freeswitch.org/downloads/libs/freeradius-client-1.1.7.tar.gz
 Source3:	http://files.freeswitch.org/downloads/libs/pocketsphinx-0.8.tar.gz
 Source4:	http://files.freeswitch.org/downloads/libs/sphinxbase-0.8.tar.gz
 Source5:	http://files.freeswitch.org/downloads/libs/communicator_semi_6000_20080321.tar.gz
-Source6:	http://files.freeswitch.org/downloads/libs/libmemcached-0.32.tar.gz
 Prefix:        	%{prefix}
 
 
@@ -147,8 +145,8 @@ BuildRequires: gnutls-devel
 BuildRequires: libtool >= 1.5.17
 BuildRequires: ncurses-devel
 BuildRequires: openssl-devel >= 1.0.1e
-BuildRequires: pcre-devel 
-BuildRequires: speex-devel 
+BuildRequires: pcre-devel
+BuildRequires: speex-devel
 BuildRequires: sqlite-devel >= 3.6.20
 BuildRequires: libtiff-devel
 BuildRequires: libedit-devel
@@ -1413,11 +1411,9 @@ Basic vanilla config set for the FreeSWITCH Open Source telephone platform.
 %prep
 %setup -b0 -q
 cp %{SOURCE1} libs/
-cp %{SOURCE2} libs/
 cp %{SOURCE3} libs/
 cp %{SOURCE4} libs/
 cp %{SOURCE5} libs/
-cp %{SOURCE6} libs/
 
 #Hotfix for redefined %_sysconfdir
 sed -ie 's:confdir="${sysconfdir}/freeswitch":confdir="$sysconfdir":' ./configure.ac
@@ -1975,6 +1971,7 @@ fi
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/verto.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/voicemail.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/voicemail_ivr.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/vpx.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/xml_cdr.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/xml_curl.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/xml_rpc.conf.xml
