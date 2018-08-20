@@ -48,6 +48,11 @@ get_util_version_opt() {
         return
     fi
 
+    if [ "$SOURCE_BRANCH" == "v1.8" ]; then
+        set -e
+        return
+    fi
+
     set -e
     echo "$SOURCE_BRANCH" | sed -e 's/^v/-v /'
 }
