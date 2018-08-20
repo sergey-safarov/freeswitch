@@ -19,6 +19,12 @@ Used environment variables
 Usage container
 ---------------
 
+1. Creating volume for sound files. This may be skipped if you not use freeswitch MOH and other sound files.
+```sh
+docker volume create --name freeswitch-sounds 
+```
+
+2. Stating container
 ```sh
 docker run --net=host --name freeswitch \
            -e SOUND_RATES=8000:16000 \
@@ -115,15 +121,22 @@ How to create custom container
 ------------------------------
 This container created from scratch image by addiding required freeswitch files packaged to tar.gz archive.
 To create custom container:
-1. clone freeswitch repo
+1. install required FreeSwitch packages. Now supported debian dist
 ```sh
-git clone https://freeswitch.org/stash/scm/fs/freeswitch.git
+apt-get install freeswitch-conf-vanilla
 ```
-2. build custom image
+2. clone freeswitch repo
+```sh
+git clone https://freeswitch.org/stash/projects/FS/repos/freeswitch/browse
+```
+3. execute ```make_min_archive.sh``` script
 ```sh
 cd freeswitch/docker/base_image
-hooks/pre_build
-docker build -t custom-fs .
+./make_min_archive.sh
+```
+4. build custom container
+```sh
+docker build -t freeswitch_custom .
 ```
 
 Read more
