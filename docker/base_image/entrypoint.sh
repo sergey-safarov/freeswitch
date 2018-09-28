@@ -106,14 +106,14 @@ else
 	delete_archives
 fi
 
-if [ "$EPMD"="true" ]; then
+if [ "$EPMD" = "true" ]; then
     /usr/bin/epmd -daemon
 fi
 
-if [ "$DUMPCAP"="true" ]; then
+if [ "$DUMPCAP" = "true" ]; then
     mkdir -p /dumpcap
     /usr/bin/dumpcap -i any -p -t -q -b duration:3600 -b files:48 -w /dumpcap/packets.pcap &
-elif [ ! -z "$DUMPCAP" -a "$DUMPCAP"!="false" ]; then
+elif [ ! -z "$DUMPCAP" -a "$DUMPCAP" != "false" ]; then
     /usr/bin/dumpcap $DUMPCAP &
 fi
 
