@@ -4831,12 +4831,6 @@ void sofia_presence_handle_sip_i_message(int status,
 			return;
 		}
 
-		if (sip->sip_content_type && sip->sip_content_type->c_subtype) {
-			if (strstr(sip->sip_content_type->c_subtype, "composing")) {
-				goto end;
-			}
-		}
-
 
 		sofia_glue_get_addr(de->data->e_msg, network_ip, sizeof(network_ip), &network_port);
 
