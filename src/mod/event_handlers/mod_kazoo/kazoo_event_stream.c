@@ -200,11 +200,11 @@ static void *SWITCH_THREAD_FUNC event_stream_loop(switch_thread_t *thread, void 
 					event_stream->socket = newsocket;
 
 					switch_socket_addr_get(&sa, SWITCH_TRUE, newsocket);
-					event_stream->local_port = switch_sockaddr_get_port(sa);
+					event_stream->remote_port = switch_sockaddr_get_port(sa);
 					switch_get_addr(event_stream->remote_ip, sizeof (event_stream->remote_ip), sa);
 
 					switch_socket_addr_get(&sa, SWITCH_FALSE, newsocket);
-					event_stream->remote_port = switch_sockaddr_get_port(sa);
+					event_stream->local_port = switch_sockaddr_get_port(sa);
 					switch_get_addr(event_stream->local_ip, sizeof (event_stream->local_ip), sa);
 
 					event_stream->connected = SWITCH_TRUE;
