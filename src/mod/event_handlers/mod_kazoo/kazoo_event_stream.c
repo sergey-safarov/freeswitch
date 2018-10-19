@@ -78,28 +78,27 @@ static switch_status_t kazoo_event_dup(switch_event_t **clone, switch_event_t *e
 			&& !switch_core_hash_find(filter, header->name)
 			&& (!kazoo_globals.send_all_headers)
 			&& (!(kazoo_globals.send_all_private_headers && is_private_header(header->name)))
-			)
-			{
-				continue;
+			) {
+			continue;
+		}
+
+		if (header->idx) {
+			int i;
+			for (i = 0; i < header->idx; i++) {
+				switch_event_add_header_string(*clone, SWITCH_STACK_PUSH, header->name, header->array[i]);
 			}
+		} else {
+			switch_event_add_header_string(*clone, SWITCH_STACK_BOTTOM, header->name, header->value);
+		}
+	}
 
-        if (header->idx) {
-            int i;
-            for (i = 0; i < header->idx; i++) {
-                switch_event_add_header_string(*clone, SWITCH_STACK_PUSH, header->name, header->array[i]);
-            }
-        } else {
-            switch_event_add_header_string(*clone, SWITCH_STACK_BOTTOM, header->name, header->value);
-        }
-    }
+	if (event->body) {
+		(*clone)->body = DUP(event->body);
+	}
 
-    if (event->body) {
-        (*clone)->body = DUP(event->body);
-    }
+	(*clone)->key = event->key;
 
-    (*clone)->key = event->key;
-
-    return SWITCH_STATUS_SUCCESS;
+	return SWITCH_STATUS_SUCCESS;
 }
 
 static void event_handler(switch_event_t *event) {
@@ -150,12 +149,12 @@ static void event_handler(switch_event_t *event) {
 }
 
 static void *SWITCH_THREAD_FUNC event_stream_loop(switch_thread_t *thread, void *obj) {
-    ei_event_stream_t *event_stream = (ei_event_stream_t *) obj;
+	ei_event_stream_t *event_stream = (ei_event_stream_t *) obj;
 	ei_event_binding_t *event_binding;
 	switch_sockaddr_t *sa;
 	uint16_t port;
-    char ipbuf[48];
-    const char *ip_addr;
+	char ipbuf[48];
+	const char *ip_addr;
 	void *pop;
 	short event_stream_framing = kazoo_globals.event_stream_framing;
 
@@ -166,7 +165,7 @@ static void *SWITCH_THREAD_FUNC event_stream_loop(switch_thread_t *thread, void 
 	/* figure out what socket we just opened */
 	switch_socket_addr_get(&sa, SWITCH_FALSE, event_stream->acceptor);
 	port = switch_sockaddr_get_port(sa);
-    ip_addr = switch_get_addr(ipbuf, sizeof(ipbuf), sa);
+	ip_addr = switch_get_addr(ipbuf, sizeof(ipbuf), sa);
 
 	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Starting erlang event stream %p on %s:%u for %s <%d.%d.%d>\n"
 					  ,(void *)event_stream, ip_addr, port, event_stream->pid.node, event_stream->pid.creation
@@ -185,13 +184,13 @@ static void *SWITCH_THREAD_FUNC event_stream_loop(switch_thread_t *thread, void 
 				if (switch_socket_accept(&newsocket, event_stream->acceptor, event_stream->pool) == SWITCH_STATUS_SUCCESS) {
 					switch_sockaddr_t *sa;
 
-                    if (switch_socket_opt_set(newsocket, SWITCH_SO_NONBLOCK, TRUE)) {
-                        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "Couldn't set socket as non-blocking\n");
-                    }
+					if (switch_socket_opt_set(newsocket, SWITCH_SO_NONBLOCK, TRUE)) {
+						switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "Couldn't set socket as non-blocking\n");
+					}
 
-                    if (switch_socket_opt_set(newsocket, SWITCH_SO_TCP_NODELAY, 1)) {
-                        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "Couldn't disable Nagle.\n");
-                    }
+					if (switch_socket_opt_set(newsocket, SWITCH_SO_TCP_NODELAY, 1)) {
+						switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "Couldn't disable Nagle.\n");
+					}
 
 					/* close the current client, if there is one */
 					close_socket(&event_stream->socket);

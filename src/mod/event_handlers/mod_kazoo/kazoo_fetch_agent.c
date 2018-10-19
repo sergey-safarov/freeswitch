@@ -456,7 +456,7 @@ static switch_status_t remove_xml_client(ei_node_t *ei_node, switch_xml_binding_
 }
 
 static ei_xml_client_t *add_xml_client(ei_node_t *ei_node, ei_xml_agent_t *agent) {
-    ei_xml_client_t *client;
+	ei_xml_client_t *client;
 
 	switch_malloc(client, sizeof(*client));
 
@@ -474,7 +474,7 @@ static ei_xml_client_t *add_xml_client(ei_node_t *ei_node, ei_xml_agent_t *agent
 }
 
 static ei_xml_client_t *find_xml_client(ei_node_t *ei_node, ei_xml_agent_t *agent) {
-    ei_xml_client_t *client;
+	ei_xml_client_t *client;
 
 	client = agent->clients;
 	while (client != NULL) {
@@ -496,8 +496,8 @@ static switch_status_t remove_fetch_handler(ei_node_t *ei_node, erlang_pid *from
 
 	agent = (ei_xml_agent_t *)switch_xml_get_binding_user_data(binding);
 
-    /* write-lock the agent */
-    switch_thread_rwlock_wrlock(agent->lock);
+	/* write-lock the agent */
+	switch_thread_rwlock_wrlock(agent->lock);
 
 	if (!(client = find_xml_client(ei_node, agent))) {
 		switch_thread_rwlock_unlock(agent->lock);
@@ -538,7 +538,7 @@ static switch_status_t remove_fetch_handler(ei_node_t *ei_node, erlang_pid *from
 
 static switch_status_t handle_api_command_stream(ei_node_t *ei_node, switch_stream_handle_t *stream, switch_xml_binding_t *binding) {
 	ei_xml_agent_t *agent;
-    ei_xml_client_t *client;
+	ei_xml_client_t *client;
 
 	if (!binding) {
 		return SWITCH_STATUS_GENERR;
@@ -608,21 +608,21 @@ switch_status_t add_fetch_handler(ei_node_t *ei_node, erlang_pid *from, switch_x
 
 	agent = (ei_xml_agent_t *)switch_xml_get_binding_user_data(binding);
 
-    /* write-lock the agent */
-    switch_thread_rwlock_wrlock(agent->lock);
+	/* write-lock the agent */
+	switch_thread_rwlock_wrlock(agent->lock);
 
 	if (!(client = find_xml_client(ei_node, agent))) {
 		client = add_xml_client(ei_node, agent);
 	}
 
 	fetch_handler = client->fetch_handlers;
-    while (fetch_handler != NULL) {
+	while (fetch_handler != NULL) {
 		if (ei_compare_pids(&fetch_handler->pid, from) == SWITCH_STATUS_SUCCESS) {
 			switch_thread_rwlock_unlock(agent->lock);
-            return SWITCH_STATUS_SUCCESS;
-        }
-        fetch_handler = fetch_handler->next;
-    }
+			return SWITCH_STATUS_SUCCESS;
+		}
+		fetch_handler = fetch_handler->next;
+	}
 
 	switch_malloc(fetch_handler, sizeof(*fetch_handler));
 
@@ -666,7 +666,7 @@ switch_status_t fetch_reply(char *uuid_str, char *xml_str, switch_xml_binding_t 
 
 	agent = (ei_xml_agent_t *)switch_xml_get_binding_user_data(binding);
 
-    switch_mutex_lock(agent->replies_mutex);
+	switch_mutex_lock(agent->replies_mutex);
 	reply = agent->replies;
 	while (reply != NULL) {
 		if (!strncmp(reply->uuid_str, uuid_str, SWITCH_UUID_FORMATTED_LENGTH)) {
@@ -680,7 +680,7 @@ switch_status_t fetch_reply(char *uuid_str, char *xml_str, switch_xml_binding_t 
 
 		reply = reply->next;
 	}
-    switch_mutex_unlock(agent->replies_mutex);
+	switch_mutex_unlock(agent->replies_mutex);
 
 	return status;
 }

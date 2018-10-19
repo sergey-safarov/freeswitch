@@ -253,7 +253,7 @@ SWITCH_STANDARD_API(kz_http_put)
 	close(fd);
 
 	/* libcurl requires FILE* */
- 	file_to_put = fopen(filename, "rb");
+	file_to_put = fopen(filename, "rb");
 	if (!file_to_put) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "fopen() error: %s\n", strerror(errno));
 		status = SWITCH_STATUS_FALSE;

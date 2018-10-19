@@ -520,8 +520,8 @@ static switch_status_t config(void) {
 static switch_status_t create_acceptor() {
 	switch_sockaddr_t *sa;
 	uint16_t port;
-    char ipbuf[48];
-    const char *ip_addr;
+	char ipbuf[48];
+	const char *ip_addr;
 
 	/* if the config has specified an erlang release compatibility then pass that along to the erlang interface */
 	if (kazoo_globals.ei_compat_rel) {

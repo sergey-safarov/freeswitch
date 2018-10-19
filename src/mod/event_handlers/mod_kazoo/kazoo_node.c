@@ -255,25 +255,25 @@ SWITCH_DECLARE(switch_status_t) kazoo_api_execute(const char *cmd, const char *a
 }
 
 static switch_status_t api_exec_stream(char *cmd, char *arg, switch_stream_handle_t *stream, char **reply) {
-        switch_status_t status = SWITCH_STATUS_FALSE;
+	switch_status_t status = SWITCH_STATUS_FALSE;
 
-        if (kazoo_api_execute(cmd, arg, NULL, stream, reply) != SWITCH_STATUS_SUCCESS) {
-                if(stream->data && strlen(stream->data)) {
-                         *reply = strdup(stream->data);
-                         status = SWITCH_STATUS_FALSE;
-                } else {
-                        *reply = switch_mprintf("%s: Command not found", cmd);
-                        status = SWITCH_STATUS_NOTFOUND;
-                }
-        } else if (!stream->data || !strlen(stream->data)) {
-                *reply = switch_mprintf("%s: Command returned no output", cmd);
-                status = SWITCH_STATUS_FALSE;
-        } else {
-                *reply = strdup(stream->data);
-                status = SWITCH_STATUS_SUCCESS;
-        }
+	if (kazoo_api_execute(cmd, arg, NULL, stream, reply) != SWITCH_STATUS_SUCCESS) {
+		if(stream->data && strlen(stream->data)) {
+			*reply = strdup(stream->data);
+			status = SWITCH_STATUS_FALSE;
+		} else {
+			*reply = switch_mprintf("%s: Command not found", cmd);
+			status = SWITCH_STATUS_NOTFOUND;
+		}
+	} else if (!stream->data || !strlen(stream->data)) {
+		*reply = switch_mprintf("%s: Command returned no output", cmd);
+		status = SWITCH_STATUS_FALSE;
+	} else {
+		*reply = strdup(stream->data);
+		status = SWITCH_STATUS_SUCCESS;
+	}
 
-        return status;
+	return status;
 }
 
 static switch_status_t api_exec(char *cmd, char *arg, char **reply) {
@@ -357,11 +357,11 @@ static void *SWITCH_THREAD_FUNC bgapi4_exec(switch_thread_t *thread, void *obj) 
 		return NULL;
 	}
 
-        SWITCH_STANDARD_STREAM(stream);
+	SWITCH_STANDARD_STREAM(stream);
 	switch_event_create(&stream.param_event, SWITCH_EVENT_API);
 
-        switch_malloc(send_msg, sizeof(*send_msg));
-        memcpy(&send_msg->pid, &acs->pid, sizeof(erlang_pid));
+	switch_malloc(send_msg, sizeof(*send_msg));
+	memcpy(&send_msg->pid, &acs->pid, sizeof(erlang_pid));
 
 	ei_x_new_with_version(&send_msg->buf);
 
@@ -376,9 +376,9 @@ static void *SWITCH_THREAD_FUNC bgapi4_exec(switch_thread_t *thread, void *obj) 
 	_ei_x_encode_string(&send_msg->buf, acs->uuid_str);
 	_ei_x_encode_string(&send_msg->buf, reply);
 
-        if (stream.param_event) {
+	if (stream.param_event) {
 		ei_encode_switch_event_headers_2(&send_msg->buf, stream.param_event, 0);
-        }
+	}
 
 	if (switch_queue_trypush(ei_node->send_msgs, send_msg) != SWITCH_STATUS_SUCCESS) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to send bgapi response %s to %s <%d.%d.%d>\n"
@@ -393,9 +393,9 @@ static void *SWITCH_THREAD_FUNC bgapi4_exec(switch_thread_t *thread, void *obj) 
 
 	switch_atomic_dec(&ei_node->pending_bgapi);
 
-        if (stream.param_event) {
-                switch_event_fire(&stream.param_event);
-        }
+	if (stream.param_event) {
+		switch_event_fire(&stream.param_event);
+	}
 
 	switch_safe_free(reply);
 	switch_safe_free(acs->arg);
@@ -607,9 +607,9 @@ static switch_status_t handle_request_sendevent(ei_node_t *ei_node, erlang_pid *
 
 	if (ei_decode_atom_safe(buf->buff, &buf->index, event_name)
 		|| switch_name_event(event_name, &event_type) != SWITCH_STATUS_SUCCESS)
-        {
+	{
 			return erlang_response_badarg(rbuf);
-        }
+	}
 
 	if (!strncasecmp(event_name, "CUSTOM", MAXATOMLEN)) {
 		if(ei_decode_atom(buf->buff, &buf->index, subclass_name)) {
@@ -660,7 +660,7 @@ static switch_status_t handle_request_sendmsg(ei_node_t *ei_node, erlang_pid *pi
 static switch_status_t handle_request_config(ei_node_t *ei_node, erlang_pid *pid, ei_x_buff *buf, ei_x_buff *rbuf) {
 
 	fetch_config_filters();
-        return erlang_response_ok(rbuf);
+	return erlang_response_ok(rbuf);
 }
 
 static switch_status_t handle_request_bind(ei_node_t *ei_node, erlang_pid *pid, ei_x_buff *buf, ei_x_buff *rbuf) {
@@ -764,33 +764,33 @@ static switch_status_t handle_request_bgapi(switch_thread_start_t func, ei_node_
 }
 
 static switch_status_t handle_request_bgapi3(ei_node_t *ei_node, erlang_pid *pid, ei_x_buff *buf, ei_x_buff *rbuf) {
-        return handle_request_bgapi(bgapi3_exec, ei_node, pid, buf, rbuf);
+	return handle_request_bgapi(bgapi3_exec, ei_node, pid, buf, rbuf);
 }
 
 static switch_status_t handle_request_bgapi4(ei_node_t *ei_node, erlang_pid *pid, ei_x_buff *buf, ei_x_buff *rbuf) {
-        return handle_request_bgapi(bgapi4_exec, ei_node, pid, buf, rbuf);
+	return handle_request_bgapi(bgapi4_exec, ei_node, pid, buf, rbuf);
 }
 
 static switch_status_t handle_request_api4(ei_node_t *ei_node, erlang_pid *pid, ei_x_buff *buf, ei_x_buff *rbuf) {
-        char cmd[MAXATOMLEN + 1];
-        char *arg;
+	char cmd[MAXATOMLEN + 1];
+	char *arg;
 	switch_stream_handle_t stream = { 0 };
 
 	SWITCH_STANDARD_STREAM(stream);
 	switch_event_create(&stream.param_event, SWITCH_EVENT_API);
 
-        if (ei_decode_atom_safe(buf->buff, &buf->index, cmd)) {
-                return erlang_response_badarg(rbuf);
-        }
+	if (ei_decode_atom_safe(buf->buff, &buf->index, cmd)) {
+		return erlang_response_badarg(rbuf);
+	}
 
-        if (ei_decode_string_or_binary(buf->buff, &buf->index, &arg)) {
-                return erlang_response_badarg(rbuf);
-        }
+	if (ei_decode_string_or_binary(buf->buff, &buf->index, &arg)) {
+		return erlang_response_badarg(rbuf);
+	}
 
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "exec: %s(%s)\n", cmd, arg);
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "exec: %s(%s)\n", cmd, arg);
 
-        if (rbuf) {
-                char *reply;
+	if (rbuf) {
+		char *reply;
 		switch_status_t status;
 
 		status = api_exec_stream(cmd, arg, &stream, &reply);
@@ -809,17 +809,17 @@ static switch_status_t handle_request_api4(ei_node_t *ei_node, erlang_pid *pid, 
 			ei_encode_switch_event_headers(rbuf, stream.param_event);
 		}
 
-                switch_safe_free(reply);
-        }
+		switch_safe_free(reply);
+	}
 
 	if (stream.param_event) {
 		switch_event_fire(&stream.param_event);
 	}
 
-        switch_safe_free(arg);
+	switch_safe_free(arg);
 	switch_safe_free(stream.data);
 
-        return SWITCH_STATUS_SUCCESS;
+	return SWITCH_STATUS_SUCCESS;
 }
 
 static switch_status_t handle_request_api(ei_node_t *ei_node, erlang_pid *pid, ei_x_buff *buf, ei_x_buff *rbuf) {
@@ -1024,10 +1024,10 @@ static switch_status_t handle_kazoo_request(ei_node_t *ei_node, erlang_pid *pid,
 		return handle_request_event(ei_node, pid, buf, rbuf);
 	case REQUEST_FETCH_REPLY:
 		return handle_request_fetch_reply(ei_node, pid, buf, rbuf);
-        case REQUEST_CONFIG:
-                return handle_request_config(ei_node, pid, buf, rbuf);
-        case REQUEST_BGAPI4:
-                return handle_request_bgapi4(ei_node, pid, buf, rbuf);
+	case REQUEST_CONFIG:
+		return handle_request_config(ei_node, pid, buf, rbuf);
+	case REQUEST_BGAPI4:
+		return handle_request_bgapi4(ei_node, pid, buf, rbuf);
 	case REQUEST_API4:
 		return handle_request_api4(ei_node, pid, buf, rbuf);
 	default:

@@ -39,47 +39,47 @@
  * provide our own version.
  * */
 
-#define put8(s,n) do {							\
-        (s)[0] = (char)((n) & 0xff);			\
-        (s) += 1;								\
+#define put8(s,n) do {					\
+	(s)[0] = (char)((n) & 0xff);			\
+	(s) += 1;					\
 	} while (0)
 
-#define put32be(s,n) do {						\
-        (s)[0] = ((n) >>  24) & 0xff;			\
-        (s)[1] = ((n) >>  16) & 0xff;			\
-        (s)[2] = ((n) >>  8) & 0xff;			\
-        (s)[3] = (n) & 0xff;					\
-        (s) += 4;								\
+#define put32be(s,n) do {				\
+	(s)[0] = ((n) >>  24) & 0xff;			\
+	(s)[1] = ((n) >>  16) & 0xff;			\
+	(s)[2] = ((n) >>  8) & 0xff;			\
+	(s)[3] = (n) & 0xff;				\
+	(s) += 4;					\
 	} while (0)
 
 #ifdef EI_DEBUG
 static void ei_x_print_reg_msg(ei_x_buff *buf, char *dest, int send) {
-    char *mbuf = NULL;
-    int i = 1;
+	char *mbuf = NULL;
+	int i = 1;
 
-    ei_s_print_term(&mbuf, buf->buff, &i);
+	ei_s_print_term(&mbuf, buf->buff, &i);
 
-    if (send) {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Encoded term %s to '%s'\n", mbuf, dest);
-    } else {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Decoded term %s for '%s'\n", mbuf, dest);
-    }
+	if (send) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Encoded term %s to '%s'\n", mbuf, dest);
+	} else {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Decoded term %s for '%s'\n", mbuf, dest);
+	}
 
-    free(mbuf);
+	free(mbuf);
 }
 
 static void ei_x_print_msg(ei_x_buff *buf, erlang_pid *pid, int send) {
-    char *pbuf = NULL;
-    int i = 0;
-    ei_x_buff pidbuf;
+	char *pbuf = NULL;
+	int i = 0;
+	ei_x_buff pidbuf;
 
-    ei_x_new(&pidbuf);
-    ei_x_encode_pid(&pidbuf, pid);
+	ei_x_new(&pidbuf);
+	ei_x_encode_pid(&pidbuf, pid);
 
-    ei_s_print_term(&pbuf, pidbuf.buff, &i);
+	ei_s_print_term(&pbuf, pidbuf.buff, &i);
 
-    ei_x_print_reg_msg(buf, pbuf, send);
-    free(pbuf);
+	ei_x_print_reg_msg(buf, pbuf, send);
+	free(pbuf);
 }
 #endif
 
@@ -88,39 +88,39 @@ void ei_encode_switch_event_headers(ei_x_buff *ebuf, switch_event_t *event) {
 }
 
 void ei_encode_switch_event_headers_2(ei_x_buff *ebuf, switch_event_t *event, int encode) {
-    switch_event_header_t *hp;
-    char *uuid = switch_event_get_header(event, "unique-id");
-    int i;
+	switch_event_header_t *hp;
+	char *uuid = switch_event_get_header(event, "unique-id");
+	int i;
 
-    for (i = 0, hp = event->headers; hp; hp = hp->next, i++);
+	for (i = 0, hp = event->headers; hp; hp = hp->next, i++);
 
-    if (event->body)
-        i++;
+	if (event->body)
+		i++;
 
-    ei_x_encode_list_header(ebuf, i + 1);
+	ei_x_encode_list_header(ebuf, i + 1);
 
-    if (uuid) {
+	if (uuid) {
 		char *unique_id = switch_event_get_header(event, "unique-id");
 		ei_x_encode_binary(ebuf, unique_id, strlen(unique_id));
-    } else {
-        ei_x_encode_atom(ebuf, "undefined");
-    }
+	} else {
+		ei_x_encode_atom(ebuf, "undefined");
+	}
 
-    for (hp = event->headers; hp; hp = hp->next) {
-        ei_x_encode_tuple_header(ebuf, 2);
-        ei_x_encode_binary(ebuf, hp->name, strlen(hp->name));
-	if(encode)
-	        switch_url_decode(hp->value);
-        ei_x_encode_binary(ebuf, hp->value, strlen(hp->value));
-    }
+	for (hp = event->headers; hp; hp = hp->next) {
+		ei_x_encode_tuple_header(ebuf, 2);
+		ei_x_encode_binary(ebuf, hp->name, strlen(hp->name));
+		if(encode)
+			switch_url_decode(hp->value);
+		ei_x_encode_binary(ebuf, hp->value, strlen(hp->value));
+	}
 
-    if (event->body) {
-        ei_x_encode_tuple_header(ebuf, 2);
-        ei_x_encode_binary(ebuf, "body", strlen("body"));
-        ei_x_encode_binary(ebuf, event->body, strlen(event->body));
-    }
+	if (event->body) {
+		ei_x_encode_tuple_header(ebuf, 2);
+		ei_x_encode_binary(ebuf, "body", strlen("body"));
+		ei_x_encode_binary(ebuf, event->body, strlen(event->body));
+	}
 
-    ei_x_encode_empty_list(ebuf);
+	ei_x_encode_empty_list(ebuf);
 }
 
 void close_socket(switch_socket_t ** sock) {
@@ -177,29 +177,29 @@ switch_socket_t *create_socket(switch_memory_pool_t *pool) {
 }
 
 switch_status_t create_ei_cnode(const char *ip_addr, const char *name, struct ei_cnode_s *ei_cnode) {
-    char hostname[EI_MAXHOSTNAMELEN + 1] = "";
-    char nodename[MAXNODELEN + 1];
-    char cnodename[EI_MAXALIVELEN + 1];
-    //EI_MAX_COOKIE_SIZE+1
-    char *atsign;
+	char hostname[EI_MAXHOSTNAMELEN + 1] = "";
+	char nodename[MAXNODELEN + 1];
+	char cnodename[EI_MAXALIVELEN + 1];
+	//EI_MAX_COOKIE_SIZE+1
+	char *atsign;
 
-    /* copy the erlang interface nodename into something we can modify */
-    strncpy(cnodename, name, EI_MAXALIVELEN);
+	/* copy the erlang interface nodename into something we can modify */
+	strncpy(cnodename, name, EI_MAXALIVELEN);
 
-    if ((atsign = strchr(cnodename, '@'))) {
-        /* we got a qualified node name, don't guess the host/domain */
-        snprintf(nodename, MAXNODELEN + 1, "%s", kazoo_globals.ei_nodename);
-        /* truncate the alivename at the @ */
-        *atsign = '\0';
-    } else {
-        if (zstr(kazoo_globals.hostname) || !strncasecmp(kazoo_globals.ip, "0.0.0.0", 7) || !strncasecmp(kazoo_globals.ip, "::", 2)) {
-            memcpy(hostname, switch_core_get_hostname(), EI_MAXHOSTNAMELEN);
-        } else {
-            memcpy(hostname, kazoo_globals.hostname, EI_MAXHOSTNAMELEN);
-        }
+	if ((atsign = strchr(cnodename, '@'))) {
+		/* we got a qualified node name, don't guess the host/domain */
+		snprintf(nodename, MAXNODELEN + 1, "%s", kazoo_globals.ei_nodename);
+		/* truncate the alivename at the @ */
+		*atsign = '\0';
+	} else {
+		if (zstr(kazoo_globals.hostname) || !strncasecmp(kazoo_globals.ip, "0.0.0.0", 7) || !strncasecmp(kazoo_globals.ip, "::", 2)) {
+			memcpy(hostname, switch_core_get_hostname(), EI_MAXHOSTNAMELEN);
+		} else {
+			memcpy(hostname, kazoo_globals.hostname, EI_MAXHOSTNAMELEN);
+		}
 
-        snprintf(nodename, MAXNODELEN + 1, "%s@%s", kazoo_globals.ei_nodename, hostname);
-    }
+		snprintf(nodename, MAXNODELEN + 1, "%s@%s", kazoo_globals.ei_nodename, hostname);
+	}
 
 	if (kazoo_globals.ei_shortname) {
 		char *off;
@@ -208,94 +208,94 @@ switch_status_t create_ei_cnode(const char *ip_addr, const char *name, struct ei
 		}
 	}
 
-    /* init the ec stuff */
-    if (ei_connect_xinit(ei_cnode, hostname, cnodename, nodename, (Erl_IpAddr) ip_addr, kazoo_globals.ei_cookie, 0) < 0) {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to initialize the erlang interface connection structure\n");
-        return SWITCH_STATUS_FALSE;
-    }
+	/* init the ec stuff */
+	if (ei_connect_xinit(ei_cnode, hostname, cnodename, nodename, (Erl_IpAddr) ip_addr, kazoo_globals.ei_cookie, 0) < 0) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Failed to initialize the erlang interface connection structure\n");
+		return SWITCH_STATUS_FALSE;
+	}
 
-    return SWITCH_STATUS_SUCCESS;
+	return SWITCH_STATUS_SUCCESS;
 }
 
 switch_status_t ei_compare_pids(const erlang_pid *pid1, const erlang_pid *pid2) {
-    if ((!strcmp(pid1->node, pid2->node))
+	if ((!strcmp(pid1->node, pid2->node))
 		&& pid1->creation == pid2->creation
 		&& pid1->num == pid2->num
 		&& pid1->serial == pid2->serial) {
-        return SWITCH_STATUS_SUCCESS;
-    } else {
-        return SWITCH_STATUS_FALSE;
-    }
+		return SWITCH_STATUS_SUCCESS;
+	} else {
+		return SWITCH_STATUS_FALSE;
+	}
 }
 
 void ei_link(ei_node_t *ei_node, erlang_pid * from, erlang_pid * to) {
-    char msgbuf[2048];
-    char *s;
-    int index = 0;
+	char msgbuf[2048];
+	char *s;
+	int index = 0;
 
-    index = 5; /* max sizes: */
-    ei_encode_version(msgbuf, &index); /*   1 */
-    ei_encode_tuple_header(msgbuf, &index, 3);
-    ei_encode_long(msgbuf, &index, ERL_LINK);
-    ei_encode_pid(msgbuf, &index, from); /* 268 */
-    ei_encode_pid(msgbuf, &index, to); /* 268 */
+	index = 5; /* max sizes: */
+	ei_encode_version(msgbuf, &index); /*   1 */
+	ei_encode_tuple_header(msgbuf, &index, 3);
+	ei_encode_long(msgbuf, &index, ERL_LINK);
+	ei_encode_pid(msgbuf, &index, from); /* 268 */
+	ei_encode_pid(msgbuf, &index, to); /* 268 */
 
-    /* 5 byte header missing */
-    s = msgbuf;
-    put32be(s, index - 4); /*   4 */
-    put8(s, ERL_PASS_THROUGH); /*   1 */
-    /* sum:  542 */
+	/* 5 byte header missing */
+	s = msgbuf;
+	put32be(s, index - 4); /*   4 */
+	put8(s, ERL_PASS_THROUGH); /*   1 */
+	/* sum:  542 */
 
-    if (write(ei_node->nodefd, msgbuf, index) == -1) {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "Failed to link to process on %s\n", ei_node->peer_nodename);
-    }
+	if (write(ei_node->nodefd, msgbuf, index) == -1) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "Failed to link to process on %s\n", ei_node->peer_nodename);
+	}
 }
 
 void ei_encode_switch_event(ei_x_buff *ebuf, switch_event_t *event) {
-    ei_x_encode_tuple_header(ebuf, 2);
-    ei_x_encode_atom(ebuf, "event");
-    ei_encode_switch_event_headers(ebuf, event);
+	ei_x_encode_tuple_header(ebuf, 2);
+	ei_x_encode_atom(ebuf, "event");
+	ei_encode_switch_event_headers(ebuf, event);
 }
 
 int ei_helper_send(ei_node_t *ei_node, erlang_pid *to, ei_x_buff *buf) {
-    int ret = 0;
+	int ret = 0;
 
-    if (ei_node->nodefd) {
+	if (ei_node->nodefd) {
 #ifdef EI_DEBUG
 		ei_x_print_msg(buf, to, 1);
 #endif
-        ret = ei_send(ei_node->nodefd, to, buf->buff, buf->index);
-    }
+		ret = ei_send(ei_node->nodefd, to, buf->buff, buf->index);
+	}
 
-    return ret;
+	return ret;
 }
 
 int ei_decode_atom_safe(char *buf, int *index, char *dst) {
-    int type, size;
+	int type, size;
 
-    ei_get_type(buf, index, &type, &size);
+	ei_get_type(buf, index, &type, &size);
 
 	if (type != ERL_ATOM_EXT) {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Unexpected erlang term type %d (size %d), needed atom\n", type, size);
-        return -1;
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Unexpected erlang term type %d (size %d), needed atom\n", type, size);
+		return -1;
 	} else if (size > MAXATOMLEN) {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Requested decoding of atom with size %d into a buffer of size %d\n", size, MAXATOMLEN);
-        return -1;
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Requested decoding of atom with size %d into a buffer of size %d\n", size, MAXATOMLEN);
+		return -1;
 	} else {
 		return ei_decode_atom(buf, index, dst);
 	}
 }
 
 int ei_decode_string_or_binary(char *buf, int *index, char **dst) {
-    int type, size, res;
-    long len;
+	int type, size, res;
+	long len;
 
-    ei_get_type(buf, index, &type, &size);
+	ei_get_type(buf, index, &type, &size);
 
-    if (type != ERL_STRING_EXT && type != ERL_BINARY_EXT && type != ERL_NIL_EXT) {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Unexpected erlang term type %d (size %d), needed binary or string\n", type, size);
-        return -1;
-    }
+	if (type != ERL_STRING_EXT && type != ERL_BINARY_EXT && type != ERL_NIL_EXT) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Unexpected erlang term type %d (size %d), needed binary or string\n", type, size);
+		return -1;
+	}
 
 	*dst = malloc(size + 1);
 
@@ -303,25 +303,25 @@ int ei_decode_string_or_binary(char *buf, int *index, char **dst) {
 		res = 0;
 		**dst = '\0';
 	} else if (type == ERL_BINARY_EXT) {
-        res = ei_decode_binary(buf, index, *dst, &len);
-        (*dst)[len] = '\0';
-    } else {
-        res = ei_decode_string(buf, index, *dst);
-    }
+		res = ei_decode_binary(buf, index, *dst, &len);
+		(*dst)[len] = '\0';
+	} else {
+		res = ei_decode_string(buf, index, *dst);
+	}
 
-    return res;
+	return res;
 }
 
 int ei_decode_string_or_binary_limited(char *buf, int *index, int maxsize, char *dst) {
-    int type, size, res;
-    long len;
+	int type, size, res;
+	long len;
 
-    ei_get_type(buf, index, &type, &size);
+	ei_get_type(buf, index, &type, &size);
 
-    if (type != ERL_STRING_EXT && type != ERL_BINARY_EXT && type != ERL_NIL_EXT) {
-        switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Unexpected erlang term type %d (size %d), needed binary or string\n", type, size);
-        return -1;
-    }
+	if (type != ERL_STRING_EXT && type != ERL_BINARY_EXT && type != ERL_NIL_EXT) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Unexpected erlang term type %d (size %d), needed binary or string\n", type, size);
+		return -1;
+	}
 
 	if (size > maxsize) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Requested decoding of %s with size %d into a buffer of size %d\n",
@@ -333,13 +333,13 @@ int ei_decode_string_or_binary_limited(char *buf, int *index, int maxsize, char 
 		res = 0;
 		*dst = '\0';
 	} else if (type == ERL_BINARY_EXT) {
-        res = ei_decode_binary(buf, index, dst, &len);
-        dst[len] = '\0'; /* binaries aren't null terminated */
-    } else {
-        res = ei_decode_string(buf, index, dst);
-    }
+		res = ei_decode_binary(buf, index, dst, &len);
+		dst[len] = '\0'; /* binaries aren't null terminated */
+	} else {
+		res = ei_decode_string(buf, index, dst);
+	}
 
-    return res;
+	return res;
 }
 
 switch_hash_t *create_default_filter() {
