@@ -5,7 +5,7 @@
 # includes module(s): freeswitch-devel freeswitch-codec-passthru-amr freeswitch-codec-passthru-amrwb freeswitch-codec-passthru-g729 
 #                     freeswitch-codec-passthru-g7231 freeswitch-lua freeswitch-perl freeswitch-python freeswitch-v8 freeswitch-signalwire
 #                     freeswitch-lan-de freeswitch-lang-en freeswitch-lang-fr freeswitch-lang-hu freeswitch-lang-ru freeswitch-freetdm
-#		      and others
+#                     and others
 #
 # Initial Version Copyright (C) 2007 Peter Nixon and Michal Bielicki, All Rights Reserved.
 #
@@ -52,79 +52,79 @@
 #
 # disable rpath checking
 #%define __arch_install_post /usr/lib/rpm/check-buildroot
-#%define _prefix   /usr
-#%define prefix    %{_prefix}
-#%define sysconfdir	/etc/freeswitch
-#%define _sysconfdir	%{sysconfdir}
-#%define logfiledir	/var/log/freeswitch
-#%define _logfiledir	%{logfiledir}
-#%define runtimedir	/var/run/freeswitch
-#%define _runtimedir	%{runtimedir}
+#%define _prefix        /usr
+#%define prefix         %{_prefix}
+#%define sysconfdir     /etc/freeswitch
+#%define _sysconfdir    %{sysconfdir}
+#%define logfiledir     /var/log/freeswitch
+#%define _logfiledir    %{logfiledir}
+#%define runtimedir     /var/run/freeswitch
+#%define _runtimedir    %{runtimedir}
 
 ######################################################################################################################
 # Layout of packages FHS (Redhat/SUSE), FS (Standard FreeSWITCH layout using /usr/local), OPT (/opt based layout)
-%define packagelayout	FHS
+%define packagelayout   FHS
 
-%define	PREFIX		%{_prefix}
-%define EXECPREFIX	%{_exec_prefix}
-%define BINDIR		%{_bindir}
-%define SBINDIR		%{_sbindir}
-%define LIBEXECDIR	%{_libexecdir}/%name
-%define SYSCONFDIR	%{_sysconfdir}/%name
-%define SHARESTATEDIR	%{_sharedstatedir}/%name
-%define LOCALSTATEDIR	%{_localstatedir}/lib/%name
-%define LIBDIR		%{_libdir}
-%define INCLUDEDIR	%{_includedir}
-%define _datarootdir	%{_prefix}/share
-%define DATAROOTDIR	%{_datarootdir}
-%define DATADIR		%{_datadir}
-%define INFODIR		%{_infodir}
-%define LOCALEDIR	%{_datarootdir}/locale
-%define MANDIR		%{_mandir}
-%define DOCDIR		%{_defaultdocdir}/%name
-%define HTMLDIR		%{_defaultdocdir}/%name/html
-%define DVIDIR		%{_defaultdocdir}/%name/dvi
-%define PDFDIR		%{_defaultdocdir}/%name/pdf
-%define PSDIR		%{_defaultdocdir}/%name/ps
-%define LOGFILEDIR	/var/log/%name
-%define MODINSTDIR	%{_libdir}/%name/mod
-%define RUNDIR		%{_localstatedir}/run/%name
-%define DBDIR		%{LOCALSTATEDIR}/db
-%define HTDOCSDIR	%{_datarootdir}/%name/htdocs
-%define SOUNDSDIR	%{_datarootdir}/%name/sounds
-%define GRAMMARDIR	%{_datarootdir}/%name/grammar
-%define SCRIPTDIR	%{_datarootdir}/%name/scripts
-%define RECORDINGSDIR	%{LOCALSTATEDIR}/recordings
-%define PKGCONFIGDIR	%{_datarootdir}/%name/pkgconfig
-%define HOMEDIR		%{LOCALSTATEDIR}
+%define PREFIX          %{_prefix}
+%define EXECPREFIX      %{_exec_prefix}
+%define BINDIR          %{_bindir}
+%define SBINDIR         %{_sbindir}
+%define LIBEXECDIR      %{_libexecdir}/%name
+%define SYSCONFDIR      %{_sysconfdir}/%name
+%define SHARESTATEDIR   %{_sharedstatedir}/%name
+%define LOCALSTATEDIR   %{_localstatedir}/lib/%name
+%define LIBDIR          %{_libdir}
+%define INCLUDEDIR      %{_includedir}
+%define _datarootdir    %{_prefix}/share
+%define DATAROOTDIR     %{_datarootdir}
+%define DATADIR         %{_datadir}
+%define INFODIR         %{_infodir}
+%define LOCALEDIR       %{_datarootdir}/locale
+%define MANDIR          %{_mandir}
+%define DOCDIR          %{_defaultdocdir}/%name
+%define HTMLDIR         %{_defaultdocdir}/%name/html
+%define DVIDIR          %{_defaultdocdir}/%name/dvi
+%define PDFDIR          %{_defaultdocdir}/%name/pdf
+%define PSDIR           %{_defaultdocdir}/%name/ps
+%define LOGFILEDIR      /var/log/%name
+%define MODINSTDIR      %{_libdir}/%name/mod
+%define RUNDIR          %{_localstatedir}/run/%name
+%define DBDIR           %{LOCALSTATEDIR}/db
+%define HTDOCSDIR       %{_datarootdir}/%name/htdocs
+%define SOUNDSDIR       %{_datarootdir}/%name/sounds
+%define GRAMMARDIR      %{_datarootdir}/%name/grammar
+%define SCRIPTDIR       %{_datarootdir}/%name/scripts
+%define RECORDINGSDIR   %{LOCALSTATEDIR}/recordings
+%define PKGCONFIGDIR    %{_datarootdir}/%name/pkgconfig
+%define HOMEDIR         %{LOCALSTATEDIR}
 
 
-Name:         	freeswitch
-Summary:      	FreeSWITCH open source telephony platform
-License:      	MPL1.1
-Group:        	Productivity/Telephony/Servers
-Version:	%{version}
-Release:	%{release}%{?dist}
-URL:          	http://www.freeswitch.org/
-Packager:     	Ken Rice
-Vendor:       	http://www.freeswitch.org/
+Name:           freeswitch
+Summary:        FreeSWITCH open source telephony platform
+License:        MPL1.1
+Group:          Productivity/Telephony/Servers
+Version:        %{version}
+Release:        %{release}%{?dist}
+URL:            http://www.freeswitch.org/
+Packager:       Ken Rice
+Vendor:         http://www.freeswitch.org/
 
 ######################################################################################################################
 #
-#					Source files and where to get them
+#                                       Source files and where to get them
 #
 ######################################################################################################################
 Source0:        http://files.freeswitch.org/%{name}-%{version}.tar.bz2
-Source1:	http://files.freeswitch.org/downloads/libs/freeradius-client-1.1.7.tar.gz
-Source3:	http://files.freeswitch.org/downloads/libs/pocketsphinx-0.8.tar.gz
-Source4:	http://files.freeswitch.org/downloads/libs/sphinxbase-0.8.tar.gz
-Source5:	http://files.freeswitch.org/downloads/libs/communicator_semi_6000_20080321.tar.gz
-Prefix:        	%{prefix}
+Source1:        http://files.freeswitch.org/downloads/libs/freeradius-client-1.1.7.tar.gz
+Source3:        http://files.freeswitch.org/downloads/libs/pocketsphinx-0.8.tar.gz
+Source4:        http://files.freeswitch.org/downloads/libs/sphinxbase-0.8.tar.gz
+Source5:        http://files.freeswitch.org/downloads/libs/communicator_semi_6000_20080321.tar.gz
+Prefix:         %{prefix}
 
 
 ######################################################################################################################
 #
-#				Build Dependencies
+#                               Build Dependencies
 #
 ######################################################################################################################
 
@@ -170,7 +170,7 @@ PreReq:       %insserv_prereq %fillup_prereq
 
 ######################################################################################################################
 #
-#					Where the packages are going to be built
+#                                       Where the packages are going to be built
 #
 ######################################################################################################################
 BuildRoot:    %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -197,8 +197,8 @@ other telephony projects including sipXecs, OpenSER, Asterisk, CodeWeaver and Op
 
 ######################################################################################################################
 #
-#		    Sub Package definitions. Description and Runtime Requirements go here
-#		What goes into which package is in the files section after the whole build enchilada
+#                   Sub Package definitions. Description and Runtime Requirements go here
+#               What goes into which package is in the files section after the whole build enchilada
 #
 ######################################################################################################################
 
@@ -212,10 +212,10 @@ Requires:       %{name} = %{version}-%{release}
 FreeSWITCH development files
 
 ######################################################################################################################
-#				FreeSWITCH Application Modules
+#                               FreeSWITCH Application Modules
 ######################################################################################################################
 %package application-abstraction
-Summary:	FreeSWITCH mod_abstraction
+Summary:        FreeSWITCH mod_abstraction
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -223,7 +223,7 @@ Requires:       %{name} = %{version}-%{release}
 Provide an abstraction to FreeSWITCH API calls
 
 %package application-avmd
-Summary:	FreeSWITCH voicemail detector
+Summary:        FreeSWITCH voicemail detector
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -231,7 +231,7 @@ Requires:       %{name} = %{version}-%{release}
 Provide an voicemail beep detector for FreeSWITCH
 
 %package application-blacklist
-Summary:	FreeSWITCH blacklist module
+Summary:        FreeSWITCH blacklist module
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -240,7 +240,7 @@ Provide black/white listing of various fields used for routing calls in
 FreeSWITCH
 
 %package application-callcenter
-Summary:	FreeSWITCH mod_callcenter Call Queuing Application
+Summary:        FreeSWITCH mod_callcenter Call Queuing Application
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -248,7 +248,7 @@ Requires:       %{name} = %{version}-%{release}
 Provide Automated Call Distribution capabilities for FreeSWITCH
 
 %package application-cidlookup
-Summary:	FreeSWITCH mod_cidlookup 
+Summary:        FreeSWITCH mod_cidlookup 
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -256,7 +256,7 @@ Requires:       %{name} = %{version}-%{release}
 Provide FreeSWITCH access to third party CallerID Name Databases via HTTP
 
 %package application-conference
-Summary:	FreeSWITCH mod_conference
+Summary:        FreeSWITCH mod_conference
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -264,7 +264,7 @@ Requires:       %{name} = %{version}-%{release}
 Provide FreeSWITCH Conference Bridge Services. 
 
 %package application-curl
-Summary:	FreeSWITCH mod_curl
+Summary:        FreeSWITCH mod_curl
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -272,7 +272,7 @@ Requires:       %{name} = %{version}-%{release}
 Provide FreeSWITCH dialplan access to CURL
 
 %package application-db
-Summary:	FreeSWITCH mod_db
+Summary:        FreeSWITCH mod_db
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -282,7 +282,7 @@ FreeSWITCH.  The database can either be in sqlite or ODBC.  It also provides
 support for group dialing and provides database backed limit interface. 
 
 %package application-directory
-Summary:	FreeSWITCH mod_directory
+Summary:        FreeSWITCH mod_directory
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -290,7 +290,7 @@ Requires:       %{name} = %{version}-%{release}
 Provides FreeSWITCH mod_directory, a dial by name directory application. 
 
 %package application-distributor
-Summary:	FreeSWITCH mod_distributor
+Summary:        FreeSWITCH mod_distributor
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -299,7 +299,7 @@ Provides FreeSWITCH mod_distributor, a simple round-robbin style distribution
 to call gateways.
 
 %package application-easyroute
-Summary:	FreeSWITCH mod_easyroute
+Summary:        FreeSWITCH mod_easyroute
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -308,7 +308,7 @@ Provides FreeSWITCH mod_easyroute, a simple, easy to use DB Backed DID routing
 Engine. Uses ODBC to connect to the DB of your choice.
 
 %package application-enum
-Summary:	FreeSWITCH mod_enum
+Summary:        FreeSWITCH mod_enum
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 BuildRequires:  ldns-devel
@@ -318,7 +318,7 @@ Provides FreeSWITCH mod_enum, a ENUM dialplan, with API and Dialplan extensions
 supporting ENUM lookups.
 
 %package application-esf
-Summary:	FreeSWITCH mod_esf
+Summary:        FreeSWITCH mod_esf
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -327,7 +327,7 @@ Provides FreeSWITCH mod_esf, Extra Sip Functionality such as Multicast Support
 
 %if %{build_mod_esl}
 %package application-esl
-Summary:	FreeSWITCH mod_esl
+Summary:        FreeSWITCH mod_esl
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -336,7 +336,7 @@ Provides FreeSWITCH mod_esl, add api commands for remote ESL commands
 %endif
 
 %package application-expr
-Summary:	FreeSWITCH mod_expr
+Summary:        FreeSWITCH mod_expr
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -345,7 +345,7 @@ Provides FreeSWITCH mod_expr, implements Brian Allen Vanderburg's ExprEval
 expression evaluation library for FreeSWITCH.
 
 %package application-fifo
-Summary:	FreeSWITCH mod_fifo
+Summary:        FreeSWITCH mod_fifo
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -354,7 +354,7 @@ Provides FreeSWITCH mod_fifo, a parking-like app which allows you to make
 custom call queues
 
 %package application-fsk
-Summary:	FreeSWITCH mod_fsk
+Summary:        FreeSWITCH mod_fsk
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -363,7 +363,7 @@ Provides FreeSWITCH mod_fsk, a module to send and receive information via
 Frequency-shift keying
 
 %package application-fsv
-Summary:	FreeSWITCH mod_fsv
+Summary:        FreeSWITCH mod_fsv
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -371,7 +371,7 @@ Requires:       %{name} = %{version}-%{release}
 Provides FreeSWITCH mod_fsk, implements functions to record and play back video
 
 %package application-hash
-Summary:	FreeSWITCH mod_hash
+Summary:        FreeSWITCH mod_hash
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -380,7 +380,7 @@ Provides FreeSWITCH mod_hash, implements an API and application interface for
 manipulating a hash table. It also provides a limit backend. 
 
 %package application-httapi
-Summary:	FreeSWITCH mod_httapi
+Summary:        FreeSWITCH mod_httapi
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -390,7 +390,7 @@ standard FreeSWITCH application interface as well as a cached http file format
 interface
 
 %package application-http-cache
-Summary:	FreeSWITCH mod_http_cache
+Summary:        FreeSWITCH mod_http_cache
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -400,7 +400,7 @@ cache a document. The primary use case is to download and cache audio files
 from a web server. 
 
 %package application-lcr
-Summary:	FreeSWITCH mod_lcr
+Summary:        FreeSWITCH mod_lcr
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -408,7 +408,7 @@ Requires:       %{name} = %{version}-%{release}
 Provides FreeSWITCH mod_lcr, provide basic Least Cost Routing Services
 
 %package application-limit
-Summary:	FreeSWITCH mod_limit
+Summary:        FreeSWITCH mod_limit
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -416,7 +416,7 @@ Requires:       %{name} = %{version}-%{release}
 Provides FreeSWITCH mod_limit, provide application to limit both concurrent and call per time period
 
 %package application-memcache
-Summary:	FreeSWITCH mod_memcache
+Summary:        FreeSWITCH mod_memcache
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 BuildRequires:  libmemcached-devel
@@ -428,16 +428,16 @@ nature, but intended for use in speeding up dynamic web applications by
 alleviating database load." 
 
 %package application-mongo
-Summary:	FreeSWITCH mod_mongo
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        FreeSWITCH mod_mongo
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 BuildRequires:  mongo-c-driver-devel
 
 %description application-mongo
 Provides FreeSWITCH mod_mongo, which implements an API interface to mongodb.
 
 %package application-nibblebill
-Summary:	FreeSWITCH mod_nibblebill
+Summary:        FreeSWITCH mod_nibblebill
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -447,7 +447,7 @@ FreeSWITCH to allow real-time debiting of credit or cash from a database
 while calls are in progress.
 
 %package application-rad_auth
-Summary:	FreeSWITCH mod_rad_auth
+Summary:        FreeSWITCH mod_rad_auth
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -455,7 +455,7 @@ Requires:       %{name} = %{version}-%{release}
 Provides FreeSWITCH mod_rad_auth, authetication via RADIUS protocol from FreeSWITCH dialplan
 
 %package application-redis
-Summary:	FreeSWITCH mod_redis
+Summary:        FreeSWITCH mod_redis
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -464,7 +464,7 @@ Provides FreeSWITCH mod_redis, access to the redis key value pair db system from
 FreeSWITCH
 
 %package application-rss
-Summary:	FreeSWITCH mod_rss
+Summary:        FreeSWITCH mod_rss
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -473,7 +473,7 @@ Provides FreeSWITCH mod_rss, edisrse and read an XML based RSS feed, then read
 the entries aloud via a TTS engine
 
 %package application-signalwire
-Summary:	FreeSWITCH mod_signalwire
+Summary:        FreeSWITCH mod_signalwire
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -481,7 +481,7 @@ Requires:       %{name} = %{version}-%{release}
 Provides FreeSWITCH mod_signalwire
 
 %package application-sms
-Summary:	FreeSWITCH mod_sms
+Summary:        FreeSWITCH mod_sms
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -491,7 +491,7 @@ potentially allowing one to build a powerful chatting system like in XMPP using
 using SIP SIMPLE on SIP clients
 
 %package application-snapshot
-Summary:	FreeSWITCH mod_snapshot
+Summary:        FreeSWITCH mod_snapshot
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -500,7 +500,7 @@ Provides FreeSWITCH mod_snapshot, allows recording a sliding window of audio
 and taking snapshots to disk. 
 
 %package application-snom
-Summary:	FreeSWITCH mod_snom
+Summary:        FreeSWITCH mod_snom
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -509,7 +509,7 @@ Provides FreeSWITCH mod_snom, an application for controlling the functionality
 and appearance of the programmable softkeys on Snom phones
 
 %package application-soundtouch
-Summary:	FreeSWITCH mod_soundtouch
+Summary:        FreeSWITCH mod_soundtouch
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 BuildRequires:  soundtouch-devel >= 1.7.1
@@ -521,7 +521,7 @@ pitch shifting and other audio effects, so you can pipe the audio of a call
 can specifically adjust pitch, rate, and tempo.
 
 %package application-spy
-Summary:	FreeSWITCH mod_spy
+Summary:        FreeSWITCH mod_spy
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -530,7 +530,7 @@ Provides FreeSWITCH mod_spy, implements userspy application which provides
 persistent eavesdrop on all channels bridged to a certain user
 
 %package application-stress
-Summary:	FreeSWITCH mod_stress
+Summary:        FreeSWITCH mod_stress
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -539,7 +539,7 @@ Provides FreeSWITCH mod_stress. mod_stress attempts to detect stress in a
 person's voice and generates FreeSWITCH events based on that data. 
 
 %package application-translate
-Summary:	FreeSWITCH mod_translate
+Summary:        FreeSWITCH mod_translate
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -547,7 +547,7 @@ Requires:       %{name} = %{version}-%{release}
 Provide an number translation to FreeSWITCH API calls
 
 %package application-valet_parking
-Summary:	FreeSWITCH mod_valet_parking
+Summary:        FreeSWITCH mod_valet_parking
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -557,7 +557,7 @@ as opposed to on the phone and allows for a number of options to handle call
 retrieval
 
 %package application-video_filter
-Summary:	FreeSWITCH video filter bugs
+Summary:        FreeSWITCH video filter bugs
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -565,7 +565,7 @@ Requires:       %{name} = %{version}-%{release}
 Provide a chromakey video filter media bug
 
 %package application-voicemail
-Summary:	FreeSWITCH mod_voicemail
+Summary:        FreeSWITCH mod_voicemail
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -573,7 +573,7 @@ Requires:       %{name} = %{version}-%{release}
 Provides FreeSWITCH mod_voicemail. Implements Voicemail Application 
 
 %package application-voicemail-ivr
-Summary:	FreeSWITCH mod_voicemail_ivr
+Summary:        FreeSWITCH mod_voicemail_ivr
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -582,11 +582,11 @@ Provides FreeSWITCH mod_voicemail_ivr. Provides a custimizable audio navigation
 system for backend voicemail systems
 
 ######################################################################################################################
-#				FreeSWITCH ASR TTS Modules
+#                               FreeSWITCH ASR TTS Modules
 ######################################################################################################################
 
 %package asrtts-flite
-Summary:	FreeSWITCH mod_flite
+Summary:        FreeSWITCH mod_flite
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 Requires:       flite >= 2.0.0
@@ -596,7 +596,7 @@ BuildRequires:  flite-devel >= 2.0.0
 Provides FreeSWITCH mod_flite, a interface to the flite text to speech engine
 
 %package asrtts-pocketsphinx
-Summary:	FreeSWITCH mod_pocketsphinx
+Summary:        FreeSWITCH mod_pocketsphinx
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 BuildRequires:  bison
@@ -606,7 +606,7 @@ Provides FreeSWITCH mod_pocketsphinx, a interface to the OpenSource
 Pocketsphinx speech recognition engine
 
 %package asrtts-tts-commandline
-Summary:	FreeSWITCH mod_tts_commandline
+Summary:        FreeSWITCH mod_tts_commandline
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -615,7 +615,7 @@ Provides FreeSWITCH mod_tts_commandline, Run a command line and play the
 output file.
 
 %package asrtts-unimrcp
-Summary:	FreeSWITCH mod_unimrcp
+Summary:        FreeSWITCH mod_unimrcp
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
@@ -624,14 +624,14 @@ Provides FreeSWITCH mod_unimrcp, allows communication with Media Resource
 Control Protocol (MRCP) servers
 
 ######################################################################################################################
-#				FreeSWITCH Codec Modules
+#                               FreeSWITCH Codec Modules
 ######################################################################################################################
 
 %package codec-passthru-amr
 Summary:        Pass-through AMR Codec support for FreeSWITCH open source telephony platform
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
-Conflicts:	codec-amr
+Conflicts:      codec-amr
 
 %description codec-passthru-amr
 Pass-through AMR Codec support for FreeSWITCH open source telephony platform
@@ -668,7 +668,7 @@ CODEC2 was created by the developers of Speex.
 Summary:        Pass-through g723.1 Codec support for FreeSWITCH open source telephony platform
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
-Conflicts:	codec-g723_1
+Conflicts:      codec-g723_1
 
 %description codec-passthru-g723_1
 Pass-through g723.1 Codec support for FreeSWITCH open source telephony platform
@@ -677,7 +677,7 @@ Pass-through g723.1 Codec support for FreeSWITCH open source telephony platform
 Summary:        Pass-through g729 Codec support for FreeSWITCH open source telephony platform
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
-Conflicts:	codec-com-g729
+Conflicts:      codec-com-g729
 
 %description codec-passthru-g729
 Pass-through g729 Codec support for FreeSWITCH open source telephony platform
@@ -737,11 +737,11 @@ OPUS Codec support for FreeSWITCH open source telephony platform
 
 %if %{build_sng_tc}
 %package sangoma-codec
-Summary:	Sangoma D100 and D500 Codec Card Support
-Group:		System/Libraries
-Requires:        %{name} = %{version}-%{release}
-Requires: sng-tc-linux
-BuildRequires: sng-tc-linux
+Summary:        Sangoma D100 and D500 Codec Card Support
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       sng-tc-linux
+BuildRequires:  sng-tc-linux
 
 %description sangoma-codec
 Sangoma D100 and D500 Codec Card Support
@@ -766,7 +766,7 @@ BuildRequires:  g722_1-devel
 %description codec-siren
 Siren Codec support for FreeSWITCH open source telephony platform. Using 
 mod_siren in a commercial product will require you to acquire a patent license
-directly from Polycom(R) for your company. 
+directly from Polycom(R) for your company.
 see http://www.polycom.com/usa/en/company/about_us/technology/siren_g7221/siren_g7221.html 
 and http://www.polycom.com/usa/en/company/about_us/technology/siren14_g7221c/siren14_g7221c.html 
 At the time of this packaging, Polycom does not charge for licensing.
@@ -780,7 +780,7 @@ Requires:       %{name} = %{version}-%{release}
 Theora Video Codec support for FreeSWITCH open source telephony platform.
 
 ######################################################################################################################
-#				FreeSWITCH Directory Modules
+#                               FreeSWITCH Directory Modules
 ######################################################################################################################
 
 #%package directory-ldap
@@ -792,7 +792,7 @@ Theora Video Codec support for FreeSWITCH open source telephony platform.
 #LDAP Directory support for FreeSWITCH open source telephony platform.
 
 ######################################################################################################################
-#				FreeSWITCH Endpoint Modules
+#                               FreeSWITCH Endpoint Modules
 ######################################################################################################################
 
 %package endpoint-dingaling
@@ -834,9 +834,9 @@ to be used as a client for GoogleTalk or other XMPP Servers.
 Summary:        PortAudio endpoint support for FreeSWITCH open source telephony platform
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
-Requires:	alsa-lib
-BuildRequires:	alsa-lib-devel
-BuildRequires:	portaudio-devel
+Requires:       alsa-lib
+BuildRequires:  alsa-lib-devel
+BuildRequires:  portaudio-devel
 
 %description endpoint-portaudio
 PortAudio endpoint support for FreeSWITCH open source telephony platform.
@@ -876,9 +876,9 @@ Requires:       %{name} = %{version}-%{release}
 Verto protocol support for FreeSWITCH open source telephony platform.
 
 %package freetdm
-Summary:	Provides a unified interface to hardware TDM cards and ss7 stacks for FreeSWITCH
-Group:		System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Summary:        Provides a unified interface to hardware TDM cards and ss7 stacks for FreeSWITCH
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description freetdm
 FreeTDM
@@ -886,14 +886,14 @@ FreeTDM
 %if %{build_sng_isdn}
 
 %package freetdm-sng-isdn
-Summary:	Sangoma ISDN Module for FreeTDM
-Group:		System/Libraries
+Summary:        Sangoma ISDN Module for FreeTDM
+Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 Requires:       %{name}-freetdm = %{version}-%{release}
-Requires: wanpipe 
-Requires: libsng_isdn 
-BuildRequires: wanpipe 
-BuildRequires: libsng_isdn 
+Requires:       wanpipe
+Requires:       libsng_isdn
+BuildRequires:  wanpipe
+BuildRequires:  libsng_isdn
 
 %description freetdm-sng-isdn
 Sangoma ISDN Module for freetdm
@@ -903,17 +903,17 @@ Sangoma ISDN Module for freetdm
 %if %{build_sng_ss7}
 
 %package freetdm-sng-ss7
-Summary:	Provides a unified interface to hardware TDM cards and ss7 stacks for FreeSWITCH, Sangoma SS7 Module
-Group:		System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Summary:        Provides a unified interface to hardware TDM cards and ss7 stacks for FreeSWITCH, Sangoma SS7 Module
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 Requires:       %{name}-freetdm = %{version}-%{release}
-Requires: wanpipe 
-Requires: libsng_ss7 
-BuildRequires: wanpipe 
-BuildRequires: libsng_ss7 
+Requires:       wanpipe
+Requires:       libsng_ss7
+BuildRequires:  wanpipe
+BuildRequires:  libsng_ss7
 %if 0%{?fedora_version} >= 8 || 0%{?rhel} >= 6
-Requires: openssl098e
-BuildRequires: openssl098e
+Requires:       openssl098e
+BuildRequires:  openssl098e
 %endif
 
 %description freetdm-sng-ss7
@@ -922,12 +922,12 @@ Sangoma SMG-SS7 drivers for FreeTDM
 %endif
 
 ######################################################################################################################
-#				FreeSWITCH Event Handler Modules
+#                               FreeSWITCH Event Handler Modules
 ######################################################################################################################
 
 %package event-cdr-mongodb
-Summary:	MongoDB CDR Logger for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
+Summary:        MongoDB CDR Logger for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 BuildRequires:  mongo-c-driver-devel
 
@@ -935,29 +935,29 @@ BuildRequires:  mongo-c-driver-devel
 MongoDB CDR Logger for FreeSWITCH
 
 %package event-cdr-pg-csv
-Summary:	PostgreSQL CDR Logger for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-Requires:	postgresql-libs
-BuildRequires:	postgresql-devel
+Summary:        PostgreSQL CDR Logger for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       postgresql-libs
+BuildRequires:  postgresql-devel
 
 %description event-cdr-pg-csv
 PostgreSQL CDR Logger for FreeSWITCH.
 
 %package event-cdr-sqlite
-Summary:	SQLite CDR Logger for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	 %{name} = %{version}-%{release}
+Summary:        SQLite CDR Logger for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description event-cdr-sqlite
 SQLite CDR Logger for FreeSWITCH.
 
 %package event-erlang-event
-Summary:	Erlang Event Module for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	 %{name} = %{version}-%{release}
-Requires:	erlang
-BuildRequires:	erlang
+Summary:        Erlang Event Module for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       erlang
+BuildRequires:  erlang
 
 %description event-erlang-event
 Erlang Event Module for FreeSWITCH.
@@ -965,41 +965,41 @@ Erlang Event Module for FreeSWITCH.
 %package event-format-cdr
 Summary:        JSON and XML Logger for the FreeSWITCH open source telephony platform
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description event-format-cdr
 JSON and XML Logger for the FreeSWITCH open source telephony platform
 
 %package kazoo
-Summary:	Kazoo Module for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-Requires:	erlang
-BuildRequires:	erlang
+Summary:        Kazoo Module for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       erlang
+BuildRequires:  erlang
 
 %description kazoo
 Kazoo Module for FreeSWITCH.
 
 %package event-multicast
-Summary:	Multicast Event System for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        Multicast Event System for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description event-multicast
 Multicast Event System for FreeSWITCH.
 
 #%package event-zmq
-#Summary:	ZeroMQ Event System for the FreeSWITCH open source telephony platform
-#Group:		System/Libraries
-#Requires:	 %{name} = %{version}-%{release}
+#Summary:        ZeroMQ Event System for the FreeSWITCH open source telephony platform
+#Group:          System/Libraries
+#Requires:       %{name} = %{version}-%{release}
 #
 #%description event-zmq
 #ZeroMQ Event System for FreeSWITCH.
 
 %package event-json-cdr
-Summary:	JSON CDR Logger for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        JSON CDR Logger for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description event-json-cdr
 JSON CDR Logger for FreeSWITCH.
@@ -1007,7 +1007,7 @@ JSON CDR Logger for FreeSWITCH.
 %package event-radius-cdr
 Summary:        RADIUS Logger for the FreeSWITCH open source telephony platform
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description event-radius-cdr
 RADIUS Logger for the FreeSWITCH open source telephony platform
@@ -1016,7 +1016,7 @@ RADIUS Logger for the FreeSWITCH open source telephony platform
 %package event-rayo
 Summary:        Rayo (XMPP 3PCC) server for the FreeSWITCH open source telephony platform
 Group:          System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description event-rayo
 Rayo 3PCC for FreeSWITCH.  http://rayo.org   http://xmpp.org/extensions/xep-0327.html
@@ -1024,46 +1024,46 @@ Rayo is an XMPP protocol extension for third-party control of telephone calls.
 %endif
 
 %package event-snmp
-Summary:	SNMP stats reporter for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-Requires:	net-snmp
-BuildRequires:	net-snmp-devel
+Summary:        SNMP stats reporter for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       net-snmp
+BuildRequires:  net-snmp-devel
 
 %description event-snmp
 SNMP stats reporter for the FreeSWITCH open source telephony platform
 
 ######################################################################################################################
-#				FreeSWITCH Logger Modules
+#                               FreeSWITCH Logger Modules
 ######################################################################################################################
 
 %package logger-graylog2
-Summary:	GELF logger for Graylog2 and Logstash
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        GELF logger for Graylog2 and Logstash
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description logger-graylog2
 GELF logger for Graylog2 and Logstash
 
 ######################################################################################################################
-#				FreeSWITCH Media Format Modules
+#                               FreeSWITCH Media Format Modules
 ######################################################################################################################
 
 %package format-local-stream
-Summary:	Local File Streamer for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        Local File Streamer for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description format-local-stream
-Local File Streamer for FreeSWITCH. It streams files from a directory and 
-multiple channels connected to the same stream will hear the same (looped) 
-file playback .. similar to a shoutcast stream. Useful for Music-on-hold type 
-scenarios. 
+Local File Streamer for FreeSWITCH. It streams files from a directory and
+multiple channels connected to the same stream will hear the same (looped)
+file playback .. similar to a shoutcast stream. Useful for Music-on-hold type
+scenarios.
 
 %package format-native-file
-Summary:	Native Media File support for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        Native Media File support for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description format-native-file
 The native file module is designed to make it easy to play sound files where no
@@ -1072,18 +1072,18 @@ Generally, these require transcoding when being played to callers. However, if
 a native format sound file is available then FreeSWITCH can use it. 
 
 %package format-portaudio-stream
-Summary:	PortAudio Media Steam support for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-BuildRequires:	portaudio-devel
+Summary:        PortAudio Media Steam support for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+BuildRequires:  portaudio-devel
 
 %description format-portaudio-stream
 Portaudio Streaming interface Audio for FreeSWITCH
 
 %package format-shell-stream
-Summary:	Implements Media Steaming from arbitrary shell commands for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        Implements Media Steaming from arbitrary shell commands for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description format-shell-stream
 Mod shell stream is a FreeSWITCH module to allow you to stream audio from an 
@@ -1091,15 +1091,15 @@ arbitrary shell command. You could use it to read audio from a database, from
 a soundcard, etc. 
 
 %package format-shout
-Summary:	Implements Media Steaming from arbitrary shell commands for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-Requires:	libshout
-Requires:	libmpg123 >= 1.20.1
-Requires:	lame
-BuildRequires:	libshout-devel
-BuildRequires:	libmpg123-devel >= 1.20.1
-BuildRequires:	lame-devel
+Summary:        Implements Media Steaming from arbitrary shell commands for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       libshout
+Requires:       libmpg123 >= 1.20.1
+Requires:       lame
+BuildRequires:  libshout-devel
+BuildRequires:  libmpg123-devel >= 1.20.1
+BuildRequires:  lame-devel
 
 %description format-shout
 Mod Shout is a FreeSWITCH module to allow you to stream audio from MP3s or from shoutcast stream.
@@ -1115,34 +1115,34 @@ mod_ssml is a FreeSWITCH module that renders SSML into audio.  This module requi
 %endif
 
 %package format-tone-stream
-Summary:	Implements TGML Tone Generation for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        Implements TGML Tone Generation for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description format-tone-stream
 Implements TGML Tone Generation for the FreeSWITCH open source telephony platform
 
 ######################################################################################################################
-#				FreeSWITCH Programming Language Modules
+#                               FreeSWITCH Programming Language Modules
 ######################################################################################################################
 
 %package lua
-Summary:	Lua support for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        Lua support for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 BuildRequires:  lua-devel
 
-%description	lua
+%description    lua
 
-%package	perl
-Summary:	Perl support for the FreeSWITCH open source telephony platform
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
-Requires:	perl
-BuildRequires:	perl-devel
-BuildRequires:	perl-ExtUtils-Embed
+%package        perl
+Summary:        Perl support for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       perl
+BuildRequires:  perl-devel
+BuildRequires:  perl-ExtUtils-Embed
 
-%description	perl
+%description    perl
 
 %package        python
 Summary:        Python support for the FreeSWITCH open source telephony platform
@@ -1154,20 +1154,20 @@ BuildRequires:  python-devel
 %description    python
 
 %package v8
-Summary:	JavaScript support for the FreeSWITCH open source telephony platform, using Google V8 JavaScript engine
-Group:		System/Libraries
-Requires:	%{name} = %{version}-%{release}
+Summary:        JavaScript support for the FreeSWITCH open source telephony platform, using Google V8 JavaScript engine
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
 
 %description v8
 
 ######################################################################################################################
-#				FreeSWITCH Say Modules
+#                               FreeSWITCH Say Modules
 ######################################################################################################################
 
 %package lang-en
-Summary:	Provides english language dependand modules and speech config for the FreeSWITCH Open Source telephone platform.
+Summary:        Provides english language dependand modules and speech config for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description lang-en
 English language phrases module and directory structure for say module and voicemail
@@ -1175,7 +1175,7 @@ English language phrases module and directory structure for say module and voice
 %package lang-ru
 Summary:        Provides russian language dependand modules and speech config for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description lang-ru
 Russian language phrases module and directory structure for say module and voicemail
@@ -1183,7 +1183,7 @@ Russian language phrases module and directory structure for say module and voice
 %package lang-fr
 Summary:        Provides french language dependend modules and speech config for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description lang-fr
 French language phrases module and directory structure for say module and voicemail
@@ -1191,7 +1191,7 @@ French language phrases module and directory structure for say module and voicem
 %package lang-de
 Summary:        Provides german language dependend modules and speech config for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description lang-de
 German language phrases module and directory structure for say module and voicemail
@@ -1199,7 +1199,7 @@ German language phrases module and directory structure for say module and voicem
 %package lang-he
 Summary:        Provides hebrew language dependend modules and speech config for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description lang-he
 Hebrew language phrases module and directory structure for say module and voicemail
@@ -1207,7 +1207,7 @@ Hebrew language phrases module and directory structure for say module and voicem
 %package lang-es
 Summary:        Provides Spanish language dependend modules and speech config for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description lang-es
 Spanish language phrases module and directory structure for say module and voicemail
@@ -1215,7 +1215,7 @@ Spanish language phrases module and directory structure for say module and voice
 %package lang-pt
 Summary:        Provides Portugese language dependend modules and speech config for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description lang-pt
 Portugese language phrases module and directory structure for say module and voicemail
@@ -1223,19 +1223,19 @@ Portugese language phrases module and directory structure for say module and voi
 %package lang-sv
 Summary:        Provides Swedish language dependend modules and speech config for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description lang-sv
 Swedish language phrases module and directory structure for say module and voicemail
 
 ######################################################################################################################
-#				FreeSWITCH Timer Modules
+#                               FreeSWITCH Timer Modules
 ######################################################################################################################
 
 %package timer-posix
 Summary:        Provides posix timer for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description timer-posix
 Provides posix timer for the FreeSWITCH Open Source telephone platform.
@@ -1244,15 +1244,15 @@ Provides posix timer for the FreeSWITCH Open Source telephone platform.
 %package timer-timerfd
 Summary:        Provides Linux Timerfs based timer for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:        %{name} = %{version}-%{release}
+Requires:       %{name} = %{version}-%{release}
 
 %description timer-timerfd
-Provides Linux Timerfs based timer for the FreeSWITCH Open Source telephone 
+Provides Linux Timerfs based timer for the FreeSWITCH Open Source telephone
 platform.
 %endif
 
 ######################################################################################################################
-#				FreeSWITCH XML INT Modules
+#                               FreeSWITCH XML INT Modules
 ######################################################################################################################
 
 %package xml-cdr
@@ -1281,89 +1281,89 @@ Requires:        %{name} = %{version}-%{release}
 Provides XML-RPC interface for the FreeSWITCH Open Source telephone platform.
 
 ######################################################################################################################
-#			FreeSWITCH ESL language modules
+#                       FreeSWITCH ESL language modules
 ######################################################################################################################
 
-%package	-n perl-ESL
-Summary:	The Perl ESL module allows for native interaction with FreeSWITCH over the event socket interface.
-Group:		System Environment/Libraries
+%package        -n perl-ESL
+Summary:        The Perl ESL module allows for native interaction with FreeSWITCH over the event socket interface.
+Group:          System Environment/Libraries
 
-%description	-n perl-ESL
+%description    -n perl-ESL
 The Perl ESL module allows for native interaction with FreeSWITCH over the event socket interface.
 
-%package	-n python-ESL
-Summary:	The Python ESL module allows for native interaction with FreeSWITCH over the event socket interface.
-Group:		System Environment/Libraries
-Requires:	python
-BuildRequires:	python-devel
+%package        -n python-ESL
+Summary:        The Python ESL module allows for native interaction with FreeSWITCH over the event socket interface.
+Group:          System Environment/Libraries
+Requires:       python
+BuildRequires:  python-devel
 
-%description	-n python-ESL
+%description    -n python-ESL
 The Python ESL module allows for native interaction with FreeSWITCH over the event socket interface.
 
 ######################################################################################################################
-#				FreeSWITCH basic config module
+#                               FreeSWITCH basic config module
 ######################################################################################################################
 
 %package config-vanilla
 Summary:        Basic vanilla config set for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
-Requires:	%{name} = %{version}-%{release}
-Requires:	freeswitch-application-abstraction
-Requires:	freeswitch-application-avmd
-Requires:	freeswitch-application-blacklist
-Requires:	freeswitch-application-callcenter
-Requires:	freeswitch-application-cidlookup
-Requires:	freeswitch-application-conference
-Requires:	freeswitch-application-curl
-Requires:	freeswitch-application-db
-Requires:	freeswitch-application-directory
-Requires:	freeswitch-application-distributor
-Requires:	freeswitch-application-easyroute
-Requires:	freeswitch-application-enum
-Requires:	freeswitch-application-esf
-Requires:	freeswitch-application-expr
-Requires:	freeswitch-application-fifo
-Requires:	freeswitch-application-fsk
-Requires:	freeswitch-application-fsv
-Requires:	freeswitch-application-hash
-Requires:	freeswitch-application-httapi
-Requires:	freeswitch-application-http-cache
-Requires:	freeswitch-application-lcr
-Requires:	freeswitch-application-limit
-Requires:	freeswitch-application-memcache
-Requires:	freeswitch-application-nibblebill
-Requires:	freeswitch-application-redis
-Requires:	freeswitch-application-rss
-Requires:	freeswitch-application-signalwire
-Requires:	freeswitch-application-sms
-Requires:	freeswitch-application-snapshot
-Requires:	freeswitch-application-snom
-Requires:	freeswitch-application-soundtouch
-Requires:	freeswitch-application-spy
-Requires:	freeswitch-application-stress
-Requires:	freeswitch-application-valet_parking
-Requires:	freeswitch-application-video_filter
-Requires:	freeswitch-application-voicemail
-Requires:	freeswitch-application-voicemail-ivr
-Requires:	freeswitch-codec-passthru-amr
-Requires:	freeswitch-codec-bv
-Requires:	freeswitch-codec-passthru-g723_1
-Requires:	freeswitch-codec-passthru-g729
-Requires:	freeswitch-codec-h26x
-Requires:	freeswitch-codec-ilbc
-Requires:	freeswitch-codec-siren
-Requires:	freeswitch-format-local-stream
-Requires:	freeswitch-format-native-file
-Requires:	freeswitch-format-portaudio-stream
-Requires:	freeswitch-format-tone-stream
-Requires:	freeswitch-lang-en
+Requires:       %{name} = %{version}-%{release}
+Requires:       freeswitch-application-abstraction
+Requires:       freeswitch-application-avmd
+Requires:       freeswitch-application-blacklist
+Requires:       freeswitch-application-callcenter
+Requires:       freeswitch-application-cidlookup
+Requires:       freeswitch-application-conference
+Requires:       freeswitch-application-curl
+Requires:       freeswitch-application-db
+Requires:       freeswitch-application-directory
+Requires:       freeswitch-application-distributor
+Requires:       freeswitch-application-easyroute
+Requires:       freeswitch-application-enum
+Requires:       freeswitch-application-esf
+Requires:       freeswitch-application-expr
+Requires:       freeswitch-application-fifo
+Requires:       freeswitch-application-fsk
+Requires:       freeswitch-application-fsv
+Requires:       freeswitch-application-hash
+Requires:       freeswitch-application-httapi
+Requires:       freeswitch-application-http-cache
+Requires:       freeswitch-application-lcr
+Requires:       freeswitch-application-limit
+Requires:       freeswitch-application-memcache
+Requires:       freeswitch-application-nibblebill
+Requires:       freeswitch-application-redis
+Requires:       freeswitch-application-rss
+Requires:       freeswitch-application-signalwire
+Requires:       freeswitch-application-sms
+Requires:       freeswitch-application-snapshot
+Requires:       freeswitch-application-snom
+Requires:       freeswitch-application-soundtouch
+Requires:       freeswitch-application-spy
+Requires:       freeswitch-application-stress
+Requires:       freeswitch-application-valet_parking
+Requires:       freeswitch-application-video_filter
+Requires:       freeswitch-application-voicemail
+Requires:       freeswitch-application-voicemail-ivr
+Requires:       freeswitch-codec-passthru-amr
+Requires:       freeswitch-codec-bv
+Requires:       freeswitch-codec-passthru-g723_1
+Requires:       freeswitch-codec-passthru-g729
+Requires:       freeswitch-codec-h26x
+Requires:       freeswitch-codec-ilbc
+Requires:       freeswitch-codec-siren
+Requires:       freeswitch-format-local-stream
+Requires:       freeswitch-format-native-file
+Requires:       freeswitch-format-portaudio-stream
+Requires:       freeswitch-format-tone-stream
+Requires:       freeswitch-lang-en
 
 %description config-vanilla
 Basic vanilla config set for the FreeSWITCH Open Source telephone platform.
 
 ######################################################################################################################
 #
-#				Unpack and prepare Source archives, copy stuff around etc ..
+#                               Unpack and prepare Source archives, copy stuff around etc ..
 #
 ######################################################################################################################
 
@@ -1379,7 +1379,7 @@ sed -ie 's:confdir="${sysconfdir}/freeswitch":confdir="$sysconfdir":' ./configur
 
 ######################################################################################################################
 #
-#						Start the Build process
+#                                               Start the Build process
 #
 ######################################################################################################################
 %build
@@ -1394,52 +1394,52 @@ export QA_RPATHS=$[ 0x0001|0x0002 ]
 
 ######################################################################################################################
 #
-#				Here the modules that will be build get defined
+#                               Here the modules that will be build get defined
 #
 ######################################################################################################################
 ######################################################################################################################
 #
-#						Application Modules
+#                                               Application Modules
 #
 ######################################################################################################################
 APPLICATION_MODULES_AC="applications/mod_abstraction applications/mod_avmd applications/mod_blacklist \
-			applications/mod_callcenter  applications/mod_cidlookup \
-			applications/mod_commands applications/mod_conference applications/mod_curl"
+                        applications/mod_callcenter  applications/mod_cidlookup \
+                        applications/mod_commands applications/mod_conference applications/mod_curl"
 APPLICATION_MODULES_DE="applications/mod_db applications/mod_directory applications/mod_distributor \
-			applications/mod_dptools applications/mod_easyroute applications/mod_enum applications/mod_esf \
-			applications/mod_expr "
+                        applications/mod_dptools applications/mod_easyroute applications/mod_enum applications/mod_esf \
+                        applications/mod_expr "
 
 %if %{build_mod_esl}
 APPLICATION_MODULES_DE+="applications/mod_esl"
 %endif
 
 APPLICATION_MODULES_FR="applications/mod_fifo applications/mod_fsk applications/mod_fsv applications/mod_hash \
-			applications/mod_httapi applications/mod_http_cache applications/mod_lcr applications/mod_limit \
-			applications/mod_memcache applications/mod_mongo applications/mod_nibblebill applications/mod_rad_auth \
-			applications/mod_redis applications/mod_rss "
+                        applications/mod_httapi applications/mod_http_cache applications/mod_lcr applications/mod_limit \
+                        applications/mod_memcache applications/mod_mongo applications/mod_nibblebill applications/mod_rad_auth \
+                        applications/mod_redis applications/mod_rss "
 
 APPLICATION_MODULES_SZ="applications/mod_signalwire applications/mod_sms applications/mod_snapshot applications/mod_snom applications/mod_soundtouch \
-			applications/mod_spandsp applications/mod_spy applications/mod_stress \
-			applications/mod_valet_parking applications/mod_translate applications/mod_voicemail \
-			applications/mod_voicemail_ivr applications/mod_video_filter"
+                        applications/mod_spandsp applications/mod_spy applications/mod_stress \
+                        applications/mod_valet_parking applications/mod_translate applications/mod_voicemail \
+                        applications/mod_voicemail_ivr applications/mod_video_filter"
 
 APPLICATIONS_MODULES="$APPLICATION_MODULES_AC $APPLICATION_MODULES_DE $APPLICATION_MODULES_FR $APPLICATION_MODULES_SZ"
 
 ######################################################################################################################
 #
-#				Automatic Speech Recognition and Text To Speech Modules
+#                               Automatic Speech Recognition and Text To Speech Modules
 #
 ######################################################################################################################
 ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_pocketsphinx asr_tts/mod_tts_commandline asr_tts/mod_unimrcp"
 
 ######################################################################################################################
 #
-#						Codecs
+#                                               Codecs
 #
 ######################################################################################################################
 CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_bv codecs/mod_codec2 codecs/mod_g723_1 \
-		codecs/mod_g729 codecs/mod_h26x codecs/mod_ilbc codecs/mod_isac codecs/mod_mp4v codecs/mod_opus codecs/mod_silk \
-		codecs/mod_siren codecs/mod_theora"
+                codecs/mod_g729 codecs/mod_h26x codecs/mod_ilbc codecs/mod_isac codecs/mod_mp4v codecs/mod_opus codecs/mod_silk \
+                codecs/mod_siren codecs/mod_theora"
 #
 %if %{build_sng_tc}
 CODECS_MODULES+="codecs/mod_sangoma_codec"
@@ -1447,38 +1447,38 @@ CODECS_MODULES+="codecs/mod_sangoma_codec"
 
 ######################################################################################################################
 #
-#					Dialplan Modules
+#                                       Dialplan Modules
 #
 ######################################################################################################################
 DIALPLANS_MODULES="dialplans/mod_dialplan_directory dialplans/mod_dialplan_xml"
 #DISABLED DIALPLANS dialplans/mod_dialplan_asterisk 
 ######################################################################################################################
 #
-#					Directory Modules
+#                                       Directory Modules
 #
 ######################################################################################################################
 DIRECTORIES_MODULES=""
 
 ######################################################################################################################
 #
-#						Endpoints
+#                                               Endpoints
 #
 ######################################################################################################################
 ENDPOINTS_MODULES="endpoints/mod_dingaling ../../libs/freetdm/mod_freetdm \
-			endpoints/mod_loopback endpoints/mod_portaudio endpoints/mod_rtmp \
-			endpoints/mod_skinny endpoints/mod_verto endpoints/mod_rtc endpoints/mod_sofia"
+                        endpoints/mod_loopback endpoints/mod_portaudio endpoints/mod_rtmp \
+                        endpoints/mod_skinny endpoints/mod_verto endpoints/mod_rtc endpoints/mod_sofia"
 
 ## DISABLED MODULES DUE TO BUILD ISSUES endpoints/mod_gsmopen endpoints/mod_h323 endpoints/mod_khomp 
  
 ######################################################################################################################
 #
-#						Event Handlers
+#                                               Event Handlers
 #
 ######################################################################################################################
 EVENT_HANDLERS_MODULES="event_handlers/mod_cdr_csv event_handlers/mod_cdr_pg_csv event_handlers/mod_cdr_sqlite \
-			event_handlers/mod_cdr_mongodb event_handlers/mod_format_cdr event_handlers/mod_erlang_event event_handlers/mod_event_multicast \
-			event_handlers/mod_event_socket event_handlers/mod_json_cdr event_handlers/mod_kazoo event_handlers/mod_radius_cdr \
-			event_handlers/mod_snmp"
+                        event_handlers/mod_cdr_mongodb event_handlers/mod_format_cdr event_handlers/mod_erlang_event event_handlers/mod_event_multicast \
+                        event_handlers/mod_event_socket event_handlers/mod_json_cdr event_handlers/mod_kazoo event_handlers/mod_radius_cdr \
+                        event_handlers/mod_snmp"
 %if %{build_mod_rayo}
 EVENT_HANDLERS_MODULES+=" event_handlers/mod_rayo"
 %endif
@@ -1486,7 +1486,7 @@ EVENT_HANDLERS_MODULES+=" event_handlers/mod_rayo"
 #### BUILD ISSUES NET RESOLVED FOR RELEASE event_handlers/mod_event_zmq 
 ######################################################################################################################
 #
-#					File and Audio Format Handlers
+#                                       File and Audio Format Handlers
 #
 ######################################################################################################################
 FORMATS_MODULES="formats/mod_local_stream formats/mod_native_file formats/mod_portaudio_stream \
@@ -1497,7 +1497,7 @@ FORMATS_MODULES+=" formats/mod_ssml"
 
 ######################################################################################################################
 #
-#						Embedded Languages
+#                                               Embedded Languages
 #
 ######################################################################################################################
 LANGUAGES_MODULES="languages/mod_lua languages/mod_perl languages/mod_python "
@@ -1505,21 +1505,21 @@ LANGUAGES_MODULES="languages/mod_lua languages/mod_perl languages/mod_python "
 
 ######################################################################################################################
 #
-#						Logging Modules
+#                                               Logging Modules
 #
 ######################################################################################################################
 LOGGERS_MODULES="loggers/mod_console loggers/mod_graylog2 loggers/mod_logfile loggers/mod_syslog"
 
 ######################################################################################################################
 #
-#						Phrase engine language modules
+#                                               Phrase engine language modules
 #
 ######################################################################################################################
 SAY_MODULES="say/mod_say_de say/mod_say_en say/mod_say_es say/mod_say_pt say/mod_say_fr say/mod_say_he say/mod_say_ru say/mod_say_sv"
 
 ######################################################################################################################
 #
-#							Timers
+#                                                       Timers
 #
 ######################################################################################################################
 TIMERS_MODULES="timers/mod_posix_timer "
@@ -1529,14 +1529,14 @@ TIMERS_MODULES+="timers/mod_timerfd"
 
 ######################################################################################################################
 #
-#						XML Modules
+#                                               XML Modules
 #
 ######################################################################################################################
 XML_INT_MODULES="xml_int/mod_xml_cdr xml_int/mod_xml_curl xml_int/mod_xml_rpc"
 
 ######################################################################################################################
 #
-#				Create one environment variable out of all the module defs
+#                               Create one environment variable out of all the module defs
 #
 ######################################################################################################################
 MYMODULES="$APPLICATIONS_MODULES $CODECS_MODULES $DIALPLANS_MODULES $DIRECTORIES_MODULES \
@@ -1545,7 +1545,7 @@ $SAY_MODULES $TIMERS_MODULES $XML_INT_MODULES"
 
 ######################################################################################################################
 #
-#					Create Modules build list and set variables
+#                                       Create Modules build list and set variables
 #
 ######################################################################################################################
 
@@ -1560,7 +1560,7 @@ export ACLOCAL_FLAGS="-I /usr/share/aclocal"
 
 ######################################################################################################################
 #
-#				Bootstrap, Configure and Build the whole enchilada
+#                               Bootstrap, Configure and Build the whole enchilada
 #
 ######################################################################################################################
 
@@ -1612,7 +1612,7 @@ cd libs/esl
 
 ######################################################################################################################
 #
-#				Install it and create some required dirs and links
+#                               Install it and create some required dirs and links
 #
 ######################################################################################################################
 %install
@@ -1686,7 +1686,7 @@ cd ../..
 
 ######################################################################################################################
 #
-#			Add a freeswitch user with group daemon that will own the whole enchilada
+#                       Add a freeswitch user with group daemon that will own the whole enchilada
 #
 ######################################################################################################################
 %pre
@@ -1719,7 +1719,7 @@ chkconfig --add freeswitch
 %{?systemd_postun freeswitch.service}
 ######################################################################################################################
 #
-#				On uninstallation get rid of the freeswitch user
+#                               On uninstallation get rid of the freeswitch user
 #
 ######################################################################################################################
 %{?run_ldconfig:%run_ldconfig}
@@ -1733,14 +1733,14 @@ fi
 %files
 ######################################################################################################################
 #
-#			What to install where ... first set default permissions
+#                       What to install where ... first set default permissions
 #
 ######################################################################################################################
 %defattr(-,root,root)
 
 ######################################################################################################################
 #
-#							Directories
+#                                                       Directories
 #
 ######################################################################################################################
 #
@@ -1780,7 +1780,7 @@ fi
 
 ######################################################################################################################
 #
-#						Other Files
+#                                               Other Files
 #
 ######################################################################################################################
 %config(noreplace) %attr(0644,-,-) %{HTDOCSDIR}/*
@@ -1804,14 +1804,14 @@ fi
 
 ######################################################################################################################
 #
-#						Binaries
+#                                               Binaries
 #
 ######################################################################################################################
 %attr(0755,-,-) %{prefix}/bin/*
 %{LIBDIR}/libfreeswitch*.so*
 ######################################################################################################################
 #
-#			Modules in Alphabetical Order, please keep them that way..
+#                       Modules in Alphabetical Order, please keep them that way..
 #
 ######################################################################################################################
 %{MODINSTDIR}/mod_cdr_csv.so*
@@ -1832,7 +1832,7 @@ fi
 %{MODINSTDIR}/mod_xml_rpc.so* 
 ######################################################################################################################
 #
-#						Package for the developer
+#                                               Package for the developer
 #
 ######################################################################################################################
 %files devel
@@ -1845,7 +1845,7 @@ fi
 
 
 ######################################################################################################################
-#						Vanilla Config Files
+#                                               Vanilla Config Files
 ######################################################################################################################
 %files config-vanilla
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/*.tpl
@@ -1934,45 +1934,45 @@ fi
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/xml_scgi.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/zeroconf.conf.xml
 ######################################################################################################################
-#						Chatplans
+#                                               Chatplans
 ######################################################################################################################
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/chatplan/default.xml
 ######################################################################################################################
-#						Dialplans
+#                                               Dialplans
 ######################################################################################################################
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/dialplan/*.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/dialplan/default/*.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/dialplan/public/*.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/dialplan/skinny-patterns/*.xml
 ######################################################################################################################
-#						Fonts
+#                                               Fonts
 ######################################################################################################################
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_datadir}/freeswitch/fonts/*.ttf
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_datadir}/freeswitch/fonts/OFL.txt
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_datadir}/freeswitch/fonts/README.fonts
 ######################################################################################################################
-#						User Directories
+#                                               User Directories
 ######################################################################################################################
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/directory/*.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/directory/default/*
 ######################################################################################################################
-#							IVR Menues
+#                                                       IVR Menues
 ######################################################################################################################
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/ivr_menus/*.xml
 ######################################################################################################################
-#							Sip Profiles
+#                                                       Sip Profiles
 ######################################################################################################################
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/sip_profiles/*.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/sip_profiles/external/*.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/sip_profiles/external-ipv6/*.xml
 ######################################################################################################################
-#				Other Protocol Profiles (skinny, jingle, mrcp)
+#                               Other Protocol Profiles (skinny, jingle, mrcp)
 ######################################################################################################################
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/skinny_profiles/*.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/jingle_profiles/*.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/mrcp_profiles/*.xml
 ######################################################################################################################
-#						Grammar Files
+#                                               Grammar Files
 ######################################################################################################################
 %config(noreplace) %attr(0644, -, -) %{GRAMMARDIR}/default.dic
 %config(noreplace) %attr(0644, -, -) %{GRAMMARDIR}/model/communicator/*
@@ -1981,7 +1981,7 @@ fi
 
 ######################################################################################################################
 #
-#						Application Packages
+#                                               Application Packages
 #
 ######################################################################################################################
 %files application-abstraction
@@ -2111,7 +2111,7 @@ fi
 
 ######################################################################################################################
 #
-#						ASR TTS Packages
+#                                               ASR TTS Packages
 #
 ######################################################################################################################
 %files asrtts-flite
@@ -2128,7 +2128,7 @@ fi
 
 ######################################################################################################################
 #
-#						CODEC Packages
+#                                               CODEC Packages
 #
 ######################################################################################################################
 
@@ -2183,7 +2183,7 @@ fi
 
 ######################################################################################################################
 #
-#						FreeSWITCH Directory Modules
+#                                               FreeSWITCH Directory Modules
 #
 ######################################################################################################################
 
@@ -2192,7 +2192,7 @@ fi
 
 ######################################################################################################################
 #
-#						FreeSWITCH endpoint Modules
+#                                               FreeSWITCH endpoint Modules
 #
 ######################################################################################################################
 
@@ -2225,7 +2225,7 @@ fi
 
 ######################################################################################################################
 #
-#						FreeTDM Module for TDM Interaction
+#                                               FreeTDM Module for TDM Interaction
 #
 ######################################################################################################################
 %files freetdm
@@ -2252,7 +2252,7 @@ fi
 
 ######################################################################################################################
 #
-#					Event Modules
+#                                       Event Modules
 #
 ######################################################################################################################
 
@@ -2296,7 +2296,7 @@ fi
 
 ######################################################################################################################
 #
-#					Event Modules
+#                                       Event Modules
 #
 ######################################################################################################################
 
@@ -2325,7 +2325,7 @@ fi
 
 ######################################################################################################################
 #
-#					Embedded Language Modules
+#                                       Embedded Language Modules
 #
 ######################################################################################################################
 %files lua
@@ -2354,7 +2354,7 @@ fi
 
 ######################################################################################################################
 #
-#						Language Modules
+#                                               Language Modules
 #
 ######################################################################################################################
 %files lang-en
@@ -2443,7 +2443,7 @@ fi
 
 ######################################################################################################################
 #
-#						Logger Modules
+#                                               Logger Modules
 #
 ######################################################################################################################
 
@@ -2452,7 +2452,7 @@ fi
 
 ######################################################################################################################
 #
-#					Timer Modules
+#                                       Timer Modules
 #
 ######################################################################################################################
 
@@ -2466,7 +2466,7 @@ fi
 
 ######################################################################################################################
 #
-#					XMLINT  Modules
+#                                       XMLINT  Modules
 #
 ######################################################################################################################
 
@@ -2477,10 +2477,10 @@ fi
 %{MODINSTDIR}/mod_xml_curl.so*
 
 ######################################################################################################################
-#			FreeSWITCH ESL language modules
+#                       FreeSWITCH ESL language modules
 ######################################################################################################################
 
-%files	-n perl-ESL
+%files  -n perl-ESL
 %defattr(644,root,root,755)
 %{perl_archlib}/ESL.pm
 %{perl_archlib}/ESL.so
@@ -2489,14 +2489,14 @@ fi
 %{perl_archlib}/ESL/Dispatch.pm
 %{perl_archlib}/ESL/IVR.pm
 
-%files	-n python-ESL
+%files  -n python-ESL
 %attr(0644, root, bin) /usr/lib*/python*/site-packages/freeswitch.py*
 %attr(0755, root, bin) /usr/lib*/python*/site-packages/_ESL.so*
 %attr(0755, root, bin) /usr/lib*/python*/site-packages/ESL.py*
 
 ######################################################################################################################
 #
-#						Changelog
+#                                               Changelog
 #
 ######################################################################################################################
 %changelog
