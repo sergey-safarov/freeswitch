@@ -1406,19 +1406,21 @@ APPLICATION_MODULES_AC="applications/mod_abstraction applications/mod_avmd appli
                         applications/mod_callcenter  applications/mod_cidlookup \
                         applications/mod_commands applications/mod_conference applications/mod_curl"
 APPLICATION_MODULES_DE="applications/mod_db applications/mod_directory applications/mod_distributor \
-                        applications/mod_dptools applications/mod_easyroute applications/mod_enum applications/mod_esf \
-                        applications/mod_expr "
+                        applications/mod_dptools applications/mod_easyroute applications/mod_enum \
+                        applications/mod_esf applications/mod_expr "
 
 %if %{build_mod_esl}
 APPLICATION_MODULES_DE+="applications/mod_esl"
 %endif
 
 APPLICATION_MODULES_FR="applications/mod_fifo applications/mod_fsk applications/mod_fsv applications/mod_hash \
-                        applications/mod_httapi applications/mod_http_cache applications/mod_lcr applications/mod_limit \
-                        applications/mod_memcache applications/mod_mongo applications/mod_nibblebill applications/mod_rad_auth \
-                        applications/mod_redis applications/mod_rss "
+                        applications/mod_httapi applications/mod_http_cache applications/mod_lcr \
+                        applications/mod_limit applications/mod_memcache applications/mod_mongo \
+                        applications/mod_nibblebill applications/mod_rad_auth applications/mod_redis \
+                        applications/mod_rss "
 
-APPLICATION_MODULES_SZ="applications/mod_signalwire applications/mod_sms applications/mod_snapshot applications/mod_snom applications/mod_soundtouch \
+APPLICATION_MODULES_SZ="applications/mod_signalwire applications/mod_sms applications/mod_snapshot
+                        applications/mod_snom applications/mod_soundtouch \
                         applications/mod_spandsp applications/mod_spy applications/mod_stress \
                         applications/mod_valet_parking applications/mod_translate applications/mod_voicemail \
                         applications/mod_voicemail_ivr applications/mod_video_filter"
@@ -1438,8 +1440,8 @@ ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_pocketsphinx asr_tts/mod_tts_comm
 #
 ######################################################################################################################
 CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_bv codecs/mod_codec2 codecs/mod_g723_1 \
-                codecs/mod_g729 codecs/mod_h26x codecs/mod_ilbc codecs/mod_isac codecs/mod_mp4v codecs/mod_opus codecs/mod_silk \
-                codecs/mod_siren codecs/mod_theora"
+                codecs/mod_g729 codecs/mod_h26x codecs/mod_ilbc codecs/mod_isac codecs/mod_mp4v codecs/mod_opus \
+                codecs/mod_silk codecs/mod_siren codecs/mod_theora"
 #
 %if %{build_sng_tc}
 CODECS_MODULES+="codecs/mod_sangoma_codec"
@@ -1476,8 +1478,9 @@ ENDPOINTS_MODULES="endpoints/mod_dingaling ../../libs/freetdm/mod_freetdm \
 #
 ######################################################################################################################
 EVENT_HANDLERS_MODULES="event_handlers/mod_cdr_csv event_handlers/mod_cdr_pg_csv event_handlers/mod_cdr_sqlite \
-                        event_handlers/mod_cdr_mongodb event_handlers/mod_format_cdr event_handlers/mod_erlang_event event_handlers/mod_event_multicast \
-                        event_handlers/mod_event_socket event_handlers/mod_json_cdr event_handlers/mod_kazoo event_handlers/mod_radius_cdr \
+                        event_handlers/mod_cdr_mongodb event_handlers/mod_format_cdr event_handlers/mod_erlang_event \
+                        event_handlers/mod_event_multicast event_handlers/mod_event_socket \
+                        event_handlers/mod_json_cdr event_handlers/mod_kazoo event_handlers/mod_radius_cdr \
                         event_handlers/mod_snmp"
 %if %{build_mod_rayo}
 EVENT_HANDLERS_MODULES+=" event_handlers/mod_rayo"
@@ -1515,7 +1518,8 @@ LOGGERS_MODULES="loggers/mod_console loggers/mod_graylog2 loggers/mod_logfile lo
 #                                               Phrase engine language modules
 #
 ######################################################################################################################
-SAY_MODULES="say/mod_say_de say/mod_say_en say/mod_say_es say/mod_say_pt say/mod_say_fr say/mod_say_he say/mod_say_ru say/mod_say_sv"
+SAY_MODULES="say/mod_say_de say/mod_say_en say/mod_say_es say/mod_say_pt say/mod_say_fr say/mod_say_he \
+             say/mod_say_ru say/mod_say_sv"
 
 ######################################################################################################################
 #
