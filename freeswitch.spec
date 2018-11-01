@@ -2698,4 +2698,3 @@ fi
 - Added devel package
 * Thu Mar 15 2007 - peter+rpmspam@suntel.com.tr
 - Initial RPM release
-
