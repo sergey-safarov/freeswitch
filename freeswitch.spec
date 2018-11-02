@@ -37,6 +37,7 @@
 %define build_mod_esl 0
 %define build_mod_rayo 1
 %define build_mod_ssml 1
+%define build_mod_av 0
 
 %{?with_sang_tc:%define build_sng_tc 1 }
 %{?with_sang_isdn:%define build_sng_isdn 1 }
@@ -44,6 +45,7 @@
 %{?with_py26_esl:%define build_py26_esl 1 }
 %{?with_timerfd:%define build_timerfd 1 }
 %{?with_mod_esl:%define build_mod_esl 1 }
+%{?with_mod_av:%define build_mod_av 1 }
 
 %define version 1.8.5
 %define release 1
@@ -635,6 +637,18 @@ Conflicts:      codec-amr
 
 %description codec-passthru-amr
 Pass-through AMR Codec support for FreeSWITCH open source telephony platform
+
+%if %{build_mod_av}
+%package codec-av
+Summary:        FS Video Codec / File Format using libav.org for FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       ffmpeg
+BuildRequires:  ffmpeg-devel
+
+%description codec-av
+FS Video Codec / File Format using libav.org for FreeSWITCH open source telephony platform
+%endif
 
 %package codec-passthru-amrwb
 Summary:        Pass-through AMR WideBand Codec support for FreeSWITCH open source telephony platform
@@ -1450,7 +1464,7 @@ ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_pocketsphinx asr_tts/mod_tts_comm
 #                                               Codecs
 #
 ######################################################################################################################
-CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_bv codecs/mod_codec2 codecs/mod_g723_1 \
+CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_av codecs/mod_bv codecs/mod_codec2 codecs/mod_g723_1 \
                 codecs/mod_g729 codecs/mod_h26x codecs/mod_ilbc codecs/mod_isac codecs/mod_mp4v codecs/mod_opus \
                 codecs/mod_silk codecs/mod_siren codecs/mod_theora"
 #
@@ -2153,6 +2167,12 @@ fi
 
 %files codec-passthru-amrwb
 %{MODINSTDIR}/mod_amrwb.so*
+
+%if %{build_mod_av}
+%files codec-av
+%{MODINSTDIR}/mod_av.so*
+%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/av.conf.xml
+%endif
 
 %files codec-bv
 %{MODINSTDIR}/mod_bv.so*
