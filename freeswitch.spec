@@ -783,13 +783,15 @@ Theora Video Codec support for FreeSWITCH open source telephony platform.
 #                               FreeSWITCH Directory Modules
 ######################################################################################################################
 
-#%package directory-ldap
-#Summary:        LDAP Directory support for FreeSWITCH open source telephony platform
-#Group:          System/Libraries
-#Requires:       %{name} = %{version}-%{release}
+%package directory-ldap
+Summary:        LDAP Directory support for FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       openldap
+BuildRequires:  openldap-devel
 
-#%description directory-ldap
-#LDAP Directory support for FreeSWITCH open source telephony platform.
+%description directory-ldap
+LDAP Directory support for FreeSWITCH open source telephony platform.
 
 ######################################################################################################################
 #                               FreeSWITCH Endpoint Modules
@@ -1459,7 +1461,7 @@ DIALPLANS_MODULES="dialplans/mod_dialplan_directory dialplans/mod_dialplan_xml"
 #                                       Directory Modules
 #
 ######################################################################################################################
-DIRECTORIES_MODULES=""
+DIRECTORIES_MODULES="directories/mod_ldap"
 
 ######################################################################################################################
 #
@@ -2193,8 +2195,8 @@ fi
 #
 ######################################################################################################################
 
-#%files directory-ldap
-#%{MODINSTDIR}/mod_ldap.so*
+%files directory-ldap
+%{MODINSTDIR}/mod_ldap.so*
 
 ######################################################################################################################
 #
