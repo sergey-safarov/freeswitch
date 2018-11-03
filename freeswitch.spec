@@ -1025,14 +1025,14 @@ BuildRequires:  net-snmp-devel
 %description event-snmp
 SNMP stats reporter for the FreeSWITCH open source telephony platform
 
-%package kazoo
+%package event-kazoo
 Summary:        Kazoo Module for the FreeSWITCH open source telephony platform
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 Requires:       erlang-erts
 BuildRequires:  erlang
 
-%description kazoo
+%description event-kazoo
 Kazoo Module for FreeSWITCH.
 
 ######################################################################################################################
@@ -1898,7 +1898,6 @@ fi
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/http_cache.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/ivr.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/java.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/kazoo.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/lcr.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/local_stream.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/logfile.conf.xml
@@ -2299,8 +2298,9 @@ fi
 %files event-snmp
 %{MODINSTDIR}/mod_snmp.so*
 
-%files kazoo
+%files event-kazoo
 %{MODINSTDIR}/mod_kazoo.so*
+%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/kazoo.conf.xml
 
 ######################################################################################################################
 #
