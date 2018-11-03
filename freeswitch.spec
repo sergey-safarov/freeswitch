@@ -877,17 +877,17 @@ Requires:       %{name} = %{version}-%{release}
 %description endpoint-rtc
 Verto protocol support for FreeSWITCH open source telephony platform.
 
-%package freetdm
+%package endpoint-freetdm
 Summary:        Provides a unified interface to hardware TDM cards and ss7 stacks for FreeSWITCH
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 
-%description freetdm
+%description endpoint-freetdm
 FreeTDM
 
 %if %{build_sng_isdn}
 
-%package freetdm-sng-isdn
+%package endpoint-freetdm-sng-isdn
 Summary:        Sangoma ISDN Module for FreeTDM
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
@@ -897,14 +897,14 @@ Requires:       libsng_isdn
 BuildRequires:  wanpipe
 BuildRequires:  libsng_isdn
 
-%description freetdm-sng-isdn
+%description endpoint-freetdm-sng-isdn
 Sangoma ISDN Module for freetdm
 
 %endif
 
 %if %{build_sng_ss7}
 
-%package freetdm-sng-ss7
+%package endpoint-freetdm-sng-ss7
 Summary:        Provides a unified interface to hardware TDM cards and ss7 stacks for FreeSWITCH, Sangoma SS7 Module
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
@@ -918,7 +918,7 @@ Requires:       openssl098e
 BuildRequires:  openssl098e
 %endif
 
-%description freetdm-sng-ss7
+%description endpoint-freetdm-sng-ss7
 Sangoma SMG-SS7 drivers for FreeTDM
 
 %endif
@@ -963,6 +963,15 @@ BuildRequires:  erlang
 
 %description event-erlang-event
 Erlang Event Module for FreeSWITCH.
+
+%package event-fail2ban
+Summary:        fail2ban Module for the FreeSWITCH open source telephony platform
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       fail2ban
+
+%description event-fail2ban
+fail2ban Module for FreeSWITCH.
 
 %package event-format-cdr
 Summary:        JSON and XML Logger for the FreeSWITCH open source telephony platform
@@ -1480,10 +1489,10 @@ ENDPOINTS_MODULES="endpoints/mod_dingaling ../../libs/freetdm/mod_freetdm \
 #
 ######################################################################################################################
 EVENT_HANDLERS_MODULES="event_handlers/mod_cdr_csv event_handlers/mod_cdr_pg_csv event_handlers/mod_cdr_sqlite \
-                        event_handlers/mod_cdr_mongodb event_handlers/mod_format_cdr event_handlers/mod_erlang_event \
-                        event_handlers/mod_event_multicast event_handlers/mod_event_socket \
-                        event_handlers/mod_json_cdr event_handlers/mod_kazoo event_handlers/mod_radius_cdr \
-                        event_handlers/mod_snmp"
+                        event_handlers/mod_cdr_mongodb event_handlers/mod_fail2ban event_handlers/mod_format_cdr \
+                        event_handlers/mod_erlang_event event_handlers/mod_event_multicast \
+                        event_handlers/mod_event_socket event_handlers/mod_json_cdr event_handlers/mod_kazoo \
+                        event_handlers/mod_radius_cdr event_handlers/mod_snmp"
 %if %{build_mod_rayo}
 EVENT_HANDLERS_MODULES+=" event_handlers/mod_rayo"
 %endif
@@ -2235,7 +2244,7 @@ fi
 #                                               FreeTDM Module for TDM Interaction
 #
 ######################################################################################################################
-%files freetdm
+%files endpoint-freetdm
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/tones.conf
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/freetdm.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/pika.conf
@@ -2248,12 +2257,12 @@ fi
 %{MODINSTDIR}/ftmod_[a-r,t-z]*.so*
 
 %if %{build_sng_ss7}
-%files freetdm-sng-ss7
+%files endpoint-freetdm-sng-ss7
 %{MODINSTDIR}/ftmod_sangoma_ss7.so*
 %endif
 
 %if %{build_sng_isdn}
-%files freetdm-sng-isdn
+%files endpoint-freetdm-sng-isdn
 %{MODINSTDIR}/ftmod_sangoma_isdn.so*
 %endif
 
