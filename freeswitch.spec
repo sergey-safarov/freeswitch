@@ -1389,6 +1389,10 @@ cp %{SOURCE5} libs/
 sed -i -e 's:@confdir@:@confdir@/freeswitch:g' libs/freetdm/Makefile.am
 sed -i -e 's:/autoload_configs:/freeswitch/autoload_configs:g' libs/freetdm/mod_freetdm/Makefile.in
 
+%if %{build_mod_av} == 0
+rm -f conf/vanilla/autoload_configs/av.conf.xml
+%endif
+
 ######################################################################################################################
 #
 #                                               Start the Build process
@@ -1415,21 +1419,21 @@ export QA_RPATHS=$[ 0x0001|0x0002 ]
 #
 ######################################################################################################################
 APPLICATION_MODULES_AC="applications/mod_abstraction applications/mod_avmd applications/mod_blacklist \
-                        applications/mod_callcenter  applications/mod_cidlookup \
-                        applications/mod_commands applications/mod_conference applications/mod_curl"
+                        applications/mod_callcenter applications/mod_cidlookup applications/mod_commands \
+                        applications/mod_conference applications/mod_curl"
 APPLICATION_MODULES_DE="applications/mod_db applications/mod_directory applications/mod_distributor \
                         applications/mod_dptools applications/mod_easyroute applications/mod_enum \
-                        applications/mod_esf applications/mod_expr "
+                        applications/mod_esf applications/mod_expr"
 
 %if %{build_mod_esl}
-APPLICATION_MODULES_DE+="applications/mod_esl"
+APPLICATION_MODULES_DE+=" applications/mod_esl"
 %endif
 
 APPLICATION_MODULES_FR="applications/mod_fifo applications/mod_fsk applications/mod_fsv applications/mod_hash \
                         applications/mod_httapi applications/mod_http_cache applications/mod_lcr \
                         applications/mod_limit applications/mod_memcache applications/mod_mongo \
                         applications/mod_nibblebill applications/mod_rad_auth applications/mod_redis \
-                        applications/mod_rss "
+                        applications/mod_rss"
 
 APPLICATION_MODULES_SZ="applications/mod_signalwire applications/mod_sms applications/mod_snapshot
                         applications/mod_snom applications/mod_soundtouch \
@@ -1451,12 +1455,15 @@ ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_pocketsphinx asr_tts/mod_tts_comm
 #                                               Codecs
 #
 ######################################################################################################################
-CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_av codecs/mod_bv codecs/mod_codec2 codecs/mod_g723_1 \
-                codecs/mod_g729 codecs/mod_h26x codecs/mod_ilbc codecs/mod_isac codecs/mod_mp4v codecs/mod_opus \
-                codecs/mod_silk codecs/mod_siren codecs/mod_theora"
+CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_bv codecs/mod_codec2 codecs/mod_g723_1 codecs/mod_g729  \
+                codecs/mod_h26x codecs/mod_ilbc codecs/mod_isac codecs/mod_mp4v codecs/mod_opus codecs/mod_silk \
+                codecs/mod_siren codecs/mod_theora"
 #
+%if %{build_mod_av}
+CODECS_MODULES+=" codecs/mod_av"
+%endif
 %if %{build_sng_tc}
-CODECS_MODULES+="codecs/mod_sangoma_codec"
+CODECS_MODULES+=" codecs/mod_sangoma_codec"
 %endif
 
 ######################################################################################################################
