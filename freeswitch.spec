@@ -54,14 +54,6 @@
 #
 # disable rpath checking
 #%define __arch_install_post /usr/lib/rpm/check-buildroot
-#%define _prefix        /usr
-#%define prefix         %{_prefix}
-#%define sysconfdir     /etc/freeswitch
-#%define _sysconfdir    %{sysconfdir}
-#%define logfiledir     /var/log/freeswitch
-#%define _logfiledir    %{logfiledir}
-#%define runtimedir     /var/run/freeswitch
-#%define _runtimedir    %{runtimedir}
 
 ######################################################################################################################
 # Layout of packages FHS (Redhat/SUSE), FS (Standard FreeSWITCH layout using /usr/local), OPT (/opt based layout)
@@ -88,7 +80,7 @@
 %define DVIDIR          %{_defaultdocdir}/%name/dvi
 %define PDFDIR          %{_defaultdocdir}/%name/pdf
 %define PSDIR           %{_defaultdocdir}/%name/ps
-%define LOGFILEDIR      /var/log/%name
+%define LOGFILEDIR      %{_localstatedir}/log/%name
 %define MODINSTDIR      %{_libdir}/%name/mod
 %define RUNDIR          %{_localstatedir}/run/%name
 %define DBDIR           %{LOCALSTATEDIR}/db
@@ -121,7 +113,6 @@ Source1:        http://files.freeswitch.org/downloads/libs/freeradius-client-1.1
 Source3:        http://files.freeswitch.org/downloads/libs/pocketsphinx-0.8.tar.gz
 Source4:        http://files.freeswitch.org/downloads/libs/sphinxbase-0.8.tar.gz
 Source5:        http://files.freeswitch.org/downloads/libs/communicator_semi_6000_20080321.tar.gz
-Prefix:         %{prefix}
 
 
 ######################################################################################################################
@@ -1399,8 +1390,9 @@ cp %{SOURCE3} libs/
 cp %{SOURCE4} libs/
 cp %{SOURCE5} libs/
 
-#Hotfix for redefined %_sysconfdir
-sed -ie 's:confdir="${sysconfdir}/freeswitch":confdir="$sysconfdir":' ./configure.ac
+# Fixed conf dir for freetdm endpoint
+sed -i -e 's:@confdir@:@confdir@/freeswitch:g' libs/freetdm/Makefile.am
+sed -i -e 's:/autoload_configs:/freeswitch/autoload_configs:g' libs/freetdm/mod_freetdm/Makefile.in
 
 ######################################################################################################################
 #
@@ -1648,9 +1640,9 @@ cd libs/esl
 %{__make} DESTDIR=%{buildroot} install
 
 # Create a log dir
-%{__mkdir} -p %{buildroot}%{prefix}/log
-%{__mkdir} -p %{buildroot}%{logfiledir}
-%{__mkdir} -p %{buildroot}%{runtimedir}
+%{__mkdir} -p %{buildroot}%{_prefix}/log
+%{__mkdir} -p %{buildroot}%{LOGFILEDIR}
+%{__mkdir} -p %{buildroot}%{RUNDIR}
 %{__mkdir} -p %{buildroot}%{_localstatedir}/cache/freeswitch
 
 #install the esl stuff
@@ -1728,9 +1720,6 @@ fi
 
 %post
 %{?run_ldconfig:%run_ldconfig}
-# Make FHS2.0 happy
-# %{__mkdir} -p /etc/opt
-# %{__ln_s} -f %{sysconfdir} /etc%{prefix}
 
 chown freeswitch:daemon /var/log/freeswitch /var/run/freeswitch
 
@@ -1775,32 +1764,32 @@ fi
 #
 #################################### Basic Directory Structure #######################################################
 #
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}
 %dir %attr(0750, freeswitch, daemon) %{LOCALSTATEDIR}
 %dir %attr(0750, freeswitch, daemon) %{LOCALSTATEDIR}/images
 %dir %attr(0750, freeswitch, daemon) %{DBDIR}
 %dir %attr(0755, -, -) %{GRAMMARDIR}
 %dir %attr(0755, -, -) %{HTDOCSDIR}
-%dir %attr(0750, freeswitch, daemon) %{logfiledir}
-%dir %attr(0750, freeswitch, daemon) %{runtimedir}
+%dir %attr(0750, freeswitch, daemon) %{LOGFILEDIR}
+%dir %attr(0750, freeswitch, daemon) %{RUNDIR}
 %dir %attr(0755, -, -) %{SCRIPTDIR}
 #
 #################################### Config Directory Structure #######################################################
 #
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/autoload_configs
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/dialplan
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/dialplan/default
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/dialplan/public
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/dialplan/skinny-patterns
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/directory
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/directory/default
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/jingle_profiles
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/mrcp_profiles
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/sip_profiles
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/sip_profiles/external
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/sip_profiles/external-ipv6
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/skinny_profiles
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/dialplan
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/dialplan/default
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/dialplan/public
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/dialplan/skinny-patterns
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/directory
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/directory/default
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/jingle_profiles
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/mrcp_profiles
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/sip_profiles
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/sip_profiles/external
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/sip_profiles/external-ipv6
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/skinny_profiles
 #
 #################################### Grammar Directory Structure #####################################################
 #
@@ -1836,7 +1825,7 @@ fi
 #                                               Binaries
 #
 ######################################################################################################################
-%attr(0755,-,-) %{prefix}/bin/*
+%attr(0755,-,-) %{_bindir}/*
 %{LIBDIR}/libfreeswitch*.so*
 ######################################################################################################################
 #
@@ -1877,56 +1866,56 @@ fi
 #                                               Vanilla Config Files
 ######################################################################################################################
 %files config-vanilla
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/*.tpl
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/*.ttml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/extensions.conf
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/mime.types
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/acl.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/alsa.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/amqp.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/cdr_csv.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/cepstral.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/console.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/dialplan_directory.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/event_socket.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/fax.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/hiredis.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/ivr.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/java.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/logfile.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/modules.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/msrp.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/opal.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/oreka.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/osp.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/post_load_modules.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/presence_map.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/sangoma_codec.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/shout.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/smpp.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/sms_flowroute.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/sofia.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/spandsp.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/switch.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/syslog.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/timezones.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/unicall.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/vpx.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/xml_rpc.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/xml_scgi.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/zeroconf.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/*.tpl
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/*.ttml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/extensions.conf
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/mime.types
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/acl.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/alsa.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/amqp.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/cdr_csv.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/cepstral.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/console.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/dialplan_directory.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/event_socket.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/fax.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/hiredis.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/ivr.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/java.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/logfile.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/modules.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/msrp.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/opal.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/oreka.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/osp.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/post_load_modules.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/presence_map.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/sangoma_codec.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/shout.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/smpp.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/sms_flowroute.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/sofia.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/spandsp.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/switch.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/syslog.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/timezones.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/unicall.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/vpx.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/xml_rpc.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/xml_scgi.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/zeroconf.conf.xml
 ######################################################################################################################
 #                                               Chatplans
 ######################################################################################################################
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/chatplan/default.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/chatplan/default.xml
 ######################################################################################################################
 #                                               Dialplans
 ######################################################################################################################
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/dialplan/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/dialplan/default/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/dialplan/public/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/dialplan/skinny-patterns/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/dialplan/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/dialplan/default/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/dialplan/public/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/dialplan/skinny-patterns/*.xml
 ######################################################################################################################
 #                                               Fonts
 ######################################################################################################################
@@ -1936,24 +1925,24 @@ fi
 ######################################################################################################################
 #                                               User Directories
 ######################################################################################################################
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/directory/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/directory/default/*
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/directory/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/directory/default/*
 ######################################################################################################################
 #                                                       IVR Menues
 ######################################################################################################################
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/ivr_menus/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/ivr_menus/*.xml
 ######################################################################################################################
 #                                                       Sip Profiles
 ######################################################################################################################
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/sip_profiles/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/sip_profiles/external/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/sip_profiles/external-ipv6/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/sip_profiles/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/sip_profiles/external/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/sip_profiles/external-ipv6/*.xml
 ######################################################################################################################
 #                               Other Protocol Profiles (skinny, jingle, mrcp)
 ######################################################################################################################
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/skinny_profiles/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/jingle_profiles/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/mrcp_profiles/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/skinny_profiles/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/jingle_profiles/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/mrcp_profiles/*.xml
 ######################################################################################################################
 #                                               Grammar Files
 ######################################################################################################################
@@ -1969,51 +1958,51 @@ fi
 ######################################################################################################################
 %files application-abstraction
 %{MODINSTDIR}/mod_abstraction.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/abstraction.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/abstraction.conf.xml
 
 %files application-avmd
 %{MODINSTDIR}/mod_avmd.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/avmd.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/avmd.conf.xml
 
 %files application-blacklist
 %{MODINSTDIR}/mod_blacklist.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/blacklist.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/blacklist.conf.xml
 
 %files application-callcenter
 %{MODINSTDIR}/mod_callcenter.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/callcenter.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/callcenter.conf.xml
 
 %files application-cidlookup
 %{MODINSTDIR}/mod_cidlookup.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/cidlookup.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/cidlookup.conf.xml
 
 %files application-conference
 %{MODINSTDIR}/mod_conference.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/conference.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/conference_layouts.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/conference.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/conference_layouts.conf.xml
 
 %files application-curl
 %{MODINSTDIR}/mod_curl.so*
 
 %files application-db
 %{MODINSTDIR}/mod_db.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/db.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/db.conf.xml
 
 %files application-directory
 %{MODINSTDIR}/mod_directory.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/directory.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/directory.conf.xml
 
 %files application-distributor
 %{MODINSTDIR}/mod_distributor.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/distributor.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/distributor.conf.xml
 
 %files application-easyroute
 %{MODINSTDIR}/mod_easyroute.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/easyroute.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/easyroute.conf.xml
 
 %files application-enum
 %{MODINSTDIR}/mod_enum.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/enum.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/enum.conf.xml
 
 %files application-esf
 %{MODINSTDIR}/mod_esf.so*
@@ -2028,7 +2017,7 @@ fi
 
 %files application-fifo
 %{MODINSTDIR}/mod_fifo.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/fifo.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/fifo.conf.xml
 
 %files application-fsk
 %{MODINSTDIR}/mod_fsk.so*
@@ -2038,46 +2027,46 @@ fi
 
 %files application-hash
 %{MODINSTDIR}/mod_hash.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/hash.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/hash.conf.xml
 
 %files application-httapi
 %{MODINSTDIR}/mod_httapi.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/httapi.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/httapi.conf.xml
 
 %files application-http-cache
 %{MODINSTDIR}/mod_http_cache.so*
 %dir %attr(0750, freeswitch, daemon) %{_localstatedir}/cache/freeswitch
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/http_cache.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/http_cache.conf.xml
 
 %files application-lcr
 %{MODINSTDIR}/mod_lcr.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/lcr.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/lcr.conf.xml
 
 %files application-limit
 %{MODINSTDIR}/mod_limit.so*
 
 %files application-memcache
 %{MODINSTDIR}/mod_memcache.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/memcache.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/memcache.conf.xml
 
 %files application-mongo
 %{MODINSTDIR}/mod_mongo.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/mongo.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/mongo.conf.xml
 
 %files application-nibblebill
 %{MODINSTDIR}/mod_nibblebill.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/nibblebill.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/nibblebill.conf.xml
 
 %files application-rad_auth
 %{MODINSTDIR}/mod_rad_auth.so*
 
 %files application-redis
 %{MODINSTDIR}/mod_redis.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/redis.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/redis.conf.xml
 
 %files application-rss
 %{MODINSTDIR}/mod_rss.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/rss.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/rss.conf.xml
 
 %files application-signalwire
 %{MODINSTDIR}/mod_signalwire.so*
@@ -2102,7 +2091,7 @@ fi
 
 %files application-translate
 %{MODINSTDIR}/mod_translate.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/translate.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/translate.conf.xml
 
 %files application-valet_parking
 %{MODINSTDIR}/mod_valet_parking.so*
@@ -2112,11 +2101,11 @@ fi
 
 %files application-voicemail
 %{MODINSTDIR}/mod_voicemail.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/voicemail.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/voicemail.conf.xml
 
 %files application-voicemail-ivr
 %{MODINSTDIR}/mod_voicemail_ivr.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/voicemail_ivr.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/voicemail_ivr.conf.xml
 
 ######################################################################################################################
 #
@@ -2128,15 +2117,15 @@ fi
 
 %files asrtts-pocketsphinx
 %{MODINSTDIR}/mod_pocketsphinx.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/pocketsphinx.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/pocketsphinx.conf.xml
 
 %files asrtts-tts-commandline
 %{MODINSTDIR}/mod_tts_commandline.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/tts_commandline.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/tts_commandline.conf.xml
 
 %files asrtts-unimrcp
 %{MODINSTDIR}/mod_unimrcp.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/unimrcp.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/unimrcp.conf.xml
 
 ######################################################################################################################
 #
@@ -2146,16 +2135,16 @@ fi
 
 %files codec-passthru-amr
 %{MODINSTDIR}/mod_amr.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/amr.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/amr.conf.xml
 
 %files codec-passthru-amrwb
 %{MODINSTDIR}/mod_amrwb.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/amrwb.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/amrwb.conf.xml
 
 %if %{build_mod_av}
 %files codec-av
 %{MODINSTDIR}/mod_av.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/av.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/av.conf.xml
 %endif
 
 %files codec-bv
@@ -2185,7 +2174,7 @@ fi
 
 %files codec-opus
 %{MODINSTDIR}/mod_opus.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/opus.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/opus.conf.xml
 
 %if %{build_sng_tc}
 %files sangoma-codec
@@ -2218,7 +2207,7 @@ fi
 
 %files endpoint-dingaling
 %{MODINSTDIR}/mod_dingaling.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/dingaling.conf.xml 
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/dingaling.conf.xml 
 
 #%files endpoint-gsmopen
 #%{MODINSTDIR}/mod_gsmopen.so*
@@ -2231,19 +2220,19 @@ fi
 
 %files endpoint-portaudio
 %{MODINSTDIR}/mod_portaudio.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/portaudio.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/portaudio.conf.xml
 
 %files endpoint-rtmp
 %{MODINSTDIR}/mod_rtmp.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/rtmp.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/rtmp.conf.xml
 
 %files endpoint-skinny
 %{MODINSTDIR}/mod_skinny.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/skinny.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/skinny.conf.xml
 
 %files endpoint-verto
 %{MODINSTDIR}/mod_verto.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/verto.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/verto.conf.xml
 
 %files endpoint-rtc
 %{MODINSTDIR}/mod_rtc.so*
@@ -2254,12 +2243,12 @@ fi
 #
 ######################################################################################################################
 %files endpoint-freetdm
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/tones.conf
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/freetdm.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/pika.conf
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/freetdm.conf
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/wanpipe.conf
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/zt.conf
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/tones.conf
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/freetdm.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/pika.conf
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/freetdm.conf
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/wanpipe.conf
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/zt.conf
 %{LIBDIR}/libfreetdm.so*
 %{MODINSTDIR}/mod_freetdm.so*
 %{MODINSTDIR}/ftmod_skel*.so*
@@ -2283,27 +2272,27 @@ fi
 
 %files event-cdr-mongodb
 %{MODINSTDIR}/mod_cdr_mongodb.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/cdr_mongodb.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/cdr_mongodb.conf.xml
 
 %files event-cdr-pg-csv
 %{MODINSTDIR}/mod_cdr_pg_csv.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/cdr_pg_csv.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/cdr_pg_csv.conf.xml
 
 %files event-cdr-sqlite
 %{MODINSTDIR}/mod_cdr_sqlite.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/cdr_sqlite.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/cdr_sqlite.conf.xml
 
 %files event-erlang-event
 %{MODINSTDIR}/mod_erlang_event.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/erlang_event.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/erlang_event.conf.xml
 
 %files event-format-cdr
 %{MODINSTDIR}/mod_format_cdr.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/format_cdr.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/format_cdr.conf.xml
 
 %files event-multicast
 %{MODINSTDIR}/mod_event_multicast.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/event_multicast.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/event_multicast.conf.xml
 
 #%files event-zmq
 #%{MODINSTDIR}/mod_xmq.so*
@@ -2324,7 +2313,7 @@ fi
 
 %files event-kazoo
 %{MODINSTDIR}/mod_kazoo.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/kazoo.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/kazoo.conf.xml
 
 ######################################################################################################################
 #
@@ -2334,7 +2323,7 @@ fi
 
 %files format-local-stream
 %{MODINSTDIR}/mod_local_stream.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/local_stream.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/local_stream.conf.xml
 
 %files format-native-file
 %{MODINSTDIR}/mod_native_file.so*
@@ -2363,27 +2352,27 @@ fi
 ######################################################################################################################
 %files lua
 %{MODINSTDIR}/mod_lua*.so*
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/autoload_configs
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/lua.conf.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/lua.conf.xml
 
 %files perl
 %{MODINSTDIR}/mod_perl*.so*
-%{prefix}/perl/*
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/autoload_configs
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/perl.conf.xml
+%{_prefix}/perl/*
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/perl.conf.xml
 
 %files python
 %{MODINSTDIR}/mod_python*.so*
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/autoload_configs
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/python.conf.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/python.conf.xml
 
 %files v8
 #%{MODINSTDIR}/mod_v8*.so*
 #%{LIBDIR}/libv8.so
 #%{LIBDIR}/libicui18n.so
 #%{LIBDIR}/libicuuc.so
-#%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/autoload_configs
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/v8.conf.xml
+#%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/v8.conf.xml
 
 ######################################################################################################################
 #
@@ -2391,87 +2380,87 @@ fi
 #
 ######################################################################################################################
 %files lang-en
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/en
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/en/demo
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/en/vm
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/en/dir
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/en/ivr
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/en/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/en/demo/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/en/vm/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/en/dir/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/en/ivr/*.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en/demo
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en/vm
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en/dir
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en/ivr
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en/demo/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en/vm/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en/dir/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/en/ivr/*.xml
 %{MODINSTDIR}/mod_say_en.so*
 
 %files lang-de
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/de
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/de/demo
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/de/vm
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/de/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/de/demo/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/de/vm/*.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/de
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/de/demo
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/de/vm
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/de/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/de/demo/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/de/vm/*.xml
 %{MODINSTDIR}/mod_say_de.so*
 
 %files lang-fr
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/fr
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/fr/demo
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/fr/vm
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/fr/dir
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/fr/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/fr/demo/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/fr/vm/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/fr/dir/*.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/fr
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/fr/demo
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/fr/vm
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/fr/dir
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/fr/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/fr/demo/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/fr/vm/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/fr/dir/*.xml
 %{MODINSTDIR}/mod_say_fr.so*
 
 %files lang-ru
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/ru
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/ru/demo
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/ru/vm
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/ru/dir
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/ru/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/ru/demo/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/ru/vm/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/ru/dir/*.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/ru
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/ru/demo
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/ru/vm
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/ru/dir
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/ru/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/ru/demo/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/ru/vm/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/ru/dir/*.xml
 %{MODINSTDIR}/mod_say_ru.so*
 
 %files lang-he
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/he/
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/he/demo
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/he/vm
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/he/dir
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/he/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/he/demo/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/he/vm/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/he/dir/*.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/he/
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/he/demo
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/he/vm
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/he/dir
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/he/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/he/demo/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/he/vm/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/he/dir/*.xml
 %{MODINSTDIR}/mod_say_he.so*
 
 %files lang-es
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/es
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/es/demo
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/es/vm
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/es/dir
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/es/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/es/demo/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/es/vm/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/es/dir/*.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/es
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/es/demo
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/es/vm
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/es/dir
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/es/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/es/demo/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/es/vm/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/es/dir/*.xml
 %{MODINSTDIR}/mod_say_es.so*
 
 %files lang-pt
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/pt
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/pt/demo
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/pt/vm
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/pt/dir
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/pt/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/pt/demo/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/pt/vm/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/pt/dir/*.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/pt
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/pt/demo
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/pt/vm
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/pt/dir
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/pt/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/pt/demo/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/pt/vm/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/pt/dir/*.xml
 %{MODINSTDIR}/mod_say_pt.so*
 
 %files lang-sv
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/sv
-%dir %attr(0750, freeswitch, daemon) %{sysconfdir}/lang/sv/vm
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/sv/*.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/lang/sv/vm/*.xml
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/sv
+%dir %attr(0750, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/sv/vm
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/sv/*.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/lang/sv/vm/*.xml
 %{MODINSTDIR}/mod_say_sv.so*
 
 ######################################################################################################################
@@ -2482,7 +2471,7 @@ fi
 
 %files logger-graylog2
 %{MODINSTDIR}/mod_graylog2.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/graylog2.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/graylog2.conf.xml
 
 ######################################################################################################################
 #
@@ -2506,11 +2495,11 @@ fi
 
 %files xml-cdr
 %{MODINSTDIR}/mod_xml_cdr.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/xml_cdr.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/xml_cdr.conf.xml
 
 %files xml-curl
 %{MODINSTDIR}/mod_xml_curl.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/xml_curl.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/xml_curl.conf.xml
 
 ######################################################################################################################
 #                       FreeSWITCH ESL language modules
