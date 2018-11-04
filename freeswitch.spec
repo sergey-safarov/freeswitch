@@ -1892,7 +1892,6 @@ fi
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/post_load_modules.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/presence_map.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/sangoma_codec.conf.xml
-%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/shout.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/smpp.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/sms_flowroute.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/sofia.conf.xml
@@ -2336,6 +2335,7 @@ fi
 
 %files format-shout
 %{MODINSTDIR}/mod_shout.so*
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/shout.conf.xml
 
 %if %{build_mod_ssml}
 %files format-ssml
