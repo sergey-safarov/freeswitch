@@ -51,11 +51,6 @@
 %define release 1
 
 ######################################################################################################################
-#
-# disable rpath checking
-#%define __arch_install_post /usr/lib/rpm/check-buildroot
-
-######################################################################################################################
 # Layout of packages FHS (Redhat/SUSE), FS (Standard FreeSWITCH layout using /usr/local), OPT (/opt based layout)
 %define packagelayout   FHS
 
