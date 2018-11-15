@@ -11435,7 +11435,7 @@ SWITCH_DECLARE(void) switch_core_media_gen_local_sdp(switch_core_session_t *sess
 		}
 	} else if ((switch_channel_test_flag(session->channel, CF_WANT_RTT) || switch_channel_test_flag(session->channel, CF_RTT) ||
 				switch_channel_var_true(session->channel, "rtp_enable_text")) &&
-			   switch_channel_test_cap(session->channel, CC_RTP_RTT)) {
+				switch_channel_test_cap(session->channel, CC_RTP_RTT) && !switch_channel_var_false(session->channel, "rtp_enable_text")) {
 		t_engine->t140_pt = 0;
 		t_engine->red_pt = 0;
 
