@@ -114,7 +114,7 @@ if [ "$DUMPCAP" = "true" ]; then
     mkdir -p /dumpcap
     /usr/bin/dumpcap -i any -p -t -q -b duration:3600 -b files:48 -w /dumpcap/packets.pcap &
 elif [ ! -z "$DUMPCAP" -a "$DUMPCAP" != "false" ]; then
-    /usr/bin/dumpcap $DUMPCAP &
+    eval /usr/bin/dumpcap $DUMPCAP &
 fi
 
 if [ ! -f "/etc/freeswitch/freeswitch.xml" ]; then
