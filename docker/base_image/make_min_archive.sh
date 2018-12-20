@@ -61,6 +61,7 @@ extra_files_debian() {
 /etc/ssl/certs/*
 /bin
 /bin/busybox
+/bin/grep
 /usr/bin
 /usr/bin/curl
 /usr/bin/dumpcap
