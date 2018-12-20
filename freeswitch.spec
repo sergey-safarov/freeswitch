@@ -1455,7 +1455,7 @@ ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_pocketsphinx asr_tts/mod_tts_comm
 #                                               Codecs
 #
 ######################################################################################################################
-CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_bv codecs/mod_codec2 codecs/mod_g723_1 codecs/mod_g729  \
+CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_bv codecs/mod_codec2 codecs/mod_g723_1 codecs/mod_g729 \
                 codecs/mod_h26x codecs/mod_ilbc codecs/mod_isac codecs/mod_mp4v codecs/mod_opus codecs/mod_silk \
                 codecs/mod_siren codecs/mod_theora"
 #
@@ -1623,6 +1623,7 @@ fi
 --with-odbc \
 --with-erlang \
 --with-openssl \
+--enable-zrtp \
 %{?configure_options}
 
 unset MODULES
