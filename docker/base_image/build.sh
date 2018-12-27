@@ -60,7 +60,7 @@ get_util_version_opt() {
 prepare_build() {
     #Preparing build environment
     echo "deb http://files.freeswitch.org/repo/deb/debian-unstable/ $RELEASE_NAME main" > /etc/apt/sources.list.d/freeswitch.list
-    apt-get update && apt-get install -y git wget apt-utils xz-utils devscripts cowbuilder
+    apt-get update && apt-get install -y git wget apt-utils xz-utils devscripts cowbuilder systemd
     wget -O - https://files.freeswitch.org/repo/deb/debian/freeswitch_archive_g0.pub | apt-key add -
     if [ ! -d /usr/src/freeswitch-debs/freeswitch ]; then
         mkdir /usr/src/freeswitch-debs
