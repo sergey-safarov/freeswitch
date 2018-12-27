@@ -51,7 +51,7 @@
 %{?with_mod_opusfile:%define build_mod_opusfile 1 }
 %{?with_mod_v8:%define build_mod_v8 1 }
 
-%define nonparsedversion 1.7.0
+%define nonparsedversion 1.10.5
 %define version %(echo '%{nonparsedversion}' | sed 's/-//g')
 %define release 1
 
