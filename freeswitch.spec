@@ -155,6 +155,10 @@ Requires: libsndfile
 PreReq:       %insserv_prereq %fillup_prereq
 %endif
 
+%if 0%{?fedora} || 0%{?rhel} == 8
+BuildRequires: gumbo-parser-devel
+%endif
+
 
 ######################################################################################################################
 #
