@@ -70,9 +70,9 @@ extra_files_debian() {
 /usr/lib/erlang
 /usr/lib/erlang/bin
 /usr/lib/erlang/bin/epmd
-/usr/lib/erlang/erts-6.2
-/usr/lib/erlang/erts-6.2/bin
-/usr/lib/erlang/erts-6.2/bin/epmd
+/usr/lib/erlang/erts-8.2.1
+/usr/lib/erlang/erts-8.2.1/bin
+/usr/lib/erlang/erts-8.2.1/bin/epmd
 /usr/lib/ssl
 /usr/lib/ssl/certs
 /usr/sbin
