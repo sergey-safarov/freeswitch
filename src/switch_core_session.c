@@ -2341,7 +2341,7 @@ SWITCH_DECLARE(switch_core_session_t *) switch_core_session_request_uuid(switch_
 		return NULL;
 	}
 
-	if (runtime.min_idle_time > 0 && runtime.profile_time < runtime.min_idle_time) {
+	if (direction == SWITCH_CALL_DIRECTION_INBOUND && runtime.min_idle_time > 0 && runtime.profile_time < runtime.min_idle_time) {
 		return NULL;
 	}
 
