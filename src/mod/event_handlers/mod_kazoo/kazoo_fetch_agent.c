@@ -271,7 +271,7 @@ static switch_xml_t fetch_handler(const char *section, const char *tag_name, con
 	if (!reply.xml_str) {
 		switch_time_t timeout;
 
-		timeout = switch_micro_time_now() + 3000000;
+		timeout = switch_micro_time_now() + 15000000;
 		while (switch_micro_time_now() < timeout) {
 			/* unlock the replies list and go to sleep, calculate a three second timeout before we started the loop
 			 * plus 100ms to add a little hysteresis between the timeout and the while loop */
