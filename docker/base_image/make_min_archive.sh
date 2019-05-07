@@ -56,6 +56,7 @@ fs_files_debian() {
 extra_files_debian() {
     cat << EOF
 /etc
+/etc/nsswitch.conf
 /etc/ssl
 /etc/ssl/certs
 /etc/ssl/certs/*
