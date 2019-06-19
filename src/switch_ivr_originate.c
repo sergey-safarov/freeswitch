@@ -2931,7 +2931,6 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_originate(switch_core_session_t *sess
 					}
 				}
 
-
 				/* Valid in both {} and [] with [] taking precedence */
 
 				/* make a special var event with mixture of the {} and the [] vars to pass down as global vars to the outgoing channel
@@ -2943,6 +2942,57 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_originate(switch_core_session_t *sess
 				if (local_var_event) {
 					switch_event_merge(originate_var_event, local_var_event);
 				}
+
+	if (switch_true(switch_event_get_header(originate_var_event, "group_confirm_cancel_timeout"))) {
+		oglobals.cancel_timeout = SWITCH_TRUE;
+	}
+
+	if ((var = switch_event_get_header(originate_var_event, "group_confirm_key"))) {
+		switch_copy_string(oglobals.key, var, sizeof(oglobals.key));
+		if ((var = switch_event_get_header(originate_var_event, "group_confirm_file"))) {
+			oglobals.file = strdup(var);
+		}
+		if ((var = switch_event_get_header(originate_var_event, "group_confirm_error_file"))) {
+			oglobals.error_file = strdup(var);
+		}
+		if ((var = switch_event_get_header(originate_var_event, "group_confirm_read_timeout"))) {
+			int tmp = atoi(var);
+
+			if (tmp >= 0) {
+				oglobals.confirm_timeout = tmp;
+			}
+
+		}
+	}
+	/* When using the AND operator, the fail_on_single_reject flag may be set in order to indicate that a single
+	   rejections should terminate the attempt rather than a timeout, answer, or rejection by all.
+	   If the value is set to 'true' any fail cause will end the attempt otherwise it can contain a comma (,) separated
+	   list of cause names which should be considered fatal
+	 */
+	if ((var = switch_event_get_header(originate_var_event, "hangup_on_single_reject"))) {
+		hangup_on_single_reject = switch_true(var);
+	}
+
+	if ((var = switch_event_get_header(originate_var_event, "fail_on_single_reject")) || hangup_on_single_reject) {
+		if (var) {
+			fail_on_single_reject_var = strdup(var);
+		}
+
+		if (switch_true(var)) {
+			fail_on_single_reject = 1;
+		} else {
+			fail_on_single_reject = -1;
+		}
+	}
+
+	if ((!zstr(oglobals.file)) && (!strcmp(oglobals.file, "undef"))) {
+		switch_safe_free(oglobals.file);
+		oglobals.file = NULL;
+	}
+	if ((!zstr(oglobals.error_file)) && (!strcmp(oglobals.error_file, "undef"))) {
+		switch_safe_free(oglobals.error_file);
+		oglobals.error_file = NULL;
+	}
 
 				if ((current_variable = switch_event_get_header(originate_var_event, "origination_ani"))) {
 					new_profile->ani = switch_core_strdup(new_profile->pool, current_variable);
