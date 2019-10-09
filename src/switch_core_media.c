@@ -8137,6 +8137,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_choose_port(switch_core_sessio
 	switch_media_handle_t *smh;
 	const char *tstr = switch_media_type2str(type);
 	char vname[128] = "";
+	const char *remote_ip;		/* Remote host, evaluated using proxed_remote_ip or remote_id form private object  */
 
 	switch_assert(session);
 
@@ -8182,7 +8183,12 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_choose_port(switch_core_sessio
 	sdp_port = engine->local_sdp_port;
 
 	/* Check if NAT is detected  */
-	if (!zstr(smh->mparams->remote_ip) && switch_core_media_check_nat(smh, smh->mparams->remote_ip)) {
+	if (!zstr(smh->mparams->proxed_remote_ip)) {
+		remote_ip = smh->mparams->proxed_remote_ip;
+	} else {
+		remote_ip = smh->mparams->remote_ip;
+	}
+	if (!zstr(remote_ip) && switch_core_media_check_nat(smh, remote_ip)) {
 		/* Yes, map the port through switch_nat */
 		switch_nat_add_mapping(engine->local_sdp_port, SWITCH_NAT_UDP, &sdp_port, SWITCH_FALSE);
 
