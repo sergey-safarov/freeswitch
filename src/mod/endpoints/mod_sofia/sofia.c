@@ -10368,6 +10368,9 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 
 
 	tech_pvt->from_user = switch_core_session_strdup(session, sip->sip_from->a_url->url_user);
+	if (!zstr(proxied_client_ip)) {
+		tech_pvt->mparams.proxed_remote_ip = switch_core_session_strdup(session, proxied_client_ip);
+	}
 	tech_pvt->mparams.remote_ip = switch_core_session_strdup(session, network_ip);
 	tech_pvt->mparams.remote_port = network_port;
 
