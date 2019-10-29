@@ -658,16 +658,6 @@ BuildRequires:  broadvoice-devel
 %description codec-bv
 BroadVoice16 and BroadVoice32 WideBand Codec support for FreeSWITCH open source telephony platform
 
-%package codec-codec2
-Summary:        Codec2 Narrow Band Codec support for FreeSWITCH open source telephony platform
-Group:          System/Libraries
-Requires:       %{name} = %{version}-%{release}
-BuildRequires:  libcodec2-devel
-
-%description codec-codec2
-CODEC2 narrow band codec support for FreeSWITCH open source telephony platform.
-CODEC2 was created by the developers of Speex.
-
 %package codec-passthru-g723_1
 Summary:        Pass-through g723.1 Codec support for FreeSWITCH open source telephony platform
 Group:          System/Libraries
@@ -1459,7 +1449,7 @@ ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_pocketsphinx asr_tts/mod_tts_comm
 #                                               Codecs
 #
 ######################################################################################################################
-CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_bv codecs/mod_codec2 codecs/mod_g723_1 codecs/mod_g729 \
+CODECS_MODULES="codecs/mod_amr codecs/mod_amrwb codecs/mod_bv codecs/mod_g723_1 codecs/mod_g729 \
                 codecs/mod_h26x codecs/mod_ilbc codecs/mod_isac codecs/mod_mp4v codecs/mod_opus codecs/mod_silk \
                 codecs/mod_siren codecs/mod_theora"
 #
@@ -2155,10 +2145,6 @@ fi
 
 %files codec-bv
 %{MODINSTDIR}/mod_bv.so*
-
-%files codec-codec2
-%{MODINSTDIR}/mod_codec2.so*
-
 
 %files codec-passthru-g723_1
 %{MODINSTDIR}/mod_g723_1.so*
