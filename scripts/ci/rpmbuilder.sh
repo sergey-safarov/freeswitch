@@ -1,5 +1,6 @@
 #!/bin/sh
 ##### -*- mode:shell-script; indent-tabs-mode:nil; sh-basic-offset:2 -*-
+set -o errexit -o nounset -o pipefail
 
 sdir="."
 [ -n "${0%/*}" ] && sdir="${0%/*}"
