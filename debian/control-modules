@@ -8,7 +8,7 @@ Description: Abstraction layer for APIs
  This module provides a way to create new API functions via regex
  rewriting.
 
-Module: applications/mod_av
+Module: codecs/mod_av
 Description: mod_av
  Adds mod_av.
 Build-Depends: libavformat-dev, libswscale-dev, libavresample-dev
