@@ -126,7 +126,7 @@ BuildRequires: gcc-c++
 BuildRequires: libtool >= 1.5.17
 BuildRequires: openssl-devel >= 1.0.1e
 BuildRequires: pcre-devel
-BuildRequires: speex-devel
+BuildRequires: speex-devel speexdsp-devel
 BuildRequires: sqlite-devel >= 3.6.20
 BuildRequires: libtiff-devel
 BuildRequires: libedit-devel
@@ -140,7 +140,7 @@ BuildRequires: libxml2-devel
 BuildRequires: libsndfile-devel
 Requires: curl >= 7.19
 Requires: pcre
-Requires: speex
+Requires: speex speexdsp
 Requires: sqlite >= 3.6.20
 Requires: libtiff
 Requires: libedit
