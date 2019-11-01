@@ -418,15 +418,6 @@ is a "high-performance, distributed memory object caching system, generic in
 nature, but intended for use in speeding up dynamic web applications by 
 alleviating database load." 
 
-%package application-mongo
-Summary:        FreeSWITCH mod_mongo
-Group:          System/Libraries
-Requires:       %{name} = %{version}-%{release}
-BuildRequires:  mongo-c-driver-devel
-
-%description application-mongo
-Provides FreeSWITCH mod_mongo, which implements an API interface to mongodb.
-
 %package application-nibblebill
 Summary:        FreeSWITCH mod_nibblebill
 Group:          System/Libraries
@@ -1439,7 +1430,7 @@ APPLICATION_MODULES_DE+=" applications/mod_esl"
 
 APPLICATION_MODULES_FR="applications/mod_fifo applications/mod_fsk applications/mod_fsv applications/mod_hash \
                         applications/mod_httapi applications/mod_http_cache applications/mod_lcr \
-                        applications/mod_limit applications/mod_memcache applications/mod_mongo \
+                        applications/mod_limit applications/mod_memcache \
                         applications/mod_nibblebill applications/mod_rad_auth applications/mod_redis \
                         applications/mod_rss"
 
@@ -2049,10 +2040,6 @@ fi
 %files application-memcache
 %{MODINSTDIR}/mod_memcache.so*
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/memcache.conf.xml
-
-%files application-mongo
-%{MODINSTDIR}/mod_mongo.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/mongo.conf.xml
 
 %files application-nibblebill
 %{MODINSTDIR}/mod_nibblebill.so*
