@@ -104,7 +104,6 @@ Vendor:         http://www.freeswitch.org/
 #
 ######################################################################################################################
 Source0:        http://files.freeswitch.org/%{name}-%{version}.tar.bz2
-Source3:        http://files.freeswitch.org/downloads/libs/pocketsphinx-0.8.tar.gz
 Source4:        http://files.freeswitch.org/downloads/libs/sphinxbase-0.8.tar.gz
 Source5:        http://files.freeswitch.org/downloads/libs/communicator_semi_6000_20080321.tar.gz
 
@@ -578,16 +577,6 @@ BuildRequires:  flite-devel >= 2.0.0
 
 %description asrtts-flite
 Provides FreeSWITCH mod_flite, a interface to the flite text to speech engine
-
-%package asrtts-pocketsphinx
-Summary:        FreeSWITCH mod_pocketsphinx
-Group:          System/Libraries
-Requires:       %{name} = %{version}-%{release}
-BuildRequires:  bison
-
-%description asrtts-pocketsphinx
-Provides FreeSWITCH mod_pocketsphinx, a interface to the OpenSource 
-Pocketsphinx speech recognition engine
 
 %package asrtts-tts-commandline
 Summary:        FreeSWITCH mod_tts_commandline
@@ -1447,7 +1436,7 @@ APPLICATIONS_MODULES="$APPLICATION_MODULES_AC $APPLICATION_MODULES_DE $APPLICATI
 #                               Automatic Speech Recognition and Text To Speech Modules
 #
 ######################################################################################################################
-ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_pocketsphinx asr_tts/mod_tts_commandline asr_tts/mod_unimrcp"
+ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_tts_commandline asr_tts/mod_unimrcp"
 
 ######################################################################################################################
 #
@@ -2102,10 +2091,6 @@ fi
 ######################################################################################################################
 %files asrtts-flite
 %{MODINSTDIR}/mod_flite.so*
-
-%files asrtts-pocketsphinx
-%{MODINSTDIR}/mod_pocketsphinx.so*
-%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/pocketsphinx.conf.xml
 
 %files asrtts-tts-commandline
 %{MODINSTDIR}/mod_tts_commandline.so*
