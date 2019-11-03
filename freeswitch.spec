@@ -104,7 +104,6 @@ Vendor:         http://www.freeswitch.org/
 #
 ######################################################################################################################
 Source0:        http://files.freeswitch.org/%{name}-%{version}.tar.bz2
-Source1:        http://files.freeswitch.org/downloads/libs/freeradius-client-1.1.7.tar.gz
 Source3:        http://files.freeswitch.org/downloads/libs/pocketsphinx-0.8.tar.gz
 Source4:        http://files.freeswitch.org/downloads/libs/sphinxbase-0.8.tar.gz
 Source5:        http://files.freeswitch.org/downloads/libs/communicator_semi_6000_20080321.tar.gz
@@ -442,6 +441,8 @@ while calls are in progress.
 Summary:        FreeSWITCH mod_rad_auth
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
+Requires:       freeradius-client >= 1.1.7
+BuildRequires:  freeradius-client-devel >= 1.1.7
 
 %description application-rad_auth
 Provides FreeSWITCH mod_rad_auth, authetication via RADIUS protocol from FreeSWITCH dialplan
@@ -1003,6 +1004,8 @@ JSON CDR Logger for FreeSWITCH.
 Summary:        RADIUS Logger for the FreeSWITCH open source telephony platform
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
+Requires:       freeradius-client >= 1.1.7
+BuildRequires:  freeradius-client-devel >= 1.1.7
 
 %description event-radius-cdr
 RADIUS Logger for the FreeSWITCH open source telephony platform
@@ -1277,6 +1280,17 @@ Requires:       %{name} = %{version}-%{release}
 Provides XML Curl interface for the FreeSWITCH Open Source telephone platform.
 Pull dynamic XML configs for FreeSWITCH over HTTP.
 
+%package xml-radius
+Summary:        Provides XML Radius interface for the FreeSWITCH Open Source telephone platform.
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+Requires:       freeradius-client >= 1.1.7
+BuildRequires:  freeradius-client-devel >= 1.1.7
+
+%description xml-radius
+Provides XML Radius interface for the FreeSWITCH Open Source telephone platform.
+Pull dynamic XML configs for FreeSWITCH over Radius.
+
 %package xml-rpc
 Summary:        Provides XML-RPC interface for the FreeSWITCH Open Source telephone platform.
 Group:          System/Libraries
@@ -1549,7 +1563,7 @@ TIMERS_MODULES+="timers/mod_timerfd"
 #                                               XML Modules
 #
 ######################################################################################################################
-XML_INT_MODULES="xml_int/mod_xml_cdr xml_int/mod_xml_curl xml_int/mod_xml_rpc"
+XML_INT_MODULES="xml_int/mod_xml_cdr xml_int/mod_xml_curl xml_int/mod_xml_radius xml_int/mod_xml_rpc"
 
 ######################################################################################################################
 #
@@ -2493,6 +2507,9 @@ fi
 %files xml-curl
 %{MODINSTDIR}/mod_xml_curl.so*
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/xml_curl.conf.xml
+
+%files xml-radius
+%{MODINSTDIR}/mod_xml_radius.so*
 
 ######################################################################################################################
 #                       FreeSWITCH ESL language modules

@@ -1356,6 +1356,12 @@ AC_CHECK_LIB([mp3lame], [lame_init],[
     AC_SUBST([MP3LAME_CFLAGS], [$CPPFLAGS])])])
 AM_CONDITIONAL([HAVE_MP3LAME],[$mp3lame])
 
+freeradius=false
+AC_CHECK_LIB([freeradius-client], [rc_get_id],[
+  AC_CHECK_HEADER([freeradius-client.h],[
+    freeradius=true])])
+AM_CONDITIONAL([HAVE_FREERADIUS],[$freeradius])
+
 PKG_CHECK_MODULES([AVCODEC], [libavcodec >= 53.35.0],[
   AM_CONDITIONAL([HAVE_AVCODEC],[true])],[
   AC_MSG_RESULT([no]); AM_CONDITIONAL([HAVE_AVCODEC],[false])])
