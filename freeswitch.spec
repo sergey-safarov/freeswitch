@@ -2241,6 +2241,9 @@ fi
 %{MODINSTDIR}/mod_erlang_event.so*
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/erlang_event.conf.xml
 
+%files event-fail2ban
+%{MODINSTDIR}/mod_fail2ban.so*
+
 %files event-format-cdr
 %{MODINSTDIR}/mod_format_cdr.so*
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/format_cdr.conf.xml
