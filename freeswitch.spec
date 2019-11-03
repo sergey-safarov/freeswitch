@@ -1875,6 +1875,9 @@ fi
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/xml_rpc.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/xml_scgi.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/zeroconf.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/curl.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/mongo.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{_sysconfdir}/%{name}/autoload_configs/pocketsphinx.conf.xml
 ######################################################################################################################
 #                                               Chatplans
 ######################################################################################################################
