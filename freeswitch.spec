@@ -1750,8 +1750,8 @@ fi
 #
 #################################### Grammar Directory Structure #####################################################
 #
-%dir %attr(0755, -, -) %{GRAMMARDIR}/model
-%dir %attr(0755, -, -) %{GRAMMARDIR}/model/communicator
+#%dir %attr(0755, -, -) %{GRAMMARDIR}/model
+#%dir %attr(0755, -, -) %{GRAMMARDIR}/model/communicator
 
 ######################################################################################################################
 #
@@ -1902,8 +1902,8 @@ fi
 ######################################################################################################################
 #                                               Grammar Files
 ######################################################################################################################
-%config(noreplace) %attr(0644, -, -) %{GRAMMARDIR}/default.dic
-%config(noreplace) %attr(0644, -, -) %{GRAMMARDIR}/model/communicator/*
+#%config(noreplace) %attr(0644, -, -) %{GRAMMARDIR}/default.dic
+#%config(noreplace) %attr(0644, -, -) %{GRAMMARDIR}/model/communicator/*
 
 ### END OF config-vanilla
 
