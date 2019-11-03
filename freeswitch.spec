@@ -925,7 +925,7 @@ SQLite CDR Logger for FreeSWITCH.
 Summary:        Erlang Event Module for the FreeSWITCH open source telephony platform
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
-Requires:       erlang-erts
+Requires:       (erlang-erts or erlang)
 BuildRequires:  erlang
 
 %description event-erlang-event
@@ -1007,7 +1007,7 @@ SNMP stats reporter for the FreeSWITCH open source telephony platform
 Summary:        Kazoo Module for the FreeSWITCH open source telephony platform
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
-Requires:       erlang-erts
+Requires:       (erlang-erts or erlang)
 BuildRequires:  erlang
 
 %description event-kazoo
