@@ -1118,7 +1118,8 @@ Requires:       %{name} = %{version}-%{release}
 Requires:       perl
 BuildRequires:  perl-devel
 BuildRequires:  perl-ExtUtils-Embed
-BuildRequires:  gdbm-libs
+BuildRequires:  gdbm-devel
+BuildRequires:  libdb-devel
 
 %description    perl
 
