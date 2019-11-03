@@ -1359,8 +1359,6 @@ Basic vanilla config set for the FreeSWITCH Open Source telephone platform.
 
 %prep
 %setup -b0 -q
-cp %{SOURCE1} libs/
-cp %{SOURCE3} libs/
 cp %{SOURCE4} libs/
 cp %{SOURCE5} libs/
 
