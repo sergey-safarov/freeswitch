@@ -1076,7 +1076,6 @@ Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
 Requires:       libshout >= 2.2.2
 Requires:       libmpg123 >= 1.16.0
-Requires:       lame
 BuildRequires:  libshout-devel >= 2.2.2
 BuildRequires:  libmpg123-devel >= 1.16.0
 BuildRequires:  lame-devel
