@@ -10247,6 +10247,7 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 			if (!ok && (x_auth_ip = sofia_glue_get_unknown_header(sip, "X-AUTH-IP")) && !zstr(x_auth_ip)) {
 				const char* x_auth_port_char = sofia_glue_get_unknown_header(sip, "X-AUTH-PORT");
 				x_auth_port = zstr(x_auth_port_char) ? 0 : atoi(x_auth_port_char);
+				switch_copy_string(proxied_client_ip, x_auth_ip, sizeof(proxied_client_ip));
 			} else {
 				x_auth_ip = network_ip;
 			}
