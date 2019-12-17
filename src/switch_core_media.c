@@ -15255,7 +15255,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_session_write_text_frame(switch_core
 
 	t_engine = &smh->engines[SWITCH_MEDIA_TYPE_TEXT];
 
-	if (!is_msrp && switch_channel_test_cap(session->channel, CC_RTP_RTT)) {
+	if (!is_msrp && switch_channel_test_flag(session->channel, CF_RTT)) {
 
 		if (frame) {
 			char *str = (char *) frame->data;
