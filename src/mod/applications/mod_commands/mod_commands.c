@@ -3226,7 +3226,6 @@ SWITCH_STANDARD_API(uuid_send_text)
 	} else {
 		if ((tsession = switch_core_session_locate(uuid))) {
 			switch_core_session_print(tsession, text);
-			switch_core_session_print(tsession, "\r\n");
 			switch_core_session_rwunlock(tsession);
 			stream->write_function(stream, "+OK\n");
 		} else {
