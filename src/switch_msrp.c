@@ -1483,15 +1483,15 @@ SWITCH_DECLARE(switch_status_t) switch_msrp_perform_send(switch_msrp_session_t *
 
 	sprintf(buf, "MSRP %s SEND\r\nTo-Path: %s\r\nFrom-Path: %s\r\n"
 		"Message-ID: %s\r\n"
-		"Content-Type: %s\r\n"
-		"Byte-Range: 1-%" SWITCH_SIZE_T_FMT "/%" SWITCH_SIZE_T_FMT "%s",
+		"Byte-Range: 1-%" SWITCH_SIZE_T_FMT "/%" SWITCH_SIZE_T_FMT "\r\n"
+		"Content-Type: %s%s",
 		transaction_id,
 		to_path,
 		from_path,
 		message_id,
+		msrp_msg->payload ? msrp_msg->payload_bytes : 0,
+		msrp_msg->payload ? msrp_msg->payload_bytes : 0,
 		switch_str_nil(switch_msrp_msg_get_header(msrp_msg, MSRP_H_CONTENT_TYPE)),
-		msrp_msg->payload ? msrp_msg->payload_bytes : 0,
-		msrp_msg->payload ? msrp_msg->payload_bytes : 0,
 		msrp_msg->payload ? "\r\n\r\n" : "");
 
 	len = strlen(buf);
