@@ -789,6 +789,7 @@ Group:		System/Libraries
 Requires:	%{name} = %{version}-%{release}
 Requires:	mariadb-connector-c
 BuildRequires:	mariadb-connector-c-devel
+BuildRequires:	mariadb-devel
 
 %description database-mariadb
 MariaDB native support for FreeSWITCH.
