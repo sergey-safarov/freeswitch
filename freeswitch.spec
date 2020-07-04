@@ -1158,6 +1158,17 @@ BuildRequires:	opusfile-devel >= 0.5
 Mod Opusfile is a FreeSWITCH module to allow you to play Opus encoded files
 %endif
 
+%package format-png
+Summary:	play a png as video, optionally with audio
+Group:		System/Libraries
+Requires:	%{name} = %{version}-%{release}
+Requires:	libpng
+BuildRequires:	libpng-devel
+
+%description format-png
+play a png as video, optionally with audio
+
+
 %if %{build_mod_ssml}
 %package format-ssml
 Summary:        Adds Speech Synthesis Markup Language (SSML) parser format for the FreeSWITCH open source telephony platform
@@ -1569,7 +1580,7 @@ EVENT_HANDLERS_MODULES+=" event_handlers/mod_rayo"
 #					File and Audio Format Handlers
 #
 ######################################################################################################################
-FORMATS_MODULES="formats/mod_local_stream formats/mod_native_file formats/mod_portaudio_stream \
+FORMATS_MODULES="formats/mod_local_stream formats/mod_native_file formats/mod_png formats/mod_portaudio_stream \
                  formats/mod_shell_stream formats/mod_shout formats/mod_sndfile formats/mod_tone_stream"
 %if %{build_mod_ssml}
 FORMATS_MODULES+=" formats/mod_ssml"
@@ -2408,6 +2419,9 @@ fi
 
 %files format-native-file
 %{MODINSTDIR}/mod_native_file.so*
+
+%files format-png
+%{MODINSTDIR}/mod_png.so*
 
 %files format-portaudio-stream
 %{MODINSTDIR}/mod_portaudio_stream.so*
