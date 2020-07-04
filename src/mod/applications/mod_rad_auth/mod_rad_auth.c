@@ -358,7 +358,7 @@ int radius_auth(switch_channel_t *channel, char* called_number, char* username, 
 			break;
 		}
 
-		strncpy(username_realm, username, sizeof(username_realm));
+		strncpy(username_realm, username, sizeof(username_realm)-1);
 
 		if ((strchr(username_realm, '@') == NULL) && default_realm &&
 		    (*default_realm != '\0'))
