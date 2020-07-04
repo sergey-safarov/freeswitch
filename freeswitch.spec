@@ -53,6 +53,7 @@
 %define version %(echo '%{nonparsedversion}' | sed 's/-//g')
 %define release 1
 
+%define _hardening_ldflags -Wl,-z,now
 ######################################################################################################################
 #
 # disable rpath checking
