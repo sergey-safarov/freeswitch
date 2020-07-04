@@ -1400,6 +1400,7 @@ export CFLAGS="$CFLAGS -fstack-protector"
 export QA_RPATHS=$[ 0x0001|0x0002 ]
 %endif
 %endif
+export CFLAGS="$CFLAGS -Wno-error=stringop-truncation"
 
 ######################################################################################################################
 #

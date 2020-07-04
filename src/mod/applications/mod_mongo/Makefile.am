@@ -7,7 +7,7 @@ if HAVE_MONGOC
 
 mod_LTLIBRARIES = mod_mongo.la
 mod_mongo_la_SOURCES  = mod_mongo.c
-mod_mongo_la_CFLAGS   = $(AM_CFLAGS) $(MONGOC_CFLAGS)
+mod_mongo_la_CFLAGS   = $(AM_CFLAGS) $(MONGOC_CFLAGS) -Wno-error=deprecated-declarations
 mod_mongo_la_CPPFLAGS = $(AM_CPPFLAGS) 
 mod_mongo_la_LIBADD   = $(switch_builddir)/libfreeswitch.la $(MONGOC_LIBS)
 mod_mongo_la_LDFLAGS  = -avoid-version -module -no-undefined -shared 
