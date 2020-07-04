@@ -656,7 +656,7 @@ BroadVoice16 and BroadVoice32 WideBand Codec support for FreeSWITCH open source 
 Summary:        Codec2 Narrow Band Codec support for FreeSWITCH open source telephony platform
 Group:          System/Libraries
 Requires:       %{name} = %{version}-%{release}
-BuildRequires:  libcodec2-devel
+BuildRequires:  codec2-devel
 
 %description codec-codec2
 CODEC2 narrow band codec support for FreeSWITCH open source telephony platform.
