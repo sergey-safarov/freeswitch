@@ -1899,8 +1899,10 @@ fi
 %attr(0755,-,-) %caps(cap_sys_nice=ep) %{prefix}/bin/freeswitch
 %attr(0755,-,-) %{prefix}/bin/fs_cli
 %attr(0755,-,-) %{prefix}/bin/fs_encode
+%attr(0755,-,-) %{prefix}/bin/fs_epmd
 %attr(0755,-,-) %{prefix}/bin/fs_ivrd
 %attr(0755,-,-) %{prefix}/bin/fsxs
+%attr(0755,-,-) %{prefix}/bin/fs_tts
 %attr(0755,-,-) %{prefix}/bin/gentls_cert
 %attr(0755,-,-) %{prefix}/bin/tone2wav
 %{LIBDIR}/libfreeswitch*.so*
