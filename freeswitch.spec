@@ -480,15 +480,6 @@ Requires:       %{name} = %{version}-%{release}
 Provides FreeSWITCH mod_rss, edisrse and read an XML based RSS feed, then read
 the entries aloud via a TTS engine
 
-%package application-signalwire
-Summary:	FreeSWITCH mod_signalwire
-Group:          System/Libraries
-Requires:       %{name} = %{version}-%{release}
-BuildRequires:  libks signalwire-client-c
-
-%description application-signalwire
-Provides FreeSWITCH mod_signalwire
-
 %package application-sms
 Summary:	FreeSWITCH mod_sms
 Group:          System/Libraries
@@ -1352,7 +1343,6 @@ Requires:	freeswitch-application-memcache
 Requires:	freeswitch-application-nibblebill
 Requires:	freeswitch-application-redis
 Requires:	freeswitch-application-rss
-Requires:	freeswitch-application-signalwire
 Requires:	freeswitch-application-sms
 Requires:	freeswitch-application-snapshot
 Requires:	freeswitch-application-snom
@@ -1436,7 +1426,7 @@ APPLICATION_MODULES_FR="applications/mod_fifo applications/mod_fsk applications/
 			applications/mod_memcache applications/mod_mongo applications/mod_nibblebill applications/mod_rad_auth \
 			applications/mod_redis applications/mod_rss "
 
-APPLICATION_MODULES_SZ="applications/mod_signalwire applications/mod_sms applications/mod_snapshot applications/mod_snom applications/mod_soundtouch \
+APPLICATION_MODULES_SZ="applications/mod_sms applications/mod_snapshot applications/mod_snom applications/mod_soundtouch \
 			applications/mod_spandsp applications/mod_spy applications/mod_stress \
 			applications/mod_valet_parking applications/mod_translate applications/mod_voicemail \
 			applications/mod_voicemail_ivr applications/mod_video_filter"
@@ -2106,9 +2096,6 @@ fi
 
 %files application-rss
 %{MODINSTDIR}/mod_rss.so*
-
-%files application-signalwire
-%{MODINSTDIR}/mod_signalwire.so*
 
 %files application-sms
 %{MODINSTDIR}/mod_sms.so*
