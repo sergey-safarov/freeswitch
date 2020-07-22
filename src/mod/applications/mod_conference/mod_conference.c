@@ -1872,6 +1872,7 @@ SWITCH_STANDARD_APP(conference_function)
 	int locked = 0;
 	int mpin_matched = 0;
 	uint32_t *mid;
+	const char *refer_conference_name = NULL;
 
 	if (!switch_channel_test_app_flag_key("conference_silent", channel, CONF_SILENT_DONE) &&
 		(switch_channel_test_flag(channel, CF_RECOVERED) || switch_true(switch_channel_get_variable(channel, "conference_silent_entry")))) {
@@ -1881,6 +1882,34 @@ SWITCH_STANDARD_APP(conference_function)
 	switch_core_session_video_reset(session);
 
 	switch_channel_set_flag(channel, CF_CONFERENCE);
+
+	refer_conference_name = switch_channel_get_variable(channel, "refer_to_conference_name");
+
+	if (!zstr(refer_conference_name) && !zstr(data)) {
+		conference_name = (char*)refer_conference_name;
+		mydata = switch_core_session_strdup(session, data);
+		if (!locked) {
+			switch_mutex_lock(conference_globals.setup_mutex);
+			locked = 1;
+		}
+		conference = conference_find(conference_name, NULL);
+
+		if (locked) {
+			switch_mutex_unlock(conference_globals.setup_mutex);
+			locked = 0;
+		}
+
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "conference mydata: %s\n", mydata);
+
+		if (conference) {
+			switch_call_cause_t cause;
+			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_name to initiate a call by refer: %s\n", refer_conference_name);
+			if (conference_outcall(conference, NULL, session, mydata, 60, conference->caller_id_number, conference->caller_id_number, conference->profile_name, NULL, &cause, NULL, NULL) != SWITCH_STATUS_SUCCESS) {
+				goto done;
+			}
+		}
+		return;
+	}
 
 	if (switch_channel_answer(channel) != SWITCH_STATUS_SUCCESS) {
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Channel answer failed.\n");
