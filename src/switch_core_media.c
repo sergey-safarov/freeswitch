@@ -15367,14 +15367,12 @@ SWITCH_DECLARE(switch_status_t) switch_core_session_read_text_frame(switch_core_
 		}
 	}
 
-	if (status == SWITCH_STATUS_SUCCESS || status == SWITCH_STATUS_BREAK) {		
+	if (status == SWITCH_STATUS_SUCCESS || status == SWITCH_STATUS_BREAK) {
 		if ((switch_channel_test_flag(session->channel, CF_QUEUE_TEXT_EVENTS) || switch_channel_test_flag(session->channel, CF_FIRE_TEXT_EVENTS)) && 
 			(*frame)->datalen && !switch_test_flag((*frame), SFF_CNG)) {
-			int ok = 1;
 			switch_event_t *event;
 			void *data = (*frame)->data;
 			char eof[1] = {'\0'};
-
 			//uint32_t datalen = (*frame)->datalen;
 
 			if (!switch_channel_test_flag(session->channel, CF_TEXT_LINE_BASED)) {
@@ -15388,38 +15386,34 @@ SWITCH_DECLARE(switch_status_t) switch_core_session_read_text_frame(switch_core_
 					switch_buffer_write(session->text_line_buffer, eof, 1);
 					data = switch_buffer_get_head_pointer(session->text_line_buffer);
 					//datalen = strlen((char *)smh->line_text_frame.data);
-				} else {
-					ok = 0;
 				}
 			}
 
 
-			if (ok) {
-				if (switch_event_create(&event, SWITCH_EVENT_TEXT) == SWITCH_STATUS_SUCCESS) {
-					switch_channel_event_set_data(session->channel, event);
+			if (switch_event_create(&event, SWITCH_EVENT_TEXT) == SWITCH_STATUS_SUCCESS) {
+				switch_channel_event_set_data(session->channel, event);
 
-					switch_event_add_body(event, "%s", (char *)data);
+				switch_event_add_body(event, "%s", (char *)data);
 
-					if (switch_channel_test_flag(session->channel, CF_QUEUE_TEXT_EVENTS)) {
-						switch_event_t *q_event = NULL;
+				if (switch_channel_test_flag(session->channel, CF_QUEUE_TEXT_EVENTS)) {
+					switch_event_t *q_event = NULL;
 
-						if (switch_channel_test_flag(session->channel, CF_FIRE_TEXT_EVENTS)) {
-							switch_event_dup(&q_event, event);
-						} else {
-							q_event = event;
-							event = NULL;
-						}
-
-						switch_core_session_queue_event(session, &q_event);
-					}
-					
 					if (switch_channel_test_flag(session->channel, CF_FIRE_TEXT_EVENTS)) {
-						switch_event_fire(&event);
+						switch_event_dup(&q_event, event);
+					} else {
+						q_event = event;
+						event = NULL;
 					}
+
+					switch_core_session_queue_event(session, &q_event);
 				}
-				if (session->text_line_buffer) {
-					switch_buffer_zero(session->text_line_buffer);
+
+				if (switch_channel_test_flag(session->channel, CF_FIRE_TEXT_EVENTS)) {
+					switch_event_fire(&event);
 				}
+			}
+			if (session->text_line_buffer) {
+				switch_buffer_zero(session->text_line_buffer);
 			}
 		}
 		switch_core_session_text_read_callback(session, *frame);
