@@ -57,6 +57,85 @@ extern su_log_t stun_log[];
 #endif
 extern su_log_t su_log_default[];
 
+static switch_status_t create_session(switch_core_session_t **new_session, const char* channel_name, const char* caller_id_number)
+{
+	switch_status_t status = SWITCH_STATUS_FALSE;
+	switch_core_session_t *session;
+	switch_channel_t *channel;
+	private_object_t *tech_pvt = NULL;
+	switch_caller_profile_t *caller_profile;
+	sofia_profile_t *profile = NULL;
+	char* caller_id_name = NULL;
+        const char* profile_name = NULL;
+        const char* context = NULL;
+
+	if (!(session = switch_core_session_request(sofia_endpoint_interface, SWITCH_CALL_DIRECTION_OUTBOUND, SOF_NONE, NULL))) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_CRIT, "Failure.\n");
+		goto end;
+	}
+
+	switch_core_session_add_stream(session, NULL);
+	channel = switch_core_session_get_channel(session);
+	tech_pvt = sofia_glue_new_pvt(session);
+
+	if (!zstr(channel_name)) {
+		switch_channel_set_name(channel, channel_name);
+	}
+	else {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_CRIT, "No channel name. Failure.\n");
+		goto end;
+	}
+
+	if (!zstr(caller_id_number)) {
+		caller_id_name = switch_core_session_sprintf(session, "user/%s", caller_id_number);
+	}
+	else {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_CRIT, "No caller_id_number. Failure.\n");
+		goto end;
+	}
+
+	profile_name = switch_core_get_variable(SOFIA_CONFERENCE_PROFILE);
+        if (NULL == profile_name) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "'%s' variable is not defined; use 'internal' profile by default\n", SOFIA_CONFERENCE_PROFILE);
+		profile_name = "internal";
+        }
+
+        if (!(profile = sofia_glue_find_profile(profile_name))) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Invalid Profile\n");
+		goto end;
+	}
+
+	context = switch_core_get_variable(SOFIA_CONFERENCE_DIALPLAN_CONTEXT);
+
+	if (NULL == context) {
+	    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_WARNING, "'%s' variable is not defined; use default dialplan context\n", SOFIA_CONFERENCE_DIALPLAN_CONTEXT);
+	}
+
+	caller_profile = switch_caller_profile_new(switch_core_session_get_pool(session),
+                                                        NULL, "XML", caller_id_name, caller_id_number, NULL, NULL, NULL, NULL, MODNAME, context, NULL);
+
+	caller_profile->destination_number = switch_core_strdup(caller_profile->pool, "");
+	caller_profile->source = switch_core_strdup(caller_profile->pool, MODNAME);
+	switch_channel_set_caller_profile(channel, caller_profile);
+	tech_pvt->caller_profile = caller_profile;
+	tech_pvt->session = session;
+	tech_pvt->channel = channel;
+	switch_channel_set_state(channel, CS_INIT);
+
+	if (switch_core_session_thread_launch(session) != SWITCH_STATUS_SUCCESS) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_CRIT, "Error spawning thread\n");
+		switch_channel_hangup(channel, SWITCH_CAUSE_DESTINATION_OUT_OF_ORDER);
+		goto end;
+	}
+
+	status = SWITCH_STATUS_SUCCESS;
+	sofia_glue_attach_private(session, profile, tech_pvt, channel_name);
+	*new_session = session;
+
+ end:
+	return status;
+}
+
 static void config_sofia_profile_urls(sofia_profile_t * profile);
 static void parse_gateways(sofia_profile_t *profile, switch_xml_t gateways_tag, const char *gwname);
 static void parse_domain_tag(sofia_profile_t *profile, switch_xml_t x_domain_tag, const char *dname, const char *parse, const char *alias);
@@ -8708,7 +8787,7 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 {
 	/* Incoming refer */
 	sip_from_t const *from;
-	//sip_to_t const *to;
+	sip_to_t const *to;
 	sip_refer_to_t const *refer_to;
 	private_object_t *tech_pvt = switch_core_session_get_private(session);
 	char *etmp = NULL, *exten = NULL;
@@ -8720,6 +8799,8 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 	nightmare_xfer_helper_t *nightmare_xfer_helper;
 	switch_memory_pool_t *npool;
 	switch_event_t *event = NULL;
+	const char* to_user = NULL;
+	const char* to_host = NULL;
 
 	if (!(profile->mflags & MFLAG_REFER)) {
 		nua_respond(nh, SIP_403_FORBIDDEN, NUTAG_WITH_THIS_MSG(de->data->e_msg), TAG_END());
@@ -8751,7 +8832,12 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 	}
 
 	from = sip->sip_from;
-	//to = sip->sip_to;
+	to = sip->sip_to;
+
+	to_user = switch_str_nil(to->a_user);
+	to_host = switch_str_nil(to->a_host);
+
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "REFER to tag: [%s@%s]\n", to_user, to_host);
 
 	nua_respond(nh, SIP_202_ACCEPTED, NUTAG_WITH_THIS_MSG(de->data->e_msg), SIPTAG_EXPIRES_STR("60"), TAG_END());
 
@@ -9367,7 +9453,7 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 	if (exten) {
 		switch_channel_t *channel = switch_core_session_get_channel(session);
 		const char *br = switch_channel_get_partner_uuid(channel);
-		switch_core_session_t *b_session;
+		switch_core_session_t *b_session = NULL;
 
 		switch_channel_set_variable_printf(channel, "transfer_to", "blind:%s", br ? br : exten);
 		switch_channel_set_variable_printf(channel, "transfer_destination", "blind:%s", exten);
@@ -9428,22 +9514,37 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 			switch_ivr_session_transfer(b_session, exten, NULL, NULL);
 			switch_core_session_rwunlock(b_session);
 		} else {
-			switch_event_t *event;
+			char* conference_name = switch_core_session_sprintf(session, "%s-%s", to_user, to_host);
+			char* channel_name = switch_core_session_sprintf(session, "sip:%s@%s", to_user, to_host);
 
-			if (switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, MY_EVENT_ERROR) == SWITCH_STATUS_SUCCESS) {
-				switch_event_add_header(event, SWITCH_STACK_BOTTOM, "Error-Type", "blind_transfer");
-				switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Transfer-Exten", exten);
-				switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Full-Refer-To", full_ref_to);
-				switch_channel_event_set_data(channel, event);
-				switch_event_fire(&event);
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "conference_name: %s\n", conference_name);
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "channel_name: %s\n", channel_name);
+			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "exten: %s\n", exten);
+
+			if (create_session(&b_session, channel_name, to_user) == SWITCH_STATUS_SUCCESS) {
+				switch_channel_t *b_channel = switch_core_session_get_channel(b_session);
+				const char* sip_refer_user = switch_str_nil(sip->sip_refer_to->r_url->url_user);
+				const char* sip_refer_host = switch_str_nil(sip->sip_refer_to->r_url->url_host);
+
+				if (!zstr(full_ref_to)) {
+					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
+				}
+
+				if (!zstr(sip_refer_user)) {
+					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_USER_VARIABLE, sip_refer_user);
+				}
+
+				if (!zstr(sip_refer_host)) {
+					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_HOST_VARIABLE, sip_refer_host);
+				}
+
+				if (!zstr(conference_name)) {
+					switch_channel_set_variable(b_channel, SOFIA_REFER_CONFERENCE_NAME_VARIABLE, conference_name);
+				}
+
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Created session for outbound channel '%s' for a call to '%s'\n", channel_name, full_ref_to);
+				switch_channel_mark_answered(b_channel);
 			}
-
-			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Cannot Blind Transfer 1 Legged calls\n");
-			switch_channel_set_variable(channel_a, SWITCH_ENDPOINT_DISPOSITION_VARIABLE, "ATTENDED_TRANSFER_ERROR");
-			nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
-					   NUTAG_SUBSTATE(nua_substate_terminated),
-					   SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"),
-					   SIPTAG_PAYLOAD_STR("SIP/2.0 403 Forbidden\r\n"), SIPTAG_EVENT_STR(etmp), TAG_END());
 		}
 	}
 
