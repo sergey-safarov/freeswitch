@@ -9598,6 +9598,7 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 			if (create_session(&b_session, channel_name, to_user, sip_refer_user) == SWITCH_STATUS_SUCCESS) {
 				switch_channel_t *b_channel = switch_core_session_get_channel(b_session);
 				const char* sip_refer_host = switch_str_nil(sip->sip_refer_to->r_url->url_host);
+				switch_event_t *var_event = NULL;
 
 				if (!zstr(full_ref_to)) {
 					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
@@ -9614,6 +9615,9 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 				if (!zstr(conference_name)) {
 					switch_channel_set_variable(b_channel, SOFIA_REFER_CONFERENCE_NAME_VARIABLE, conference_name);
 				}
+
+				switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
+				switch_channel_process_export(channel, b_channel, var_event, "conference_auto_refer_export_vars");
 
 				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Created session for outbound channel '%s' for a call to '%s'\n", channel_name, full_ref_to);
 				switch_channel_mark_answered(b_channel);
