@@ -60,6 +60,7 @@ static struct {
 	switch_memory_pool_t *pool;
 	// switch_mutex_t *mutex;
 	char *ip;
+	char *msrp_hostname;
 	int message_buffer_size;
 
 	char *cert;
@@ -184,6 +185,7 @@ static void msrp_init_ssl()
 }
 
 SWITCH_DECLARE_GLOBAL_STRING_FUNC(set_global_ip, globals.ip);
+SWITCH_DECLARE_GLOBAL_STRING_FUNC(set_global_msrp_hostname, globals.msrp_hostname);
 
 static switch_status_t load_config()
 {
@@ -210,6 +212,8 @@ static switch_status_t load_config()
 			char *val = (char *) switch_xml_attr_soft(param, "value");
 			if (!strcasecmp(var, "listen-ip")) {
 				set_global_ip(val);
+			} else if (!strcasecmp(var, "msrp-hostname")) {
+				set_global_msrp_hostname(val);
 			} else if (!strcasecmp(var, "listen-port")) {
 				globals.msock.port = atoi(val);
 			} else if (!strcasecmp(var, "listen-ssl-port")) {
@@ -250,7 +254,7 @@ static switch_status_t msock_init(char *ip, switch_port_t port, switch_socket_t 
 	switch_sockaddr_t *sa;
 	switch_status_t rv;
 
-	rv = switch_sockaddr_info_get(&sa, ip, SWITCH_INET, port, 0, pool);
+	rv = switch_sockaddr_info_get(&sa, ip, SWITCH_UNSPEC, port, 0, pool);
 	if (rv) goto sock_fail;
 
 	rv = switch_socket_create(sock, switch_sockaddr_get_family(sa), SOCK_STREAM, SWITCH_PROTO_TCP, pool);
@@ -275,7 +279,11 @@ sock_fail:
 
 SWITCH_DECLARE(const char *) switch_msrp_listen_ip()
 {
-	return globals.ip;
+	if (!zstr(globals.msrp_hostname)) {
+		return globals.msrp_hostname;
+	} else {
+		return globals.ip;
+	}
 }
 
 SWITCH_DECLARE(switch_status_t) switch_msrp_init()

@@ -11215,27 +11215,44 @@ SWITCH_DECLARE(void) switch_core_media_gen_local_sdp(switch_core_session_t *sess
 
 	if (smh->msrp_session) {
 		switch_msrp_session_t *msrp_session = smh->msrp_session;
+		const char *msrp_ip = switch_msrp_listen_ip();
+		int required_brackets = strchr(msrp_ip, ':') ? 1 : 0;
 
 		if (!zstr(msrp_session->remote_path)) {
 			if (zstr(msrp_session->local_path)) {
 				msrp_session->local_path = switch_core_session_sprintf(session,
-					"msrp%s://%s:%d/%s;tcp",
+					"msrp%s://%s%s%s:%d/%s;tcp",
 					msrp_session->secure ? "s" : "",
-					ip, msrp_session->local_port, msrp_session->call_id);
+					required_brackets ? "[" : "",
+					msrp_ip,
+					required_brackets ? "]" : "",
+					msrp_session->local_port, msrp_session->call_id);
 			}
 
 			switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf),
-				"m=message %d TCP/%sMSRP *\r\n"
+				"m=message %d TCP/%sMSRP *\r\n",
+				msrp_session->local_port,
+				msrp_session->secure ? "TLS/" : "");
+
+			if (strcmp(msrp_ip, ip)) {
+				const char *msrp_family = strchr(msrp_ip, ':') ? "IP6" : "IP4";
+
+				switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf),
+					"c=IN %s %s\r\n",
+					msrp_family,
+					msrp_ip);
+			}
+
+			switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf),
 				"a=path:%s\r\n"
 				"a=accept-types:%s\r\n"
 				"a=accept-wrapped-types:%s\r\n"
 				"a=setup:%s\r\n",
-				msrp_session->local_port,
-				msrp_session->secure ? "TLS/" : "",
 				msrp_session->local_path,
 				msrp_session->local_accept_types,
 				msrp_session->local_accept_wrapped_types,
 				msrp_session->active ? "active" : "passive");
+
 		} else {
 			char *uuid = switch_core_session_get_uuid(session);
 			const char *file_selector = switch_channel_get_variable(session->channel, "sip_msrp_local_file_selector");
@@ -11248,19 +11265,33 @@ SWITCH_DECLARE(void) switch_core_media_gen_local_sdp(switch_core_session_t *sess
 
 			if (zstr(msrp_session->local_path)) {
 				msrp_session->local_path = switch_core_session_sprintf(session,
-					"msrp%s://%s:%d/%s;tcp",
+					"msrp%s://%s%s%s:%d/%s;tcp",
 					msrp_session->secure ? "s" : "",
-					ip, msrp_session->local_port, uuid);
+					required_brackets ? "[" : "",
+					msrp_ip,
+					required_brackets ? "]" : "",
+					msrp_session->local_port, uuid);
 			}
 
 			switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf),
-				"m=message %d TCP/%sMSRP *\r\n"
+				"m=message %d TCP/%sMSRP *\r\n",
+				msrp_session->local_port,
+				msrp_session->secure ? "TLS/" : "");
+
+			if (strcmp(msrp_ip, ip)) {
+				const char *msrp_family = strchr(msrp_ip, ':') ? "IP6" : "IP4";
+
+				switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf),
+					"c=IN %s %s\r\n",
+					msrp_family,
+					msrp_ip);
+			}
+
+			switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf),
 				"a=path:%s\r\n"
 				"a=accept-types:message/cpim text/* application/im-iscomposing+xml\r\n"
 				"a=accept-wrapped-types:*\r\n"
 				"a=setup:%s\r\n",
-				msrp_session->local_port,
-				msrp_session->secure ? "TLS/" : "",
 				msrp_session->local_path,
 				msrp_session->active ? "active" : "passive");
 
