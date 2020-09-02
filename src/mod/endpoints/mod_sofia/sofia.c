@@ -57,7 +57,7 @@ extern su_log_t stun_log[];
 #endif
 extern su_log_t su_log_default[];
 
-static switch_status_t create_session(switch_core_session_t **new_session, const char* channel_name, const char* caller_id_number)
+static switch_status_t create_session(switch_core_session_t **new_session, const char* channel_name, const char* caller_id_number, const char* callee_number)
 {
 	switch_status_t status = SWITCH_STATUS_FALSE;
 	switch_core_session_t *session;
@@ -114,7 +114,7 @@ static switch_status_t create_session(switch_core_session_t **new_session, const
 	caller_profile = switch_caller_profile_new(switch_core_session_get_pool(session),
                                                         NULL, "XML", caller_id_name, caller_id_number, NULL, NULL, NULL, NULL, MODNAME, context, NULL);
 
-	caller_profile->destination_number = switch_core_strdup(caller_profile->pool, "");
+	caller_profile->destination_number = switch_core_strdup(caller_profile->pool, callee_number);
 	caller_profile->source = switch_core_strdup(caller_profile->pool, MODNAME);
 	switch_channel_set_caller_profile(channel, caller_profile);
 	tech_pvt->caller_profile = caller_profile;
@@ -9516,14 +9516,14 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 		} else {
 			char* conference_name = switch_core_session_sprintf(session, "%s-%s", to_user, to_host);
 			char* channel_name = switch_core_session_sprintf(session, "sip:%s@%s", to_user, to_host);
+			const char* sip_refer_user = switch_str_nil(sip->sip_refer_to->r_url->url_user);
 
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "conference_name: %s\n", conference_name);
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "channel_name: %s\n", channel_name);
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "exten: %s\n", exten);
 
-			if (create_session(&b_session, channel_name, to_user) == SWITCH_STATUS_SUCCESS) {
+			if (create_session(&b_session, channel_name, to_user, sip_refer_user) == SWITCH_STATUS_SUCCESS) {
 				switch_channel_t *b_channel = switch_core_session_get_channel(b_session);
-				const char* sip_refer_user = switch_str_nil(sip->sip_refer_to->r_url->url_user);
 				const char* sip_refer_host = switch_str_nil(sip->sip_refer_to->r_url->url_host);
 				switch_event_t *var_event = NULL;
 
