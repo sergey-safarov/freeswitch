@@ -590,6 +590,7 @@ static int flush_video_queue(switch_queue_t *q, int min)
 
 static void *SWITCH_THREAD_FUNC video_bug_thread(switch_thread_t *thread, void *obj)
 {
+	const char *tmp;
 	switch_media_bug_t *bug = (switch_media_bug_t *) obj;
 	switch_queue_t *main_q = NULL, *other_q = NULL;
 	switch_image_t *IMG = NULL, *img = NULL, *other_img = NULL;
@@ -634,10 +635,15 @@ static void *SWITCH_THREAD_FUNC video_bug_thread(switch_thread_t *thread, void *
 	if (mm.fps) {
 		fps = mm.fps;
 	} else {
-		fps = 15;
+		if ((tmp = switch_channel_get_variable(bug->session->channel, "video_bug_fps"))) {
+			fps = atof(tmp);
+		} else {
+			fps = 15;
+		}
 	}
 	switch_calc_video_fps(&fps_data, fps);
 
+	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(bug->session), SWITCH_LOG_INFO, "Used fps value: %4.2f\n", fps);
 	switch_core_timer_init(&timer, "soft", fps_data.ms, fps_data.samples, NULL);
 
 	while (bug->ready) {
