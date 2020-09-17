@@ -1771,7 +1771,7 @@ static switch_status_t av_file_open(switch_file_handle_t *handle, const char *pa
 			handle->mm.ab = 128;
 			handle->mm.cbr = 1;
 			handle->mm.vencspd = SWITCH_VIDEO_ENCODE_SPEED_FAST;
-			handle->mm.vprofile = SWITCH_VIDEO_PROFILE_BASELINE;
+			handle->mm.vprofile = SWITCH_VIDEO_PROFILE_HIGH;
 
 			if (!handle->mm.vb && handle->mm.vw && handle->mm.vh) {
 				switch(handle->mm.vh) {
