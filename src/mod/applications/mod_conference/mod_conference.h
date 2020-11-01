@@ -981,6 +981,7 @@ struct bg_call {
 	char *cid_name;
 	char *cid_num;
 	char *conference_name;
+	char *conference_domain;
 	char *uuid;
 	char *profile;
 	switch_call_cause_t *cancel_cause;

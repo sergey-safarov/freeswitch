@@ -1562,7 +1562,13 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 	}
 
 
-	status = switch_ivr_originate(session, &peer_session, cause, bridgeto, timeout, NULL, cid_name, cid_num, NULL, var_event, SOF_NO_LIMITS, cancel_cause, NULL);
+	if (conference_utils_test_flag(conference, CFLAG_RFC4579)) {
+		char *dialstr = switch_mprintf("{sip_invite_contact_params=~isfocus}%s", bridgeto);
+		status = switch_ivr_originate(session, &peer_session, cause, dialstr, timeout, NULL, cid_name, cid_num, NULL, var_event, SOF_NO_LIMITS, cancel_cause, NULL);
+		switch_safe_free(dialstr);
+	} else {
+		status = switch_ivr_originate(session, &peer_session, cause, bridgeto, timeout, NULL, cid_name, cid_num, NULL, var_event, SOF_NO_LIMITS, cancel_cause, NULL);
+	}
 	switch_mutex_lock(conference->mutex);
 	conference->originating--;
 	switch_mutex_unlock(conference->mutex);
@@ -1707,10 +1713,22 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 		return SWITCH_STATUS_MEMERR;
 
 	memset(call, 0, sizeof(*call));
-	call->conference = conference;
 	call->session = session;
 	call->timeout = timeout;
 	call->cancel_cause = cancel_cause;
+
+	if (conference_name) {
+		call->conference_name = strdup(conference_name);
+		if ((call->conference_domain = strchr(call->conference_name, '@'))) {
+			*call->conference_domain++ = '\0';
+		}
+	}
+
+	if (conference == NULL && !zstr(call->conference_name) && (call->conference = conference_find(call->conference_name, call->conference_domain))) {
+		switch_thread_rwlock_unlock(call->conference->rwlock);
+	} else {
+		call->conference = conference;
+	}
 
 	if (var_event) {
 		call->var_event = *var_event;
@@ -1735,10 +1753,6 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 	}
 	if (cid_num) {
 		call->cid_num = strdup(cid_num);
-	}
-
-	if (conference_name) {
-		call->conference_name = strdup(conference_name);
 	}
 
 	if (call_uuid) {
