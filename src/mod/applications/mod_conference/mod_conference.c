@@ -1708,6 +1708,7 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 	switch_thread_t *thread;
 	switch_threadattr_t *thd_attr = NULL;
 	switch_memory_pool_t *pool = NULL;
+	conference_member_t *export_vars_member = NULL;
 
 	if (!(call = malloc(sizeof(*call))))
 		return SWITCH_STATUS_MEMERR;
@@ -1733,6 +1734,9 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 	if (var_event) {
 		call->var_event = *var_event;
 		var_event = NULL;
+	} else if (call->conference->outcall_export_member_id && (export_vars_member = conference_member_get(call->conference, call->conference->outcall_export_member_id))) {
+		switch_event_create(&call->var_event, SWITCH_EVENT_CHANNEL_DATA);
+		switch_channel_process_export(export_vars_member->channel, NULL, call->var_event, "conference_auto_outcall_export_vars");
 	}
 
 	if (conference) {

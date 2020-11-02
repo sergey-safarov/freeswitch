@@ -755,6 +755,8 @@ typedef struct conference_obj {
 	video_layout_t *new_personal_vlayout;
 	int max_bw_in;
 	int force_bw_in;
+	/* memeber id that need to use for outcall channel vars export */
+	uint32_t outcall_export_member_id;
 
 	/* special use case, scalling shared h264 canvas*/
 	int scale_h264_canvas_width;

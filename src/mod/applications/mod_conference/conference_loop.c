@@ -1344,6 +1344,10 @@ void conference_loop_output(conference_member_t *member)
 	/* Start the input thread */
 	conference_loop_launch_input(member, switch_core_session_get_pool(member->session));
 
+	if (switch_channel_get_variable(channel, "conference_auto_outcall_export_vars")) {
+		member->conference->outcall_export_member_id = member->id;
+	}
+
 	if ((call_list = switch_channel_get_private(channel, "_conference_autocall_list_"))) {
 		const char *cid_name = switch_channel_get_variable(channel, "conference_auto_outcall_caller_id_name");
 		const char *cid_num = switch_channel_get_variable(channel, "conference_auto_outcall_caller_id_number");
