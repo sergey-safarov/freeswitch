@@ -10926,11 +10926,25 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 		}
 	}
 
-
 	if (sip->sip_multipart) {
-		msg_multipart_t *mp;
+		msg_multipart_t *mp = sip->sip_multipart;
+		msg_multipart_t *_mp = sip->sip_multipart;
+		switch_bool_t sdp_twice = SWITCH_FALSE;
 
-		for (mp = sip->sip_multipart; mp; mp = mp->mp_next) {
+		if (_mp && _mp->mp_content_type && _mp->mp_content_type->c_type && !strcmp(_mp->mp_content_type->c_type, "application/sdp")) {
+			for (; _mp; _mp = _mp->mp_next) {
+				if (_mp && _mp->mp_content_type && _mp->mp_content_type->c_type && !strcmp(_mp->mp_content_type->c_type, "application/sdp")) {
+					sdp_twice = SWITCH_TRUE;
+					break;
+				}
+			}
+		}
+
+		if (sdp_twice) {
+			mp = mp->mp_next;
+		}
+
+		for (; mp; mp = mp->mp_next) {
 			if (mp->mp_payload && mp->mp_payload->pl_data && mp->mp_content_type && mp->mp_content_type->c_type) {
 				char *val = switch_core_session_sprintf(session, "%s:%s", mp->mp_content_type->c_type, mp->mp_payload->pl_data);
 				switch_channel_add_variable_var_check(channel, "sip_multipart", val, SWITCH_FALSE, SWITCH_STACK_PUSH);
