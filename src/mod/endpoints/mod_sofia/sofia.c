@@ -10983,8 +10983,11 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 	}
 
 	if ((call_info = sip_call_info(sip))) {
+		char* call_info_header_array = NULL;
 		call_info_str = sip_header_as_string(nh->nh_home, (void *) call_info);
-
+		if (strstr(call_info_str,"cid:") && strstr(call_info_str,"EmergencyCallData")) {
+			call_info_header_array = switch_core_session_sprintf(session, "%s", call_info_str);
+		}
 		if (sofia_test_pflag(profile, PFLAG_MANAGE_SHARED_APPEARANCE) && switch_stristr("appearance", call_info_str)) {
 			char *p;
 
@@ -11005,10 +11008,18 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 
 		while (call_info) {
 			call_info_str = sip_header_as_string(nh->nh_home, (void *) call_info);
+			if (strstr(call_info_str,"cid:") && strstr(call_info_str,"EmergencyCallData")) {
+				if (call_info_header_array == NULL) {
+					call_info_header_array = switch_core_session_sprintf(session, "%s", call_info_str);
+				}
+				else {
+					call_info_header_array = switch_core_session_sprintf(session, "%s,%s", call_info_header_array, call_info_str);
+				}
+			}
 			switch_channel_add_variable_var_check(channel, "sip_call_info", call_info_str, SWITCH_FALSE, SWITCH_STACK_PUSH);
 			call_info = call_info->ci_next;
 		}
-
+		switch_channel_set_variable(channel, "sip_call_info_extra_h_Call-Info", call_info_header_array);
 		call_info = sip_call_info(sip);
 
 	} else if (sofia_test_pflag(profile, PFLAG_MANAGE_SHARED_APPEARANCE)) {
@@ -11377,6 +11388,7 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 	if (tech_pvt->caller_profile) {
 
 		int first_history_info = 1;
+		char* geolocation_array = NULL;
 
 		if (rpid) {
 			if (rpid->rpid_privacy) {
@@ -11456,6 +11468,15 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 				tech_pvt->x_freeswitch_support_remote = switch_core_session_strdup(session, un->un_value);
 			} else if (!strcasecmp(un->un_name, "Geolocation")) {
 				switch_channel_set_variable(channel, "sip_geolocation", un->un_value);
+
+				if (strstr(un->un_value,"cid:")) {
+					if (geolocation_array == NULL) {
+						geolocation_array = switch_core_session_sprintf(session, "%s", un->un_value);
+					}
+					else {
+						geolocation_array = switch_core_session_sprintf(session, "%s,%s", geolocation_array, un->un_value);
+					}
+				}
 			} else if (!strcasecmp(un->un_name, "Geolocation-Error")) {
 				switch_channel_set_variable(channel, "sip_geolocation_error", un->un_value);
 			} else if (!strcasecmp(un->un_name, "userLocation")) {
@@ -11483,6 +11504,9 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 			}
 		}
 
+		if (geolocation_array != NULL) {
+			switch_channel_set_variable(channel, "sip_extra_geolocation_h_Geolocation", geolocation_array);
+		}
 	}
 
 	tech_pvt->sofia_private = sofia_private;

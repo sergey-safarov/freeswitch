@@ -732,6 +732,8 @@ switch_status_t sofia_glue_do_invite(switch_core_session_t *session)
 	char *e_dest = NULL;
 	const char *holdstr = "";
 	char *extra_headers = NULL;
+	char *callinfo_extra_headers = NULL;
+	char *geolocation_extra_headers = NULL;
 	switch_status_t status = SWITCH_STATUS_FALSE;
 	uint32_t session_timeout = 0;
 	const char *val;
@@ -1238,6 +1240,8 @@ switch_status_t sofia_glue_do_invite(switch_core_session_t *session)
 	}
 
 	extra_headers = sofia_glue_get_extra_headers(channel, SOFIA_SIP_HEADER_PREFIX);
+	callinfo_extra_headers = sofia_glue_get_extra_headers(channel, SOFIA_SIP_CALLINFO_EXTRA_HEADER_PREFIX);
+	geolocation_extra_headers = sofia_glue_get_extra_headers(channel, SOFIA_SIP_GEOLOCATION_EXTRA_HEADER_PREFIX);
 
 	session_timeout = tech_pvt->profile->session_timeout;
 
@@ -1338,6 +1342,8 @@ switch_status_t sofia_glue_do_invite(switch_core_session_t *session)
 				   TAG_IF(!zstr(tech_pvt->privacy), SIPTAG_PRIVACY_STR(tech_pvt->privacy)),
 				   TAG_IF(!zstr(alert_info), SIPTAG_HEADER_STR(alert_info)),
 				   TAG_IF(!zstr(extra_headers), SIPTAG_HEADER_STR(extra_headers)),
+				   TAG_IF(!zstr(callinfo_extra_headers), SIPTAG_HEADER_STR(callinfo_extra_headers)),
+				   TAG_IF(!zstr(geolocation_extra_headers), SIPTAG_HEADER_STR(geolocation_extra_headers)),
 				   TAG_IF(sofia_test_pflag(tech_pvt->profile, PFLAG_PASS_CALLEE_ID), SIPTAG_HEADER_STR("X-FS-Support: " FREESWITCH_SUPPORT)),
 				   TAG_IF(!zstr(max_forwards), SIPTAG_MAX_FORWARDS_STR(max_forwards)),
 				   TAG_IF(!zstr(route_uri), NUTAG_PROXY(route_uri)),
@@ -1375,6 +1381,8 @@ switch_status_t sofia_glue_do_invite(switch_core_session_t *session)
 				   TAG_IF(!zstr(tech_pvt->privacy), SIPTAG_PRIVACY_STR(tech_pvt->privacy)),
 				   TAG_IF(!zstr(alert_info), SIPTAG_HEADER_STR(alert_info)),
 				   TAG_IF(!zstr(extra_headers), SIPTAG_HEADER_STR(extra_headers)),
+				   TAG_IF(!zstr(callinfo_extra_headers), SIPTAG_HEADER_STR(callinfo_extra_headers)),
+				   TAG_IF(!zstr(geolocation_extra_headers), SIPTAG_HEADER_STR(geolocation_extra_headers)),
 				   TAG_IF(sofia_test_pflag(tech_pvt->profile, PFLAG_PASS_CALLEE_ID), SIPTAG_HEADER_STR("X-FS-Support: " FREESWITCH_SUPPORT)),
 				   TAG_IF(!zstr(max_forwards), SIPTAG_MAX_FORWARDS_STR(max_forwards)),
 				   TAG_IF(!zstr(route_uri), NUTAG_PROXY(route_uri)),
@@ -1391,6 +1399,8 @@ switch_status_t sofia_glue_do_invite(switch_core_session_t *session)
 
 	sofia_glue_free_destination(dst);
 	switch_safe_free(extra_headers);
+	switch_safe_free(callinfo_extra_headers)
+	switch_safe_free(geolocation_extra_headers)
 	switch_safe_free(mp);
 	tech_pvt->redirected = NULL;
 
