@@ -639,6 +639,45 @@ char *sofia_glue_get_extra_headers(switch_channel_t *channel, const char *prefix
 	return extra_headers;
 }
 
+static char *_sofia_glue_get_extra_headers(switch_channel_t *channel, const char *prefix)
+{
+	char *extra_headers = NULL;
+	switch_stream_handle_t stream = { 0 };
+	switch_event_header_t *hi = NULL;
+	const char *exclude_regex = NULL;
+	switch_regex_t *re = NULL;
+	int ovector[30] = {0};
+	int proceed;
+
+	exclude_regex = switch_channel_get_variable(channel, "exclude_outgoing_extra_header");
+	SWITCH_STANDARD_STREAM(stream);
+	if ((hi = switch_channel_variable_first(channel))) {
+		for (; hi; hi = hi->next) {
+			const char *name = (char *) hi->name;
+			char *value = (char *) hi->value;
+
+			if (!strncasecmp(name, prefix, strlen(prefix))) {
+				if ( !exclude_regex || !(proceed = switch_regex_perform(name, exclude_regex, &re, ovector, sizeof(ovector) / sizeof(ovector[0])))) {
+					const char *hname = name + strlen(prefix);
+					stream.write_function(&stream, "%s: %s\r\n", hname, value);
+					switch_regex_safe_free(re);
+				} else {
+					switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Ignoring Extra Header [%s] , matches exclude_outgoing_extra_header [%s]\n", name, exclude_regex);
+				}
+			}
+		}
+		switch_channel_variable_last(channel);
+	}
+
+	if (!zstr((char *) stream.data)) {
+		extra_headers = stream.data;
+	} else {
+		switch_safe_free(stream.data);
+	}
+
+	return extra_headers;
+}
+
 void sofia_glue_set_extra_headers(switch_core_session_t *session, sip_t const *sip, const char *prefix)
 {
 	sip_unknown_t *un;
@@ -1240,8 +1279,8 @@ switch_status_t sofia_glue_do_invite(switch_core_session_t *session)
 	}
 
 	extra_headers = sofia_glue_get_extra_headers(channel, SOFIA_SIP_HEADER_PREFIX);
-	callinfo_extra_headers = sofia_glue_get_extra_headers(channel, SOFIA_SIP_CALLINFO_EXTRA_HEADER_PREFIX);
-	geolocation_extra_headers = sofia_glue_get_extra_headers(channel, SOFIA_SIP_GEOLOCATION_EXTRA_HEADER_PREFIX);
+	callinfo_extra_headers = _sofia_glue_get_extra_headers(channel, SOFIA_SIP_CALLINFO_EXTRA_HEADER_PREFIX);
+	geolocation_extra_headers = _sofia_glue_get_extra_headers(channel, SOFIA_SIP_GEOLOCATION_EXTRA_HEADER_PREFIX);
 
 	session_timeout = tech_pvt->profile->session_timeout;
 
