@@ -10946,7 +10946,26 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 
 		for (; mp; mp = mp->mp_next) {
 			if (mp->mp_payload && mp->mp_payload->pl_data && mp->mp_content_type && mp->mp_content_type->c_type) {
-				char *val = switch_core_session_sprintf(session, "%s:%s", mp->mp_content_type->c_type, mp->mp_payload->pl_data);
+				char *val = NULL;
+				if (mp->mp_content_id && mp->mp_content_id->g_string) {
+				    val = switch_core_session_sprintf(session, "%s", mp->mp_content_id->g_string);
+				}
+				else {
+				    val = switch_core_session_sprintf(session, "%s", "NULL");
+				}
+
+				if (mp->mp_content_disposition && mp->mp_content_disposition->cd_type) {
+				    val = switch_core_session_sprintf(session, "%s:%s", val, mp->mp_content_disposition->cd_type);
+				}
+				else {
+				    val = switch_core_session_sprintf(session, "%s:%s", val, "NULL");
+				}
+				if (val) {
+				    val = switch_core_session_sprintf(session, "%s:%s:%s", val, mp->mp_content_type->c_type, mp->mp_payload->pl_data);
+				}
+				else {
+				    val = switch_core_session_sprintf(session, "%s:%s", mp->mp_content_type->c_type, mp->mp_payload->pl_data);
+				}
 				switch_channel_add_variable_var_check(channel, "sip_multipart", val, SWITCH_FALSE, SWITCH_STACK_PUSH);
 			}
 		}

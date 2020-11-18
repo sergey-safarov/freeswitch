@@ -100,13 +100,46 @@ switch_status_t sofia_media_tech_media(private_object_t *tech_pvt, const char *r
 static void process_mp(switch_core_session_t *session, switch_stream_handle_t *stream, const char *boundary, const char *str) {
 	char *dname = switch_core_session_strdup(session, str);
 	char *dval;
+	char *format_string = NULL;
+	char *temp = NULL;
+	char *next = NULL;
 
-	if ((dval = strchr(dname, ':'))) {
+	if ((temp = strchr(dname, ':'))) {
+		*temp++ = '\0';
+		if (strcasecmp(dname,"NULL")) {
+			format_string = switch_core_session_sprintf(session, "Content-ID: %s", dname);
+		}
+	}
+
+	if ((next = strchr(temp, ':'))) {
+		*next++ = '\0';
+		if (strcasecmp(temp,"NULL")) {
+			if (format_string) {
+				format_string = switch_core_session_sprintf(session, "%s\r\nContent-Disposition: %s", format_string, temp);
+			}
+			else {
+				format_string = switch_core_session_sprintf(session, "Content-Disposition: %s", temp);
+			}
+		}
+		temp = next;
+	}
+
+	if ((dval = strchr(temp, ':'))) {
 		*dval++ = '\0';
 		if (*dval == '~') {
-			stream->write_function(stream, "--%s\r\nContent-Type: %s\r\nContent-Length: %d\r\n%s\r\n", boundary, dname, strlen(dval), dval + 1);
+			if (format_string) {
+				stream->write_function(stream, "--%s\r\n%s\r\nContent-Type: %s\r\nContent-Length: %d\r\n%s\r\n", boundary, format_string, next, strlen(dval), dval + 1);
+			}
+			else {
+				stream->write_function(stream, "--%s\r\nContent-Type: %s\r\nContent-Length: %d\r\n%s\r\n", boundary, next, strlen(dval), dval + 1);
+			}
 		} else {
-			stream->write_function(stream, "--%s\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n%s\r\n", boundary, dname, strlen(dval) + 1, dval);
+			if (format_string) {
+				stream->write_function(stream, "--%s\r\n%s\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n%s\r\n", boundary, format_string, next, strlen(dval) + 1, dval);
+			}
+			else {
+				stream->write_function(stream, "--%s\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n%s\r\n", boundary, next, strlen(dval) + 1, dval);
+			}
 		}
 	}
 }
