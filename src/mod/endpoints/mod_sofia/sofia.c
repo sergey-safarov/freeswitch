@@ -9544,7 +9544,7 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 				}
 
 				switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
-				switch_channel_process_export(channel, b_channel, var_event, "conference_auto_outcall_export_vars");
+				switch_channel_process_export(channel, b_channel, var_event, "conference_auto_refer_export_vars");
 
 				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Created session for outbound channel '%s' for a call to '%s'\n", channel_name, full_ref_to);
 				switch_channel_mark_answered(b_channel);
