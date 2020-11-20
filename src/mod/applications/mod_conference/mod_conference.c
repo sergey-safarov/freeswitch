@@ -1737,8 +1737,8 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 
 	if (call->conference) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "To function passed conference object.\n");
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Conference outcall_export_member_id: [%i]\n", call->conference->outcall_export_member_id);
 	}
-	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Conference outcall_export_member_id: [%i]\n", call->conference->outcall_export_member_id);
 
 	if (var_event) {
 		call->var_event = *var_event;
