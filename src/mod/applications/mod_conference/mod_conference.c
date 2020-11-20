@@ -1746,6 +1746,7 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 	} else if (call->conference && call->conference->outcall_export_member_id && (export_vars_member = conference_member_get(call->conference, call->conference->outcall_export_member_id))) {
 		switch_event_create(&call->var_event, SWITCH_EVENT_CHANNEL_DATA);
 		switch_channel_process_export(export_vars_member->channel, NULL, call->var_event, "conference_auto_outcall_export_vars");
+		switch_event_del_header(call->var_event, "conference_auto_outcall_export_vars");
 	}
 
 	if (conference) {
