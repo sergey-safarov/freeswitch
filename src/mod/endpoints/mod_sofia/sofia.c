@@ -120,6 +120,7 @@ static switch_status_t create_session(switch_core_session_t **new_session, const
 	tech_pvt->caller_profile = caller_profile;
 	tech_pvt->session = session;
 	tech_pvt->channel = channel;
+	sofia_glue_attach_private(session, profile, tech_pvt, channel_name);
 	switch_channel_set_state(channel, CS_INIT);
 
 	if (switch_core_session_thread_launch(session) != SWITCH_STATUS_SUCCESS) {
@@ -129,7 +130,6 @@ static switch_status_t create_session(switch_core_session_t **new_session, const
 	}
 
 	status = SWITCH_STATUS_SUCCESS;
-	sofia_glue_attach_private(session, profile, tech_pvt, channel_name);
 	*new_session = session;
 
  end:
