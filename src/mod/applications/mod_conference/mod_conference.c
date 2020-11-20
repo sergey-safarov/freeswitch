@@ -1727,9 +1727,18 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 
 	if (conference == NULL && !zstr(call->conference_name) && (call->conference = conference_find(call->conference_name, call->conference_domain))) {
 		switch_thread_rwlock_unlock(call->conference->rwlock);
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "found conference object by name: [%s]\n", call->conference_name);
 	} else {
 		call->conference = conference;
+		if (!zstr(call->conference_name)) {
+			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Not found conference object by name: [%s]\n", call->conference_name);
+		}
 	}
+
+	if (call->conference) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "To function passed conference object.\n");
+	}
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Conference outcall_export_member_id: [%i]\n", call->conference->outcall_export_member_id);
 
 	if (var_event) {
 		call->var_event = *var_event;

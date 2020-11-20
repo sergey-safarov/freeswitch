@@ -1346,6 +1346,9 @@ void conference_loop_output(conference_member_t *member)
 
 	if (switch_channel_get_variable(channel, "conference_auto_outcall_export_vars")) {
 		member->conference->outcall_export_member_id = member->id;
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Channel has defined variable 'conference_auto_outcall_export_vars', vars exported from member: [%i]\n", member->conference->outcall_export_member_id);
+	} else {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Channel do not has defined variable 'conference_auto_outcall_export_vars': conference member [%i]\n", member->id);
 	}
 
 	if ((call_list = switch_channel_get_private(channel, "_conference_autocall_list_"))) {
