@@ -2544,6 +2544,7 @@ SWITCH_STANDARD_APP(conference_function)
 	}
 
 	/* Remove the caller from the conference */
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "111 conference_member_del\n");
 	conference_member_del(member.conference, &member);
 
 	/* Put the original codec back */

@@ -400,10 +400,11 @@ conference_member_t *conference_member_get_by_var(conference_obj_t *conference, 
 	conference_member_t *member = NULL;
 
 	switch_assert(conference != NULL);
+
 	if (!(var && val)) {
 		return NULL;
 	}
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_get_by_var: var: %s; val: %s\n", var, val);
 	switch_mutex_lock(conference->member_mutex);
 	for (member = conference->members; member; member = member->next) {
 		const char *check_var;
@@ -416,20 +417,23 @@ conference_member_t *conference_member_get_by_var(conference_obj_t *conference, 
 			break;
 		}
 	}
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_get_by_var: 111\n");
 	if (member) {
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_get_by_var: 222\n");
 		if (!conference_utils_member_test_flag(member, MFLAG_INTREE) ||
 			conference_utils_member_test_flag(member, MFLAG_KICKED) ||
 			(member->session && !switch_channel_up(switch_core_session_get_channel(member->session)))) {
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_get_by_var: 333 member is kicked or hanging up so forget it\n");
 			/* member is kicked or hanging up so forget it */
 			member = NULL;
 		}
 	}
 
 	if (member) {
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_get_by_var: 444\n");
 		if (switch_thread_rwlock_tryrdlock(member->rwlock) != SWITCH_STATUS_SUCCESS) {
 			/* if you cant readlock it's way to late to do anything */
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_get_by_var: 555 if you cant readlock it's way to late to do anything\n");
 			member = NULL;
 		}
 	}
@@ -1157,7 +1161,7 @@ switch_status_t conference_member_del(conference_obj_t *conference, conference_m
 	conference_file_node_t *member_fnode;
 	switch_speech_handle_t *member_sh;
 	const char *exit_sound = NULL;
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_del: start\n");
 	switch_assert(conference != NULL);
 	switch_assert(member != NULL);
 
@@ -1355,7 +1359,7 @@ switch_status_t conference_member_del(conference_obj_t *conference, conference_m
 
 	switch_mutex_unlock(conference->mutex);
 	status = SWITCH_STATUS_SUCCESS;
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_del: end\n");
 	return status;
 }
 

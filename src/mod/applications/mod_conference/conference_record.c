@@ -403,6 +403,7 @@ void *SWITCH_THREAD_FUNC conference_record_thread_run(switch_thread_t *thread, v
 
 	switch_safe_free(data_buf);
 	switch_core_timer_destroy(&timer);
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "222 conference_member_del\n");
 	conference_member_del(conference, member);
 
 	if (canvas) {

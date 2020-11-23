@@ -4186,7 +4186,12 @@ switch_status_t conference_api_dispatch(conference_obj_t *conference, switch_str
 						if ((val = strchr(var, '='))) {
 							*val++ = '\0';
 						}
-
+if (var) {
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_api_dispatch: var: %s\n", var);
+}
+if (val) {
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_api_dispatch: val: %s\n", val);
+}
 						member = conference_member_get_by_var(conference, var, val);
 
 						if (member != NULL) {
