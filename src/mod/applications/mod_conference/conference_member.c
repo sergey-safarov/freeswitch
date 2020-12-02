@@ -1161,11 +1161,20 @@ switch_status_t conference_member_del(conference_obj_t *conference, conference_m
 	conference_file_node_t *member_fnode;
 	switch_speech_handle_t *member_sh;
 	const char *exit_sound = NULL;
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_del: start\n");
+	int err_code = 0;
+
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_member_del: start\n");
 	switch_assert(conference != NULL);
 	switch_assert(member != NULL);
 
-	switch_thread_rwlock_wrlock(member->rwlock);
+	err_code = switch_thread_rwlock_trywrlock(member->rwlock);
+	if (EBUSY == err_code) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "trywrlock for member to be deleted returned EBUSY, keep waiting\n");
+		switch_thread_rwlock_wrlock(member->rwlock);
+	}
+	else if (EDEADLK == err_code) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "trywrlock for member to be deleted returned EDEADLK, skip member rwlock acquisition\n");
+	}
 
 	if (member->video_queue) {
 		conference_video_flush_queue(member->video_queue, 0);
