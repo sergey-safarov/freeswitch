@@ -161,13 +161,25 @@ void conference_list(conference_obj_t *conference, switch_stream_handle_t *strea
 	switch_mutex_unlock(conference->member_mutex);
 }
 
-void conference_send_notify(conference_obj_t *conference, const char *status, const char *call_id, switch_bool_t final)
+void conference_send_notify(conference_obj_t *conference, const char *status, const char *call_id, switch_bool_t final, switch_event_t *source_event)
 {
 	switch_event_t *event;
 	char *name = NULL, *domain = NULL, *dup_domain = NULL;
+	char* profile_name = NULL;
+	char* to_uri = NULL;
+	char* from_uri = NULL;
+	char* contact_uri = NULL;
+	char* body = NULL;
 
 	if (!conference_utils_test_flag(conference, CFLAG_RFC4579)) {
 		return;
+	}
+
+	if (source_event) {
+	    to_uri = switch_event_get_header(source_event, "to-uri");
+	    from_uri = switch_event_get_header(source_event, "from-uri");
+	    contact_uri = switch_event_get_header(source_event, "contact-uri");
+	    profile_name = switch_event_get_header(source_event, "profile");
 	}
 
 	if (!(name = conference->name)) {
@@ -184,18 +196,25 @@ void conference_send_notify(conference_obj_t *conference, const char *status, co
 
 	if (switch_event_create(&event, SWITCH_EVENT_CONFERENCE_DATA) == SWITCH_STATUS_SUCCESS) {
 		event->flags |= EF_UNIQ_HEADERS;
-
-		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "conference-name", name);
-		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "conference-domain", domain);
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "conference-name", switch_str_nil(name));
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "conference-domain", switch_str_nil(domain));
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "conference-event", "refer");
-		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "call_id", call_id);
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "contact-uri", switch_str_nil(contact_uri));
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "to-uri", switch_str_nil(to_uri));
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "from-uri", switch_str_nil(from_uri));
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "profile", switch_str_nil(profile_name));
 
 		if (final) {
 			switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "final", "true");
 		}
 
-
-		switch_event_add_body(event, "%s", status);
+		if (!zstr(status)) {
+		    switch_event_add_body(event, "%s", status);
+		}
+		else {
+		    body = conference_cdr_rfc4579_render(conference, source_event, event);
+		    switch_event_add_body(event, "%s", body);
+		}
 		switch_event_fire(&event);
 	}
 
@@ -1528,11 +1547,23 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 	switch_bool_t have_flags = SWITCH_FALSE;
 	const char *outcall_flags;
 	int track = 0;
+	const char *sip_refer_contact = NULL;
+	const char *sip_refer_from = NULL;
+	const char *sip_refer_to = NULL;
+	const char *profile_name = NULL;
 	const char *call_id = NULL;
 
 	if (var_event && switch_true(switch_event_get_header(var_event, "conference_track_status"))) {
 		track++;
-		call_id = switch_event_get_header(var_event, "conference_track_call_id");
+		sip_refer_contact = switch_event_get_header(var_event, "sip_refer_contact");
+		sip_refer_from = switch_event_get_header(var_event, "sip_refer_from");
+		sip_refer_to = switch_event_get_header(var_event, "sip_refer_to");
+		profile_name = switch_event_get_header(var_event, "sip_refer_from_profile");
+
+		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "contact-uri", switch_str_nil(sip_refer_contact));
+		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "to-uri", switch_str_nil(sip_refer_to));
+		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "from-uri", switch_str_nil(sip_refer_from));
+		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "profile", switch_str_nil(profile_name));
 	}
 
 	*cause = SWITCH_CAUSE_NORMAL_CLEARING;
@@ -1577,7 +1608,7 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 	switch_mutex_unlock(conference->mutex);
 
 	if (track) {
-		conference_send_notify(conference, "SIP/2.0 100 Trying\r\n", call_id, SWITCH_FALSE);
+		conference_send_notify(conference, "SIP/2.0 100 Trying\r\n", call_id, SWITCH_FALSE, var_event);
 	}
 
 
@@ -1600,14 +1631,14 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 		}
 
 		if (track) {
-			conference_send_notify(conference, "SIP/2.0 481 Failure\r\n", call_id, SWITCH_TRUE);
+			conference_send_notify(conference, "SIP/2.0 481 Failure\r\n", call_id, SWITCH_TRUE, var_event);
 		}
 
 		goto done;
 	}
 
 	if (track) {
-		conference_send_notify(conference, "SIP/2.0 200 OK\r\n", call_id, SWITCH_TRUE);
+		conference_send_notify(conference, "SIP/2.0 200 OK\r\n", call_id, SWITCH_FALSE, var_event);
 	}
 
 	rdlock = 1;
@@ -1961,10 +1992,24 @@ SWITCH_STANDARD_APP(conference_function)
 
 		if (conference) {
 			switch_call_cause_t cause;
+			const char *sip_refer_contact = switch_channel_get_variable(channel, "sip_refer_contact");
+			const char *sip_refer_from = switch_channel_get_variable(channel, "sip_refer_from");
+			const char *sip_refer_to = switch_channel_get_variable(channel, "sip_refer_to");
+			const char *_profile_name = switch_channel_get_variable(channel, "sip_refer_from_profile");
+			switch_event_t *var_event = NULL;
+
+			switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
+			switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "conference_track_status", "true");
+			switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "sip_refer_contact", switch_str_nil(sip_refer_contact));
+			switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "sip_refer_to", switch_str_nil(sip_refer_to));
+			switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "sip_refer_from", switch_str_nil(sip_refer_from));
+			switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "sip_refer_from_profile", switch_str_nil(_profile_name));
+
 			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_name to initiate a call by refer: %s\n", refer_conference_name);
-			if (conference_outcall(conference, NULL, session, mydata, 60, conference->caller_id_number, conference->caller_id_number, conference->profile_name, NULL, &cause, NULL, NULL, NULL) != SWITCH_STATUS_SUCCESS) {
+			if (conference_outcall(conference, NULL, session, mydata, 60, conference->caller_id_number, conference->caller_id_number, conference->profile_name, NULL, &cause, NULL, var_event, NULL) != SWITCH_STATUS_SUCCESS) {
 				goto done;
 			}
+			switch_thread_rwlock_unlock(conference->rwlock);
 		}
 		return;
 	}
@@ -4028,6 +4073,10 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_conference_load)
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't subscribe to conference data query events!\n");
 	}
 
+	if (switch_event_bind(modname, SWITCH_EVENT_CONFERENCE_DATA, SWITCH_EVENT_SUBCLASS_ANY, conference_data_rfc4579_event_handler, NULL) != SWITCH_STATUS_SUCCESS) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't subscribe to conference data events!\n");
+	}
+
 	if (switch_event_bind(modname, SWITCH_EVENT_CALL_SETUP_REQ, SWITCH_EVENT_SUBCLASS_ANY, conference_event_call_setup_handler, NULL) != SWITCH_STATUS_SUCCESS) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't subscribe to conference data query events!\n");
 	}
@@ -4066,6 +4115,7 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_conference_shutdown)
 
 		switch_event_unbind_callback(conference_event_pres_handler);
 		switch_event_unbind_callback(conference_data_event_handler);
+		switch_event_unbind_callback(conference_data_rfc4579_event_handler);
 		switch_event_unbind_callback(conference_event_call_setup_handler);
 		switch_event_free_subclass(CONF_EVENT_MAINT);
 
