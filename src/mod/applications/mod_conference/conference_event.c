@@ -893,7 +893,7 @@ void conference_data_event_handler(switch_event_t *event)
 	char *domain = switch_event_get_header(event, "conference-domain");
 	conference_obj_t *conference = NULL;
 	char *body = NULL;
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_data_event_handler 1\n");
 	if (!zstr(name) && (conference = conference_find(name, domain))) {
 		if (conference_utils_test_flag(conference, CFLAG_RFC4579)) {
 			switch_event_dup(&revent, event);

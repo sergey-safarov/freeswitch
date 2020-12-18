@@ -189,7 +189,7 @@ void conference_send_notify(conference_obj_t *conference, const char *status, co
 	if (!(name = conference->name)) {
 		name = "conference";
 	}
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_send_notify: name: %s\n", name);
 	if (!(domain = conference->domain)) {
 		dup_domain = switch_core_get_domain(SWITCH_TRUE);
 		if (!(domain = dup_domain)) {
@@ -1597,7 +1597,7 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 	switch_mutex_lock(conference->mutex);
 	conference->originating++;
 	switch_mutex_unlock(conference->mutex);
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_outcall: 1\n");
 	if (track) {
 		conference_send_notify(conference, "SIP/2.0 100 Trying\r\n", _call_id, SWITCH_FALSE, var_event);
 	}

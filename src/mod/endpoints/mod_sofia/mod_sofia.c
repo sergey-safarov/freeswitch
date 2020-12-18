@@ -1775,6 +1775,7 @@ static switch_status_t sofia_receive_message(switch_core_session_t *session, swi
 								  "Operation not permitted on an inbound non-answered call leg!\n");
 			} else {
 				full_to = switch_str_nil(switch_channel_get_variable(channel, "sip_full_to"));
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_receive_message notify  111\n");
 				nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), NUTAG_SUBSTATE(nua_substate_active),
 						   TAG_IF((full_to), SIPTAG_TO_STR(full_to)),SIPTAG_SUBSCRIPTION_STATE_STR("active"),
 						   SIPTAG_EVENT_STR(event), TAG_END());
@@ -5185,7 +5186,7 @@ static int notify_csta_callback(void *pArg, int argc, char **argv, char **column
 	cseq = sip_cseq_create(nh->nh_home, callsequence, SIP_METHOD_NOTIFY);
 
 	nua_handle_bind(nh, &mod_sofia_globals.destroy_private);
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "notify_csta_callback notify  111\n");
 	nua_notify(nh, NUTAG_NEWSUB(1),
 			   TAG_IF(dst->route_uri, NUTAG_PROXY(route_uri)), TAG_IF(dst->route, SIPTAG_ROUTE_STR(dst->route)), TAG_IF(call_id, SIPTAG_CALL_ID_STR(call_id)),
 			   SIPTAG_EVENT_STR("as-feature-event"), SIPTAG_CONTENT_TYPE_STR(ct), TAG_IF(!zstr(extra_headers), SIPTAG_HEADER_STR(extra_headers)), TAG_IF(!zstr(body), SIPTAG_PAYLOAD_STR(body)), SIPTAG_CSEQ(cseq), TAG_END());
@@ -5243,7 +5244,7 @@ static int notify_callback(void *pArg, int argc, char **argv, char **columnNames
 	nh = nua_handle(profile->nua, NULL, NUTAG_URL(dst->contact), SIPTAG_FROM_STR(id), SIPTAG_TO_STR(id), SIPTAG_CONTACT_STR(profile->url), TAG_END());
 
 	nua_handle_bind(nh, &mod_sofia_globals.destroy_private);
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "notify_callback 111\n");
 	nua_notify(nh, NUTAG_NEWSUB(1), SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"),
 			   TAG_IF(dst->route_uri, NUTAG_PROXY(route_uri)), TAG_IF(dst->route, SIPTAG_ROUTE_STR(dst->route)),
 			   SIPTAG_EVENT_STR(es), SIPTAG_CONTENT_TYPE_STR(ct), TAG_IF(!zstr(body), SIPTAG_PAYLOAD_STR(body)), TAG_END());
@@ -5309,37 +5310,44 @@ void general_event_handler(switch_event_t *event)
 					char *sip_sub_st = NULL;
 
 					dst = sofia_glue_get_destination((char *) contact_uri);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 to_uri:'%s'\n", switch_str_nil(to_uri));
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 from_uri:'%s'\n", switch_str_nil(from_uri));
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 call_id:'%s'\n", switch_str_nil(call_id));
 
 					if (dst->route_uri) {
-						route_uri = sofia_glue_strip_uri(dst->route_uri);
+					    route_uri = sofia_glue_strip_uri(dst->route_uri);
 					}
 					else if (!zstr(sip_invite_record_route)) {
-						char *route_list[100] = {0};
-						char* _invite_route_uri = strdup(sip_invite_record_route);
-						int size = switch_split(_invite_route_uri, ',', route_list);
-						if (size > 0) {
-							int index = size - 1;
-							char* dst_route = strdup(route_list[index]);
-							--index;
-							while(index >= 0) {
-								dst_route = switch_core_sprintf(profile->pool, "%s,%s", dst_route, route_list[index]);
-								--index;
-							}
-
-							dst->route = strdup(dst_route);
-							{
-								char* stripped_uri = NULL;
-								_invite_route_uri = strdup(route_list[size - 1]);
-								stripped_uri = sofia_glue_strip_uri(_invite_route_uri);
-
-								size = switch_split(stripped_uri, ';', route_list);
-								if (size > 0) {
-									route_uri = strdup(route_list[0]);
-									switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "route_uri to send NOTIFY:'%s'\n", switch_str_nil(route_uri));
-									dst->route_uri = strdup(route_uri);
-								}
-							}
+					    char *route_list[100] = {0};
+					    char* _invite_route_uri = strdup(sip_invite_record_route);
+					    int size = switch_split(_invite_route_uri, ',', route_list);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "full route URI list:'%s'\n", switch_str_nil(_invite_route_uri));
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "size:'%d'\n", size);
+					    if (size > 0) {
+						int index = size - 1;
+						char* dst_route = strdup(route_list[index]);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "1 dst_route:'%s'; index='%d'\n", switch_str_nil(dst_route), index);
+						--index;
+						while(index >= 0) {
+						    dst_route = switch_core_sprintf(profile->pool, "%s,%s", dst_route, route_list[index]);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "2 dst_route:'%s'; index='%d'\n", switch_str_nil(dst_route), index);
+						    --index;
 						}
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "dst_route to send NOTIFY:'%s'\n", switch_str_nil(dst_route));
+						dst->route = strdup(dst_route);
+						{
+						    char* stripped_uri = NULL;
+						    _invite_route_uri = strdup(route_list[size - 1]);
+						    stripped_uri = sofia_glue_strip_uri(_invite_route_uri);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "target route_uri:'%s'\n", switch_str_nil(stripped_uri));
+						    size = switch_split(stripped_uri, ';', route_list);
+						    if (size > 0) {
+							route_uri = strdup(route_list[0]);
+							switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "route_uri to send NOTIFY:'%s'\n", switch_str_nil(route_uri));
+							dst->route_uri = strdup(route_uri);
+						    }
+						}
+					    }
 					}
 
 					if (zstr(dst->contact)) {
@@ -5360,6 +5368,18 @@ void general_event_handler(switch_event_t *event)
 					if (!switch_true(no_sub_state)) {
 						sip_sub_st = "terminated;reason=noresource";
 					}
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  222 body: %s\n", body);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  111\n");
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: route_uri: %s\n", route_uri);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: sip_sub_st: %s\n", sip_sub_st);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: contact_uri: %s\n", contact_uri);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: to_uri: %s\n", to_uri);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: from_uri: %s\n", from_uri);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: call_id: %s\n", call_id);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: dst->route_uri: %s\n", dst->route_uri);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: dst->route: %s\n", dst->route);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: dst->to: %s\n", dst->to);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: dst->contact: %s\n", dst->contact);
 
 					nua_notify(nh,
 							   NUTAG_NEWSUB(1), TAG_IF(sip_sub_st, SIPTAG_SUBSCRIPTION_STATE_STR(sip_sub_st)),
