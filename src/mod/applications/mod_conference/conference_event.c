@@ -851,9 +851,9 @@ void conference_event_call_setup_handler(switch_event_t *event)
 
 			} else if (!strcasecmp(action, "end")) {
 				if (switch_core_session_hupall_matching_var("conference_call_key", key, SWITCH_CAUSE_NORMAL_CLEARING)) {
-					conference_send_notify(conference, "SIP/2.0 200 OK\r\n", call_id, SWITCH_TRUE);
+					conference_send_notify(conference, "SIP/2.0 200 OK\r\n", call_id, SWITCH_TRUE, event);
 				} else {
-					conference_send_notify(conference, "SIP/2.0 481 Failure\r\n", call_id, SWITCH_TRUE);
+					conference_send_notify(conference, "SIP/2.0 481 Failure\r\n", call_id, SWITCH_TRUE, event);
 				}
 				status = SWITCH_STATUS_SUCCESS;
 			}
@@ -900,7 +900,6 @@ void conference_data_event_handler(switch_event_t *event)
 			revent->event_id = SWITCH_EVENT_CONFERENCE_DATA;
 			revent->flags |= EF_UNIQ_HEADERS;
 			switch_event_add_header(revent, SWITCH_STACK_TOP, "Event-Name", "CONFERENCE_DATA");
-
 			body = conference_cdr_rfc4579_render(conference, event, revent);
 			switch_event_add_body(revent, "%s", body);
 			switch_event_fire(&revent);
@@ -910,6 +909,39 @@ void conference_data_event_handler(switch_event_t *event)
 	}
 }
 
+void conference_data_rfc4579_event_handler(switch_event_t *event)
+{
+	char *name = switch_event_get_header(event, "conference-name");
+	char *domain = switch_event_get_header(event, "conference-domain");
+	char *event_name = switch_event_get_header(event, "conference-event");
+	char *profile_name = switch_event_get_header(event, "profile");
+	char *to_uri = switch_event_get_header(event, "to-uri");
+	char *from_uri = switch_event_get_header(event, "from-uri");
+	char *contact_uri = switch_event_get_header(event, "contact-uri");
+	char *record_route = switch_event_get_header(event, "sip_invite_record_route");
+	char *_call_id = switch_event_get_header(event, "call-id");
+	conference_obj_t *conference = NULL;
+	char *body = switch_event_get_body(event);
+
+	if (!zstr(name) && (conference = conference_find(name, domain))) {
+		if (conference_utils_test_flag(conference, CFLAG_RFC4579)) {
+		    switch_event_t *notify_event = NULL;
+
+		    switch_event_create(&notify_event, SWITCH_EVENT_NOTIFY);
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "profile", profile_name);
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "event-string", event_name);
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "content-type", "message/sipfrag");
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "contact-uri", contact_uri);
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "from-uri", from_uri);
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "to-uri", to_uri);
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "call-id", _call_id);
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", record_route);
+		    switch_event_add_body(notify_event, "%s", body);
+		    switch_event_fire(&notify_event);
+		}
+		switch_thread_rwlock_unlock(conference->rwlock);
+	}
+}
 
 void conference_event_pres_handler(switch_event_t *event)
 {

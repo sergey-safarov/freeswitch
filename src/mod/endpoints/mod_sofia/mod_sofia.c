@@ -5280,6 +5280,7 @@ void general_event_handler(switch_event_t *event)
 			const char *extra_headers = switch_event_get_header(event, "extra-headers");
 			const char *contact_uri = switch_event_get_header(event, "contact-uri");
 			const char *no_sub_state = switch_event_get_header(event, "no-sub-state");
+			const char *sip_invite_record_route = switch_event_get_header(event, "sip_invite_record_route");
 
 			sofia_profile_t *profile;
 
@@ -5311,6 +5312,34 @@ void general_event_handler(switch_event_t *event)
 
 					if (dst->route_uri) {
 						route_uri = sofia_glue_strip_uri(dst->route_uri);
+					}
+					else if (!zstr(sip_invite_record_route)) {
+						char *route_list[100] = {0};
+						char* _invite_route_uri = strdup(sip_invite_record_route);
+						int size = switch_split(_invite_route_uri, ',', route_list);
+						if (size > 0) {
+							int index = size - 1;
+							char* dst_route = strdup(route_list[index]);
+							--index;
+							while(index >= 0) {
+								dst_route = switch_core_sprintf(profile->pool, "%s,%s", dst_route, route_list[index]);
+								--index;
+							}
+
+							dst->route = strdup(dst_route);
+							{
+								char* stripped_uri = NULL;
+								_invite_route_uri = strdup(route_list[size - 1]);
+								stripped_uri = sofia_glue_strip_uri(_invite_route_uri);
+
+								size = switch_split(stripped_uri, ';', route_list);
+								if (size > 0) {
+									route_uri = strdup(route_list[0]);
+									switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "route_uri to send NOTIFY:'%s'\n", switch_str_nil(route_uri));
+									dst->route_uri = strdup(route_uri);
+								}
+							}
+						}
 					}
 
 					if (zstr(dst->contact)) {
