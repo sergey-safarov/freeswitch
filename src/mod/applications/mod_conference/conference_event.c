@@ -702,7 +702,7 @@ void conference_event_send_rfc(conference_obj_t *conference)
 	switch_event_t *event;
 	char *body;
 	char *name = NULL, *domain = NULL, *dup_domain = NULL;
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "1 conference_event_send_rfc: 111\n");
 	if (!conference_utils_test_flag(conference, CFLAG_RFC4579)) {
 		return;
 	}
@@ -710,7 +710,7 @@ void conference_event_send_rfc(conference_obj_t *conference)
 	if (!(name = conference->name)) {
 		name = "conference";
 	}
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "2 conference_event_send_rfc: %s\n", name);
 	if (!(domain = conference->domain)) {
 		dup_domain = switch_core_get_domain(SWITCH_TRUE);
 		if (!(domain = dup_domain)) {
@@ -718,10 +718,10 @@ void conference_event_send_rfc(conference_obj_t *conference)
 		}
 	}
 
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "3 conference_event_send_rfc: %s\n", domain);
 	if (switch_event_create(&event, SWITCH_EVENT_CONFERENCE_DATA) == SWITCH_STATUS_SUCCESS) {
 		event->flags |= EF_UNIQ_HEADERS;
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "4 conference_event_send_rfc: 444\n");
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "conference-name", name);
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "conference-domain", domain);
 

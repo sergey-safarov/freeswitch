@@ -2527,7 +2527,7 @@ SWITCH_STANDARD_APP(conference_function)
 		switch_queue_create(&member.video_queue, 200, member.pool);
 		switch_frame_buffer_create(&member.fb, 500);
 	}
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_function: conference_member_add!!!\n");
 	/* Add the caller to the conference */
 	if (conference_member_add(conference, &member) != SWITCH_STATUS_SUCCESS) {
 		switch_core_codec_destroy(&member.read_codec);

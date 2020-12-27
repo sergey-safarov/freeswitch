@@ -323,7 +323,7 @@ void *SWITCH_THREAD_FUNC conference_record_thread_run(switch_thread_t *thread, v
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Path", rec->path);
 		switch_event_fire(&event);
 	}
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_record_thread_run: conference_member_add!!!\n");
 	if (conference_member_add(conference, member) != SWITCH_STATUS_SUCCESS) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Error Joining Conference\n");
 		goto end;

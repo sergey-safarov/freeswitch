@@ -5413,7 +5413,7 @@ void general_event_handler(switch_event_t *event)
 									TAG_END());
 
 					nua_handle_bind(nh, &mod_sofia_globals.destroy_private);
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  222\n");
 					nua_notify(nh,
 							   NUTAG_NEWSUB(1), SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"),
 							   TAG_IF(dst->route_uri, NUTAG_PROXY(dst->route_uri)), TAG_IF(dst->route, SIPTAG_ROUTE_STR(dst->route)),
@@ -5436,6 +5436,7 @@ void general_event_handler(switch_event_t *event)
 
 				if ((session = switch_core_session_locate(uuid))) {
 					if ((tech_pvt = switch_core_session_get_private(session))) {
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333\n");
 						nua_notify(tech_pvt->nh,
 								   NUTAG_NEWSUB(1), SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"),
 								   SIPTAG_EVENT_STR(es), SIPTAG_CONTENT_TYPE_STR(ct), TAG_IF(!zstr(body), SIPTAG_PAYLOAD_STR(body)), TAG_END());

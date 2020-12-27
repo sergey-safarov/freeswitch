@@ -2841,7 +2841,7 @@ switch_status_t sofia_glue_send_notify(sofia_profile_t *profile, const char *use
 
 	nh = nua_handle(profile->nua, NULL, NUTAG_URL(contact), SIPTAG_FROM_STR(id), SIPTAG_TO_STR(id), SIPTAG_CONTACT_STR(contact_str), TAG_END());
 	nua_handle_bind(nh, &mod_sofia_globals.destroy_private);
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_glue_send_notify notify  111\n");
 	nua_notify(nh,
 			   NUTAG_NEWSUB(1),
 			   TAG_IF(dst->route_uri, NUTAG_PROXY(route_uri)), TAG_IF(dst->route, SIPTAG_ROUTE_STR(dst->route)),
