@@ -5315,39 +5315,39 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 from_uri:'%s'\n", s
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 call_id:'%s'\n", switch_str_nil(call_id));
 
 					if (dst->route_uri) {
-					    route_uri = sofia_glue_strip_uri(dst->route_uri);
+						route_uri = sofia_glue_strip_uri(dst->route_uri);
 					}
 					else if (!zstr(sip_invite_record_route)) {
-					    char *route_list[100] = {0};
-					    char* _invite_route_uri = strdup(sip_invite_record_route);
-					    int size = switch_split(_invite_route_uri, ',', route_list);
+						char *route_list[100] = {0};
+						char* _invite_route_uri = strdup(sip_invite_record_route);
+						int size = switch_split(_invite_route_uri, ',', route_list);
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "full route URI list:'%s'\n", switch_str_nil(_invite_route_uri));
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "size:'%d'\n", size);
-					    if (size > 0) {
-						int index = size - 1;
-						char* dst_route = strdup(route_list[index]);
+						if (size > 0) {
+							int index = size - 1;
+							char* dst_route = strdup(route_list[index]);
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "1 dst_route:'%s'; index='%d'\n", switch_str_nil(dst_route), index);
-						--index;
-						while(index >= 0) {
-						    dst_route = switch_core_sprintf(profile->pool, "%s,%s", dst_route, route_list[index]);
+							--index;
+							while(index >= 0) {
+								dst_route = switch_core_sprintf(profile->pool, "%s,%s", dst_route, route_list[index]);
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "2 dst_route:'%s'; index='%d'\n", switch_str_nil(dst_route), index);
-						    --index;
-						}
+								--index;
+							}
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "dst_route to send NOTIFY:'%s'\n", switch_str_nil(dst_route));
-						dst->route = strdup(dst_route);
-						{
-						    char* stripped_uri = NULL;
-						    _invite_route_uri = strdup(route_list[size - 1]);
-						    stripped_uri = sofia_glue_strip_uri(_invite_route_uri);
+							dst->route = strdup(dst_route);
+							{
+								char* stripped_uri = NULL;
+								_invite_route_uri = strdup(route_list[size - 1]);
+								stripped_uri = sofia_glue_strip_uri(_invite_route_uri);
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "target route_uri:'%s'\n", switch_str_nil(stripped_uri));
-						    size = switch_split(stripped_uri, ';', route_list);
-						    if (size > 0) {
-							route_uri = strdup(route_list[0]);
-							switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "route_uri to send NOTIFY:'%s'\n", switch_str_nil(route_uri));
-							dst->route_uri = strdup(route_uri);
-						    }
+								size = switch_split(stripped_uri, ';', route_list);
+								if (size > 0) {
+									route_uri = strdup(route_list[0]);
+									switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "route_uri to send NOTIFY:'%s'\n", switch_str_nil(route_uri));
+									dst->route_uri = strdup(route_uri);
+								}
+							}
 						}
-					    }
 					}
 
 					if (zstr(dst->contact)) {
