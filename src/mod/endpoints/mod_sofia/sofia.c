@@ -9547,11 +9547,11 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 				switch_channel_set_variable(b_channel, SOFIA_SIP_HEADER_PREFIX "Referred-By", full_ref_by);
 			}
 
-			if (!zstr(full_ref_to)) {
-				switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
-			}
+                        if (!zstr(full_ref_to)) {
+                                switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
+                        }
 
-			if (switch_true(switch_channel_get_variable(channel, "recording_follow_transfer"))) {
+                        if (switch_true(switch_channel_get_variable(channel, "recording_follow_transfer"))) {
 				switch_ivr_transfer_recordings(session, b_session);
 			}
 
@@ -9606,38 +9606,38 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 
 			if (create_session(&b_session, channel_name, to_user, sip_refer_user) == SWITCH_STATUS_SUCCESS) {
 				switch_channel_t *b_channel = switch_core_session_get_channel(b_session);
-				const char* sip_refer_host = switch_str_nil(sip->sip_refer_to->r_url->url_host);
 				switch_event_t *var_event = NULL;
 				const char* contact_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) sip->sip_contact);
 				const char* from_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) from);
+				const char* to_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) to);
 
 				if (!zstr(profile->name)) {
+					switch_channel_set_variable(channel, SOFIA_REFER_FROM_PROFILE_VARIABLE, profile->name);
 					switch_channel_set_variable(b_channel, SOFIA_REFER_FROM_PROFILE_VARIABLE, profile->name);
 				}
 
-				if (!zstr(full_ref_to)) {
-					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
-				}
-
-				if (!zstr(sip_refer_user)) {
-					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_USER_VARIABLE, sip_refer_user);
-				}
-
-				if (!zstr(sip_refer_host)) {
-					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_HOST_VARIABLE, sip_refer_host);
-				}
+                                if (!zstr(full_ref_to)) {
+                                        switch_channel_set_variable(channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
+                                        switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
+                                }
 
 				if (!zstr(contact_uri)) {
+					switch_channel_set_variable(channel, SOFIA_REFER_CONTACT_VARIABLE, contact_uri);
 					switch_channel_set_variable(b_channel, SOFIA_REFER_CONTACT_VARIABLE, contact_uri);
 				}
 
 				if (!zstr(from_uri)) {
+					switch_channel_set_variable(channel, SOFIA_REFER_FROM_VARIABLE, from_uri);
 					switch_channel_set_variable(b_channel, SOFIA_REFER_FROM_VARIABLE, from_uri);
 				}
 
-				if (!zstr(conference_name)) {
-					switch_channel_set_variable(b_channel, SOFIA_REFER_CONFERENCE_NAME_VARIABLE, conference_name);
+				if (!zstr(to_uri)) {
+					switch_channel_set_variable(channel, SOFIA_REFER_TO_URI_VARIABLE, to_uri);
+					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_URI_VARIABLE, to_uri);
 				}
+
+				switch_channel_set_variable(channel, "conference_track_status", "true");
+				switch_channel_set_variable(b_channel, "conference_track_status", "true");
 
 				switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
 				switch_channel_process_export(channel, b_channel, var_event, "conference_auto_refer_export_vars");

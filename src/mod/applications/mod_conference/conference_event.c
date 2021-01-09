@@ -897,7 +897,7 @@ void conference_data_event_handler(switch_event_t *event)
 	char *domain = switch_event_get_header(event, "conference-domain");
 	conference_obj_t *conference = NULL;
 	char *body = NULL;
-
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_data_event_handler 1\n");
 	if (!zstr(name) && (conference = conference_find(name, domain))) {
 		if (conference_utils_test_flag(conference, CFLAG_RFC4579)) {
 			switch_event_dup(&revent, event);
@@ -923,6 +923,8 @@ void conference_data_rfc4579_event_handler(switch_event_t *event)
 	char *to_uri = switch_event_get_header(event, "to-uri");
 	char *from_uri = switch_event_get_header(event, "from-uri");
 	char *contact_uri = switch_event_get_header(event, "contact-uri");
+	char *record_route = switch_event_get_header(event, "sip_invite_record_route");
+	char *_call_id = switch_event_get_header(event, "call-id");
 	conference_obj_t *conference = NULL;
 	char *body = switch_event_get_body(event);
 
@@ -937,6 +939,8 @@ void conference_data_rfc4579_event_handler(switch_event_t *event)
 		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "contact-uri", contact_uri);
 		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "from-uri", from_uri);
 		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "to-uri", to_uri);
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "call-id", _call_id);
+		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", record_route);
 		    switch_event_add_body(notify_event, "%s", body);
 
 		    switch_event_fire(&notify_event);
