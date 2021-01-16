@@ -8651,7 +8651,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_activate_rtp(switch_core_sessi
 							  switch_channel_get_name(session->channel));
 			a_engine->cur_payload_map->negotiated = 1;
 			//XX
-			goto video;
+			goto text;
 		} else {
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Audio params changed for %s from %s:%d to %s:%d\n",
 							  switch_channel_get_name(session->channel),
