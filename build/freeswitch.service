@@ -12,6 +12,10 @@ EnvironmentFile=-/etc/sysconfig/freeswitch
 WorkingDirectory=/run/freeswitch
 ExecStart=/usr/bin/freeswitch -nc -nf $FREESWITCH_PARAMS
 ExecReload=/usr/bin/kill -HUP $MAINPID
+Restart=on-failure
+SuccessExitStatus=255
+AmbientCapabilities=CAP_SYS_NICE
+LimitNOFILE=999999
 
 [Install]
 WantedBy=multi-user.target
