@@ -9577,21 +9577,21 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 						   TAG_END());
 			}
 
-            if (refer_to->r_url->url_params) {
-                switch_channel_set_variable(b_channel, "sip_h_X-FS-Refer-Params", refer_to->r_url->url_params);
-            }
+			if (refer_to->r_url->url_params) {
+			    switch_channel_set_variable(b_channel, "sip_h_X-FS-Refer-Params", refer_to->r_url->url_params);
+			}
 
-            if(sofia_test_pflag(profile, PFLAG_FIRE_TRANFER_EVENTS)) {
-	            if (switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, MY_EVENT_TRANSFEROR) == SWITCH_STATUS_SUCCESS) {
-	                switch_channel_event_set_data(channel_a, event);
-	                switch_event_fire(&event);
-	            }
+			if(sofia_test_pflag(profile, PFLAG_FIRE_TRANFER_EVENTS)) {
+				if (switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, MY_EVENT_TRANSFEROR) == SWITCH_STATUS_SUCCESS) {
+				    switch_channel_event_set_data(channel_a, event);
+				    switch_event_fire(&event);
+				}
 
-				if (switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, MY_EVENT_TRANSFEREE) == SWITCH_STATUS_SUCCESS) {
-	                switch_channel_event_set_data(b_channel, event);
-	                switch_event_fire(&event);
-	            }
-            }
+					    if (switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, MY_EVENT_TRANSFEREE) == SWITCH_STATUS_SUCCESS) {
+				    switch_channel_event_set_data(b_channel, event);
+				    switch_event_fire(&event);
+				}
+			}
 
 			switch_ivr_session_transfer(b_session, exten, NULL, NULL);
 			switch_core_session_rwunlock(b_session);
@@ -9599,64 +9599,102 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 			char* conference_name = switch_core_session_sprintf(session, "%s-%s", to_user, to_host);
 			char* channel_name = switch_core_session_sprintf(session, "sip:%s@%s", to_user, to_host);
 			const char* sip_refer_user = switch_str_nil(sip->sip_refer_to->r_url->url_user);
+			char *method = NULL;
 
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "conference_name: %s\n", conference_name);
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "channel_name: %s\n", channel_name);
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "exten: %s\n", exten);
 
-			if (create_session(&b_session, channel_name, to_user, sip_refer_user) == SWITCH_STATUS_SUCCESS) {
-				switch_channel_t *b_channel = switch_core_session_get_channel(b_session);
-				switch_event_t *var_event = NULL;
-				const char* contact_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) sip->sip_contact);
-				const char* from_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) from);
-				const char* to_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) to);
-				const char* sip_refer_host = switch_str_nil(sip->sip_refer_to->r_url->url_host);
-
-				if (!zstr(profile->name)) {
-					switch_channel_set_variable(channel, SOFIA_REFER_FROM_PROFILE_VARIABLE, profile->name);
-					switch_channel_set_variable(b_channel, SOFIA_REFER_FROM_PROFILE_VARIABLE, profile->name);
+			if (sip->sip_refer_to->r_url->url_params && switch_stristr("method=", sip->sip_refer_to->r_url->url_params)) {
+				char *params = su_strdup(nua_handle_home(nh), sip->sip_refer_to->r_url->url_params);
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Refer-To tag contains the following params: %s\n", switch_str_nil(params));
+				if (params) {
+					method = switch_find_parameter(params, "method", NULL);
+					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Refer-To tag contains the following method in its params: %s\n", switch_str_nil(params));
 				}
+			}
 
-                                if (!zstr(full_ref_to)) {
-                                        switch_channel_set_variable(channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
-                                        switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
-                                }
+			if (method && !strcasecmp(method, "BYE")) {
+			    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Refer-To contains 'BYE' method as a param\n");
+			    if (switch_event_create(&event, SWITCH_EVENT_CONFERENCE_DATA) == SWITCH_STATUS_SUCCESS) {
+				    const char* conf_name = switch_channel_get_variable(channel, "conference_name");
+				    const char* contact_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) sip->sip_contact);
+				    const char* from_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) from);
+				    const char* to_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) to);
+				    switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "conference name to send BYE request: %s\n", conf_name);
+				    event->flags |= EF_UNIQ_HEADERS;
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "conference-name", switch_str_nil(conf_name));
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "conference-domain", switch_str_nil(to_host));
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "sip-refer-to", switch_str_nil(full_ref_to));
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "sip-refer-to-method", switch_str_nil(method));
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "sip-refer-to-user", switch_str_nil(sip_refer_user));
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "profile", switch_str_nil(profile->name));
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "event-string", "refer");
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "contact-uri", contact_uri);
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "from-uri", from_uri);
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "to-uri", to_uri);
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "call-id", sip->sip_call_id->i_id);
+				    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", switch_channel_get_variable(channel, "sip_invite_record_route"));
 
-				if (!zstr(contact_uri)) {
-					switch_channel_set_variable(channel, SOFIA_REFER_CONTACT_VARIABLE, contact_uri);
-					switch_channel_set_variable(b_channel, SOFIA_REFER_CONTACT_VARIABLE, contact_uri);
+				    switch_event_fire(&event);
+			    }
+			}
+			else {
+				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Refer-To tag does not contain 'method' param\n");
+				if (create_session(&b_session, channel_name, to_user, sip_refer_user) == SWITCH_STATUS_SUCCESS) {
+					switch_channel_t *b_channel = switch_core_session_get_channel(b_session);
+					switch_event_t *var_event = NULL;
+					const char* contact_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) sip->sip_contact);
+					const char* from_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) from);
+					const char* to_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) to);
+					const char* sip_refer_host = switch_str_nil(sip->sip_refer_to->r_url->url_host);
+
+					if (!zstr(profile->name)) {
+						switch_channel_set_variable(channel, SOFIA_REFER_FROM_PROFILE_VARIABLE, profile->name);
+						switch_channel_set_variable(b_channel, SOFIA_REFER_FROM_PROFILE_VARIABLE, profile->name);
+					}
+
+					if (!zstr(full_ref_to)) {
+						switch_channel_set_variable(channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
+						switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
+					}
+
+					if (!zstr(contact_uri)) {
+						switch_channel_set_variable(channel, SOFIA_REFER_CONTACT_VARIABLE, contact_uri);
+						switch_channel_set_variable(b_channel, SOFIA_REFER_CONTACT_VARIABLE, contact_uri);
+					}
+
+					if (!zstr(from_uri)) {
+						switch_channel_set_variable(channel, SOFIA_REFER_FROM_VARIABLE, from_uri);
+						switch_channel_set_variable(b_channel, SOFIA_REFER_FROM_VARIABLE, from_uri);
+					}
+
+					if (!zstr(to_uri)) {
+						switch_channel_set_variable(channel, SOFIA_REFER_TO_URI_VARIABLE, to_uri);
+						switch_channel_set_variable(b_channel, SOFIA_REFER_TO_URI_VARIABLE, to_uri);
+					}
+
+					if (!zstr(sip_refer_user)) {
+						switch_channel_set_variable(b_channel, SOFIA_REFER_TO_USER_VARIABLE, sip_refer_user);
+					}
+
+					if (!zstr(sip_refer_host)) {
+						switch_channel_set_variable(b_channel, SOFIA_REFER_TO_HOST_VARIABLE, sip_refer_host);
+					}
+
+					if (!zstr(conference_name)) {
+						switch_channel_set_variable(b_channel, SOFIA_REFER_CONFERENCE_NAME_VARIABLE, conference_name);
+					}
+
+					switch_channel_set_variable(channel, "conference_track_status", "true");
+					switch_channel_set_variable(b_channel, "conference_track_status", "true");
+
+					switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
+					switch_channel_process_export(channel, b_channel, var_event, "conference_auto_refer_export_vars");
+
+					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Created session for outbound channel '%s' for a call to '%s'\n", channel_name, full_ref_to);
+					switch_channel_mark_answered(b_channel);
 				}
-
-				if (!zstr(from_uri)) {
-					switch_channel_set_variable(channel, SOFIA_REFER_FROM_VARIABLE, from_uri);
-					switch_channel_set_variable(b_channel, SOFIA_REFER_FROM_VARIABLE, from_uri);
-				}
-
-				if (!zstr(to_uri)) {
-					switch_channel_set_variable(channel, SOFIA_REFER_TO_URI_VARIABLE, to_uri);
-					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_URI_VARIABLE, to_uri);
-				}
-
-				if (!zstr(sip_refer_user)) {
-					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_USER_VARIABLE, sip_refer_user);
-				}
-
-				if (!zstr(sip_refer_host)) {
-					switch_channel_set_variable(b_channel, SOFIA_REFER_TO_HOST_VARIABLE, sip_refer_host);
-				}
-
-				if (!zstr(conference_name)) {
-					switch_channel_set_variable(b_channel, SOFIA_REFER_CONFERENCE_NAME_VARIABLE, conference_name);
-				}
-
-				switch_channel_set_variable(channel, "conference_track_status", "true");
-				switch_channel_set_variable(b_channel, "conference_track_status", "true");
-
-				switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
-				switch_channel_process_export(channel, b_channel, var_event, "conference_auto_refer_export_vars");
-
-				switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Created session for outbound channel '%s' for a call to '%s'\n", channel_name, full_ref_to);
-				switch_channel_mark_answered(b_channel);
 			}
 		}
 	}

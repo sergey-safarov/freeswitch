@@ -914,6 +914,28 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_data_event_h
 	}
 }
 
+static void send_notify(const char* profile_name,
+			const char* event_name,
+			const char* contact_uri,
+			const char* from_uri,
+			const char* to_uri,
+			const char* call_id,
+			const char* record_route,
+			const char* body) {
+    switch_event_t *notify_event = NULL;
+    switch_event_create(&notify_event, SWITCH_EVENT_NOTIFY);
+    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "profile", profile_name);
+    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "event-string", event_name);
+    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "content-type", "message/sipfrag");
+    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "contact-uri", contact_uri);
+    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "from-uri", from_uri);
+    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "to-uri", to_uri);
+    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "call-id", call_id);
+    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", record_route);
+    switch_event_add_body(notify_event, "%s", body);
+    switch_event_fire(&notify_event);
+}
+
 void conference_data_rfc4579_event_handler(switch_event_t *event)
 {
 	char *name = switch_event_get_header(event, "conference-name");
@@ -923,27 +945,50 @@ void conference_data_rfc4579_event_handler(switch_event_t *event)
 	char *to_uri = switch_event_get_header(event, "to-uri");
 	char *from_uri = switch_event_get_header(event, "from-uri");
 	char *contact_uri = switch_event_get_header(event, "contact-uri");
+	char *refer_to_method = switch_event_get_header(event, "sip-refer-to-method");
+	char *refer_to_user = switch_event_get_header(event, "sip-refer-to-user");
 	char *record_route = switch_event_get_header(event, "sip_invite_record_route");
 	char *_call_id = switch_event_get_header(event, "call-id");
 	conference_obj_t *conference = NULL;
 	char *body = switch_event_get_body(event);
 
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Conference rfc4579 event handler data: conference_name='%s', conference_domain='%s', method='%s'\n", switch_str_nil(name), switch_str_nil(domain), switch_str_nil(refer_to_method));
 	if (!zstr(name) && (conference = conference_find(name, domain))) {
 		if (conference_utils_test_flag(conference, CFLAG_RFC4579)) {
-		    switch_event_t *notify_event = NULL;
+		    if (refer_to_method && !strcasecmp(refer_to_method, "BYE")) {
+			    switch_event_t *event;
+			    conference_member_t *member;
+			    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, " Conference participant to be kicked: '%s'\n", refer_to_user);
+			    if ((member = conference_member_get_by_var(conference, "caller_id_name", refer_to_user)) ||
+				(member = conference_member_get_by_var(conference, "caller_id_number", refer_to_user))) {
+				    switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Member '%s' has been found in conference '%s'\n", refer_to_user, name);
+				    conference_send_notify(conference, "SIP/2.0 100 Trying\r\n", _call_id, SWITCH_FALSE, event);
+				    send_notify(profile_name, event_name, contact_uri, from_uri, to_uri, _call_id, record_route, "SIP/2.0 100 Trying\r\n");
+				    conference_utils_member_clear_flag(member, MFLAG_RUNNING);
+				    conference_utils_member_set_flag_locked(member, MFLAG_KICKED);
+				    switch_core_session_kill_channel(member->session, SWITCH_SIG_BREAK);
 
-		    switch_event_create(&notify_event, SWITCH_EVENT_NOTIFY);
-		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "profile", profile_name);
-		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "event-string", event_name);
-		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "content-type", "message/sipfrag");
-		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "contact-uri", contact_uri);
-		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "from-uri", from_uri);
-		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "to-uri", to_uri);
-		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "call-id", _call_id);
-		    switch_event_add_header_string(notify_event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", record_route);
-		    switch_event_add_body(notify_event, "%s", body);
+				    if (member->conference && test_eflag(member->conference, EFLAG_KICK_MEMBER)) {
+					    if (switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, CONF_EVENT_MAINT) == SWITCH_STATUS_SUCCESS) {
+						    conference_member_add_event_data(member, event);
+						    switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Action", "kick-member");
+						    switch_event_fire(&event);
+					    }
+				    }
+				    send_notify(profile_name, event_name, contact_uri, from_uri, to_uri, _call_id, record_route, "SIP/2.0 200 OK\r\n");
+			    }
+			    else {
+				switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_WARNING, "Conference with name '%s' does not have a participant with name/number='%s'\n", name, refer_to_user);
+				send_notify(profile_name, event_name, contact_uri, from_uri, to_uri, _call_id, record_route, "SIP/2.0 481 Failure\r\n");
+			    }
+		    }
+		    else if (!zstr(to_uri) && !zstr(from_uri) && !zstr(_call_id)) {
+			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Conference participant to send conference update event: '%s'\n", to_uri);
+			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Conference update event name: '%s'\n", event_name);
+			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Conference update event body: '%s'\n", body);
+			send_notify(profile_name, event_name, contact_uri, from_uri, to_uri, _call_id, record_route, body);
+		    }
 
-		    switch_event_fire(&notify_event);
 		}
 		switch_thread_rwlock_unlock(conference->rwlock);
 	}
