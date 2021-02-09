@@ -15603,8 +15603,8 @@ SWITCH_DECLARE(switch_status_t) switch_core_session_write_text_frame(switch_core
 	}
 
 
-	if (!is_msrp && switch_channel_test_cap(session->channel, CC_RTP_RTT)) {
-		if (t_engine->red_pt) {
+	if (!is_msrp && switch_channel_test_flag(session->channel, CF_RTT)) {
+		if (t_engine->red_pt && t_engine->tf) {
 			t_engine->tf->red_pos++;
 			if (t_engine->tf->red_pos == t_engine->tf->red_max) {
 				t_engine->tf->red_pos = 0;
