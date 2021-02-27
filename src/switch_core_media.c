@@ -4990,7 +4990,6 @@ SWITCH_DECLARE(uint8_t) switch_core_media_negotiate_sdp(switch_core_session_t *s
 	smh->rej_idx = 0;
 
 	switch_core_media_set_rmode(smh->session, SWITCH_MEDIA_TYPE_VIDEO, SWITCH_MEDIA_FLOW_INACTIVE, sdp_type);
-	switch_core_media_set_rmode(smh->session, SWITCH_MEDIA_TYPE_TEXT, SWITCH_MEDIA_FLOW_INACTIVE, sdp_type);
 	
 	for (m = sdp->sdp_media; m; m = m->m_next) {
 		sdp_connection_t *connection;
