@@ -1818,7 +1818,7 @@ static switch_status_t sofia_receive_message(switch_core_session_t *session, swi
 			} else {
 				const char *session_id_header = sofia_glue_session_id_header(session, tech_pvt->profile);
 				full_to = switch_str_nil(switch_channel_get_variable(channel, "sip_full_to"));
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_receive_message notify  111\n");
+
 				nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), NUTAG_SUBSTATE(nua_substate_active),
 						   TAG_IF((full_to), SIPTAG_TO_STR(full_to)),SIPTAG_SUBSCRIPTION_STATE_STR("active"),
 						   SIPTAG_EVENT_STR(event), 

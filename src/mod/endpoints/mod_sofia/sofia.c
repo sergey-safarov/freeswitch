@@ -816,7 +816,7 @@ void sofia_handle_sip_i_notify(switch_core_session_t *session, int status,
 					pl = switch_core_session_strdup(other_session, (char*)sip->sip_payload->pl_data);
 				}
 				unknown = sofia_glue_get_non_extra_unknown_headers(sip);
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_notify notify  111\n");
+
 				nua_notify(other_tech_pvt->nh, NUTAG_NEWSUB(1), NUTAG_SUBSTATE(nua_substate_active),
 							TAG_IF((full_to), SIPTAG_TO_STR(full_to)), SIPTAG_SUBSCRIPTION_STATE_STR("active"),
 							SIPTAG_EVENT_STR(sip->sip_event->o_type), TAG_IF(!zstr(unknown), SIPTAG_HEADER_STR(unknown)),
@@ -7467,7 +7467,7 @@ static void sofia_handle_sip_i_state(switch_core_session_t *session, int status,
 		if ((var = switch_channel_get_variable(channel, "sip_auto_answer")) && switch_true(var) &&
                     !((var = switch_channel_get_variable(channel, "sip_auto_answer_suppress_notify")) && switch_true(var))) {
 			full_to = switch_str_nil(switch_channel_get_variable(channel, "sip_full_to"));
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_state notify  111\n");
+
 			nua_notify(nh,
 					   NUTAG_NEWSUB(1),
 					   NUTAG_WITH_THIS_MSG(de->data->e_msg),
@@ -8939,7 +8939,8 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 			const char *br_a = NULL, *br_b = NULL;
 			char *buf;
 			char *p;
-
+			const char *conference_name = switch_channel_get_variable(tech_pvt->channel, "conference_name");
+			switch_bool_t is_conference = zstr(conference_name) ? SWITCH_FALSE : SWITCH_TRUE;
 			rep = switch_core_session_strdup(session, rep + 9);
 
 			if ((buf = switch_core_session_alloc(session, strlen(rep) + 1))) {
@@ -9025,7 +9026,7 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 
 					if (deny_refer_requests) {
 						switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "Denying Attended Transfer, variable [deny_refer_requests] was set to true\n");
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refer notify  111\n");
+
 						nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
 							NUTAG_SUBSTATE(nua_substate_terminated),SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"),
 							TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)),
@@ -9119,7 +9120,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 							}
 
 							switch_core_session_rwunlock(a_session);
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refer notify  222\n");
+
 							nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
 									   NUTAG_SUBSTATE(nua_substate_terminated),SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"), SIPTAG_PAYLOAD_STR("SIP/2.0 200 OK\r\n"), SIPTAG_EVENT_STR(etmp),
 									   TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)),
@@ -9143,7 +9144,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 
 							}
 						} else {
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refer notify  333\n");
+
 							nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
 									   NUTAG_SUBSTATE(nua_substate_terminated),SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"),
 									   SIPTAG_PAYLOAD_STR("SIP/2.0 403 Forbidden\r\n"), SIPTAG_EVENT_STR(etmp), 
@@ -9225,7 +9226,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 
 						switch_ivr_uuid_bridge(br_a, br_b);
 						switch_channel_set_variable(channel_b, SWITCH_ENDPOINT_DISPOSITION_VARIABLE, "ATTENDED_TRANSFER");
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refer notify  444\n");
+
 						nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
 								   NUTAG_SUBSTATE(nua_substate_terminated),SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"), SIPTAG_PAYLOAD_STR("SIP/2.0 200 OK\r\n"), SIPTAG_EVENT_STR(etmp),
 								   TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)),
@@ -9307,7 +9308,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 								} else {
 									switch_ivr_session_transfer(t_session, ext, NULL, NULL);
 								}
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refer notify  666\n");
+
 								nua_notify(tech_pvt->nh,
 										   NUTAG_NEWSUB(1),
 										   SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
@@ -9316,10 +9317,12 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 										   TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)),
 										   TAG_END());
 								switch_core_session_rwunlock(t_session);
-								switch_channel_hangup(hup_channel, SWITCH_CAUSE_ATTENDED_TRANSFER);
+								if (SWITCH_FALSE == is_conference) {
+									switch_channel_hangup(hup_channel, SWITCH_CAUSE_ATTENDED_TRANSFER);
+								}
 							} else {
 								switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Session to transfer to not found.\n");
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refer notify  777\n");
+
 								nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
 										   NUTAG_SUBSTATE(nua_substate_terminated),SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"),
 										   SIPTAG_PAYLOAD_STR("SIP/2.0 403 Forbidden\r\n"), SIPTAG_EVENT_STR(etmp), 
@@ -9514,7 +9517,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 				  error:
 					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Invalid Transfer! [%s]\n", br_a);
 					switch_channel_set_variable(channel_a, SWITCH_ENDPOINT_DISPOSITION_VARIABLE, "ATTENDED_TRANSFER_ERROR");
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refer notify  888\n");
+
 					nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
 							   NUTAG_SUBSTATE(nua_substate_terminated),SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"), SIPTAG_PAYLOAD_STR("SIP/2.0 403 Forbidden\r\n"), SIPTAG_EVENT_STR(etmp),
 							   TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)),
@@ -9568,7 +9571,6 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refe
 				switch_channel_set_variable(channel, "park_timeout", "600:blind_transfer");
 				switch_channel_set_state(channel, CS_PARK);
 			} else {
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "sofia_handle_sip_i_refer notify  000\n");
 				nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
 						   NUTAG_SUBSTATE(nua_substate_terminated),
 						   SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"),

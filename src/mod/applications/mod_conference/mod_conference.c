@@ -1568,7 +1568,7 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 		profile_name = switch_event_get_header(var_event, "sip_refer_from_profile");
 		_call_id = switch_event_get_header(var_event, "sip_call_id");
 		record_route = switch_event_get_header(var_event, "sip_invite_record_route");
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 0.1\n");
+
 		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "contact-uri", switch_str_nil(sip_refer_contact));
 		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "to-uri", switch_str_nil(sip_refer_from));
 		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "from-uri", switch_str_nil(sip_refer_to));
@@ -1578,23 +1578,23 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 0.1
 	}
 
 	*cause = SWITCH_CAUSE_NORMAL_CLEARING;
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 0.2\n");
+
 	if (conference == NULL) {
 		char *dialstr = switch_mprintf("{ignore_early_media=true}%s", bridgeto);
 		status = switch_ivr_originate(NULL, &peer_session, cause, dialstr, 60, NULL, cid_name, cid_num, NULL, var_event, SOF_NO_LIMITS, NULL, NULL);
 		switch_safe_free(dialstr);
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 0.3\n");
+
 		if (status != SWITCH_STATUS_SUCCESS) {
 			return status;
 		}
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 0.4\n");
+
 		peer_channel = switch_core_session_get_channel(peer_session);
 		rdlock = 1;
 		goto callup;
 	}
 
 	conference_name = conference->name;
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 0.5\n");
+
 	if (switch_thread_rwlock_tryrdlock(conference->rwlock) != SWITCH_STATUS_SUCCESS) {
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_CRIT, "Read Lock Fail\n");
 		return SWITCH_STATUS_FALSE;
@@ -1617,9 +1617,8 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 0.5
 	switch_mutex_lock(conference->mutex);
 	conference->originating++;
 	switch_mutex_unlock(conference->mutex);
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 1\n");
+
 	if (track) {
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 1.1.1\n");
 		conference_send_notify(conference, "SIP/2.0 100 Trying\r\n", _call_id, SWITCH_FALSE, var_event);
 	}
 
@@ -1641,9 +1640,8 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 1.1
 		if (caller_channel) {
 			switch_channel_hangup(caller_channel, *cause);
 		}
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 1.1\n");
+
 		if (track) {
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 1.2\n");
 			conference_send_notify(conference, "SIP/2.0 481 Failure\r\n", _call_id, SWITCH_TRUE, var_event);
 		}
 
@@ -1651,7 +1649,6 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 1.2
 	}
 
 	if (track) {
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall: 1.3\n");
 		conference_send_notify(conference, "SIP/2.0 200 OK\r\n", _call_id, SWITCH_FALSE, var_event);
 	}
 
@@ -1821,7 +1818,6 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 	} else {
 		switch_event_create_plain(&call->var_event, SWITCH_EVENT_GENERAL);
 	}
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_bg 1\n");
 
 	if (conference) {
 		pool = conference->pool;
@@ -1842,7 +1838,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_bg 1
 	if (cid_num) {
 		call->cid_num = strdup(cid_num);
 	}
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_bg 2\n");
+
 	if (call_uuid) {
 		call->uuid = strdup(call_uuid);
 		if (call->var_event) {
@@ -1853,7 +1849,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_bg 2
 	if (profile) {
 		call->profile = strdup(profile);
 	}
-switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_bg 3\n");
+
 	switch_threadattr_create(&thd_attr, pool);
 	switch_threadattr_detach_set(thd_attr, 1);
 	switch_threadattr_stacksize_set(thd_attr, SWITCH_THREAD_STACKSIZE);
