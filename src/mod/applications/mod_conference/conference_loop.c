@@ -1373,6 +1373,7 @@ void conference_loop_output(conference_member_t *member)
 
 		switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
 		switch_channel_process_export(channel, NULL, var_event, "conference_auto_outcall_export_vars");
+		switch_event_del_header(var_event, "conference_auto_outcall_export_vars");
 
 		if (ann && !switch_channel_test_app_flag_key("conference_silent", channel, CONF_SILENT_REQ)) {
 			member->conference->special_announce = switch_core_strdup(member->conference->pool, ann);
