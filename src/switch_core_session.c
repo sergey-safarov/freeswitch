@@ -2726,7 +2726,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_session_execute_application_get_flag
 				switch_goto_status(SWITCH_STATUS_FALSE, done);
 			}
 		} else {
-			uint32_t ready = 0, sanity = 2000;
+			uint32_t ready = 0, sanity = 8000;
 
 			do {
 				sanity--;
