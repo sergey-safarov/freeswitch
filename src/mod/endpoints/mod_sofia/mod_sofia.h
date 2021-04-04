@@ -106,6 +106,8 @@ typedef struct private_object private_object_t;
 
 #define MY_EVENT_BYE_RESPONSE "sofia::bye_response"
 
+#define MY_EVENT_SOFIA_STATISTICS "sofia::statistics"
+
 #define MULTICAST_EVENT "multicast::event"
 #define SOFIA_REPLACES_HEADER "_sofia_replaces_"
 #define SOFIA_CHAT_PROTO "sip"
@@ -1275,6 +1277,8 @@ void sofia_reg_close_handles(sofia_profile_t *profile);
 
 void write_csta_xml_chunk(switch_event_t *event, switch_stream_handle_t stream, const char *csta_event, char *fwd_type);
 void sofia_glue_clear_soa(switch_core_session_t *session, switch_bool_t partner);
+
+void sofia_notify_statistics_changed(sofia_profile_t* profile);
 
 /* For Emacs:
  * Local Variables:
