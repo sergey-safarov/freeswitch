@@ -215,6 +215,15 @@ static switch_status_t api_erlang_nodes_list(switch_stream_handle_t *stream) {
 	return SWITCH_STATUS_SUCCESS;
 }
 
+static void notify_kazoo_nodes_changed() {
+	switch_event_t* event = NULL;
+	const char* nodes_count = "277";
+
+	switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, "kazoo::nodes");
+	switch_event_add_header(event, SWITCH_STACK_BOTTOM, "kazoo-nodes-count", nodes_count);
+	switch_event_fire(&event);
+}
+
 static switch_status_t api_erlang_nodes_count(switch_stream_handle_t *stream) {
 	ei_node_t *ei_node;
 	int count = 0;
@@ -226,7 +235,7 @@ static switch_status_t api_erlang_nodes_count(switch_stream_handle_t *stream) {
 		ei_node = ei_node->next;
 	}
 	switch_thread_rwlock_unlock(kazoo_globals.ei_nodes_lock);
-
+	notify_kazoo_nodes_changed();
 	stream->write_function(stream, "%d\n", count);
 
 	return SWITCH_STATUS_SUCCESS;

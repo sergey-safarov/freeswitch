@@ -91,6 +91,8 @@ typedef enum {
 	REQUEST_MAX
 } request_atoms_t;
 
+#define KAZOO_NODES_COUNT "kazoo::nodes"
+
 static switch_status_t find_request(char *atom, int *request) {
 	int i;
 	for (i = 0; i < REQUEST_MAX; i++) {
@@ -101,6 +103,31 @@ static switch_status_t find_request(char *atom, int *request) {
 	}
 
 	return SWITCH_STATUS_FALSE;
+}
+
+static void notify_kazoo_nodes_changed(switch_bool_t need_lock) {
+	switch_event_t* event = NULL;
+	ei_node_t *ei_node = NULL;
+	int nodes_count = 0;
+	char* nodes_count_str = NULL;
+
+	switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, KAZOO_NODES_COUNT);
+
+	if (SWITCH_TRUE == need_lock) {
+		switch_thread_rwlock_wrlock(kazoo_globals.ei_nodes_lock);
+	}
+	ei_node = kazoo_globals.ei_nodes;
+	while(ei_node != NULL) {
+		++nodes_count;
+		ei_node = ei_node->next;
+	}
+	if (SWITCH_TRUE == need_lock) {
+		switch_thread_rwlock_unlock(kazoo_globals.ei_nodes_lock);
+	}
+
+	nodes_count_str = switch_core_sprintf(kazoo_globals.pool, "%d", nodes_count);
+	switch_event_add_header(event, SWITCH_STACK_BOTTOM, "kazoo-nodes-count", nodes_count_str);
+	switch_event_fire(&event);
 }
 
 static void destroy_node_handler(ei_node_t *ei_node) {
@@ -158,7 +185,7 @@ static switch_status_t add_to_ei_nodes(ei_node_t *this_ei_node) {
 		this_ei_node->next = kazoo_globals.ei_nodes;
 		kazoo_globals.ei_nodes = this_ei_node;
 	}
-
+	notify_kazoo_nodes_changed(SWITCH_FALSE);
 	switch_thread_rwlock_unlock(kazoo_globals.ei_nodes_lock);
 
 	return SWITCH_STATUS_SUCCESS;
@@ -189,7 +216,7 @@ static switch_status_t remove_from_ei_nodes(ei_node_t *this_ei_node) {
 			prev->next = ei_node->next;
 		}
 	}
-
+	notify_kazoo_nodes_changed(SWITCH_FALSE);
 	switch_thread_rwlock_unlock(kazoo_globals.ei_nodes_lock);
 
 	return SWITCH_STATUS_SUCCESS;

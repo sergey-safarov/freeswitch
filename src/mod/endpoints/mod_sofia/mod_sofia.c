@@ -423,7 +423,7 @@ switch_status_t sofia_on_hangup(switch_core_session_t *session)
 		} else {
 			tech_pvt->profile->ib_failed_calls++;
 		}
-
+		sofia_notify_statistics_changed(tech_pvt->profile);
 		if (gateway_ptr) {
 			if (switch_channel_direction(channel) == SWITCH_CALL_DIRECTION_OUTBOUND) {
 				gateway_ptr->ob_failed_calls++;
@@ -5202,6 +5202,7 @@ static switch_call_cause_t sofia_outgoing_channel(switch_core_session_t *session
 		} else {
 			profile->ob_failed_calls++;
 		}
+		sofia_notify_statistics_changed(profile);
 		sofia_glue_release_profile(profile);
 	}
 	return cause;
@@ -6543,6 +6544,25 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_sofia_shutdown)
 {
 	mod_sofia_shutdown_cleanup();
 	return SWITCH_STATUS_SUCCESS;
+}
+
+void sofia_notify_statistics_changed(sofia_profile_t* profile) {
+	switch_event_t* event = NULL;
+	ei_node_t *ei_node = NULL;
+	int nodes_count = 0;
+	char* calls_in = switch_core_sprintf(profile->pool, "%d", profile->ib_calls);
+	char* failed_calls_in = switch_core_sprintf(profile->pool, "%d", profile->ib_failed_calls);
+	char* calls_out = switch_core_sprintf(profile->pool, "%d", profile->ob_calls);
+	char* failed_calls_out = switch_core_sprintf(profile->pool, "%d", profile->ob_failed_calls);
+
+	switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, MY_EVENT_SOFIA_STATISTICS);
+
+	switch_event_add_header(event, SWITCH_STACK_BOTTOM, "profile_name", profile->name);
+	switch_event_add_header(event, SWITCH_STACK_BOTTOM, "CALLS-IN", calls_in);
+	switch_event_add_header(event, SWITCH_STACK_BOTTOM, "FAILED-CALLS-IN", failed_calls_in);
+	switch_event_add_header(event, SWITCH_STACK_BOTTOM, "CALLS-OUT", calls_out);
+	switch_event_add_header(event, SWITCH_STACK_BOTTOM, "FAILED-CALLS-OUT", failed_calls_out);
+	switch_event_fire(&event);
 }
 
 /* For Emacs:
