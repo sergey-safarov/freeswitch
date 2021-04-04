@@ -139,6 +139,7 @@ static switch_status_t create_session(switch_core_session_t **new_session, const
 	return status;
 }
 
+
 static void config_sofia_profile_urls(sofia_profile_t * profile);
 static void parse_gateways(sofia_profile_t *profile, switch_xml_t gateways_tag, const char *gwname);
 static void parse_domain_tag(sofia_profile_t *profile, switch_xml_t x_domain_tag, const char *dname, const char *parse, const char *alias);
@@ -10451,6 +10452,7 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 	}
 
 	profile->ib_calls++;
+	sofia_notify_statistics_changed(profile);
 
 	if (sip && sip->sip_payload && sip->sip_payload->pl_data) {
 		r_sdp = sip->sip_payload->pl_data;
@@ -11737,7 +11739,7 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 
   fail:
 	profile->ib_failed_calls++;
-
+	sofia_notify_statistics_changed(profile);
 	return;
 
 }
