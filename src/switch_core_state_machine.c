@@ -35,6 +35,8 @@
 #include <switch.h>
 #include "private/switch_core_pvt.h"
 
+#define MY_EVENT_CALL_RTP_STATISTICS "sofia::rtp_statistics"
+
 static void switch_core_standard_on_init(switch_core_session_t *session)
 {
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "%s Standard INIT\n", switch_channel_get_name(session->channel));
@@ -52,16 +54,234 @@ static void switch_core_standard_on_init(switch_core_session_t *session)
 	switch_channel_clear_flag(session->channel, CF_RECOVERING);
 }
 
+static void notify_rtp_statistics(const char* profile_name, switch_rtp_stats_t *audio_stats, switch_rtp_stats_t *video_stats, switch_rtp_stats_t *text_stats) {
+	switch_event_t* event = NULL;
+	int in_raw_bytes;
+	int in_media_bytes;
+	int in_packet_count;
+	int in_media_packet_count;
+	int in_skip_packet_count;
+	int in_jitter_packet_count;
+	int in_dtmf_packet_count;
+	int in_cng_packet_count;
+	int in_flush_packet_count;
+	int in_largest_jb_size;
+	int in_jitter_min_variance;
+	int in_jitter_max_variance;
+	int in_jitter_loss_rate;
+	int in_jitter_burst_rate;
+	int in_mean_interval;
+	int in_flaw_total;
+	int in_quality_percentage;
+	int in_mos;
+	int out_raw_bytes;
+	int out_media_bytes;
+	int out_packet_count;
+	int out_media_packet_count;
+	int out_skip_packet_count;
+	int out_dtmf_packet_count;
+	int cng_packet_count;
+	int rtcp_packet_count;
+	int rtcp_octet_count;
+
+	switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, MY_EVENT_CALL_RTP_STATISTICS);
+
+	switch_event_add_header(event, SWITCH_STACK_BOTTOM, "profile_name", profile_name);
+
+	if (audio_stats) {
+		in_raw_bytes = (int)audio_stats->inbound.raw_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_raw_bytes", "%d", in_raw_bytes);
+		in_media_bytes = (int)audio_stats->inbound.media_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_media_bytes", "%d", in_media_bytes);
+		in_packet_count = (int)audio_stats->inbound.packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_packet_count", "%d", in_packet_count);
+		in_media_packet_count = (int)audio_stats->inbound.media_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_media_packet_count", "%d", in_media_packet_count);
+		in_skip_packet_count = (int)audio_stats->inbound.skip_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_skip_packet_count", "%d", in_skip_packet_count);
+		in_jitter_packet_count = (int)audio_stats->inbound.jb_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_jitter_packet_count", "%d", in_jitter_packet_count);
+		in_dtmf_packet_count = (int)audio_stats->inbound.dtmf_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_dtmf_packet_count", "%d", in_dtmf_packet_count);
+		in_cng_packet_count = (int)audio_stats->inbound.cng_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_cng_packet_count", "%d", in_cng_packet_count);
+		in_flush_packet_count = (int)audio_stats->inbound.flush_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_flush_packet_count", "%d", in_flush_packet_count);
+		in_largest_jb_size = (int)audio_stats->inbound.largest_jb_size;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_largest_jb_size", "%d", in_largest_jb_size);
+		in_jitter_min_variance = (int)audio_stats->inbound.min_variance;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_jitter_min_variance", "%d", in_jitter_min_variance);
+		in_jitter_max_variance = (int)audio_stats->inbound.max_variance;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_jitter_max_variance", "%d", in_jitter_max_variance);
+		in_jitter_loss_rate = (int)audio_stats->inbound.lossrate;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_jitter_loss_rate", "%d", in_jitter_loss_rate);
+		in_jitter_burst_rate = audio_stats->inbound.burstrate;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_jitter_burst_rate", "%d", in_jitter_burst_rate);
+		in_mean_interval = audio_stats->inbound.mean_interval;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_mean_interval", "%d", in_mean_interval);
+		in_flaw_total = (int)audio_stats->inbound.flaws;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_flaw_total", "%d", in_flaw_total);
+		in_quality_percentage = audio_stats->inbound.R;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_quality_percentage", "%d", in_quality_percentage);
+		in_mos = audio_stats->inbound.mos;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_in_mos", "%d", in_mos);
+		out_raw_bytes = (int)audio_stats->outbound.raw_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_out_raw_bytes", "%d", out_raw_bytes);
+		out_media_bytes = (int)audio_stats->outbound.media_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_out_media_bytes", "%d", out_media_bytes);
+		out_packet_count = (int)audio_stats->outbound.packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_out_packet_count", "%d", out_packet_count);
+		out_media_packet_count = (int)audio_stats->outbound.media_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_out_media_packet_count", "%d", out_media_packet_count);
+		out_skip_packet_count = (int)audio_stats->outbound.skip_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_out_skip_packet_count", "%d", out_skip_packet_count);
+		out_dtmf_packet_count = (int)audio_stats->outbound.dtmf_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_out_dtmf_packet_count", "%d", out_dtmf_packet_count);
+		cng_packet_count = (int)audio_stats->outbound.cng_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_cng_packet_count", "%d", cng_packet_count);
+		rtcp_packet_count = (int)audio_stats->rtcp.packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_rtcp_packet_count", "%d", rtcp_packet_count);
+		rtcp_octet_count = (int)audio_stats->rtcp.octet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "audio_rtcp_octet_count", "%d", rtcp_octet_count);
+	}
+
+	if (video_stats) {
+		in_raw_bytes = (int)video_stats->inbound.raw_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_raw_bytes", "%d", in_raw_bytes);
+		in_media_bytes = (int)video_stats->inbound.media_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_media_bytes", "%d", in_media_bytes);
+		in_packet_count = (int)video_stats->inbound.packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_packet_count", "%d", in_packet_count);
+		in_media_packet_count = (int)video_stats->inbound.media_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_media_packet_count", "%d", in_media_packet_count);
+		in_skip_packet_count = (int)video_stats->inbound.skip_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_skip_packet_count", "%d", in_skip_packet_count);
+		in_jitter_packet_count = (int)video_stats->inbound.jb_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_jitter_packet_count", "%d", in_jitter_packet_count);
+		in_dtmf_packet_count = (int)video_stats->inbound.dtmf_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_dtmf_packet_count", "%d", in_dtmf_packet_count);
+		in_cng_packet_count = (int)video_stats->inbound.cng_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_cng_packet_count", "%d", in_cng_packet_count);
+		in_flush_packet_count = (int)video_stats->inbound.flush_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_flush_packet_count", "%d", in_flush_packet_count);
+		in_largest_jb_size = (int)video_stats->inbound.largest_jb_size;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_largest_jb_size", "%d", in_largest_jb_size);
+		in_jitter_min_variance = (int)video_stats->inbound.min_variance;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_jitter_min_variance", "%d", in_jitter_min_variance);
+		in_jitter_max_variance = (int)video_stats->inbound.max_variance;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_jitter_max_variance", "%d", in_jitter_max_variance);
+		in_jitter_loss_rate = (int)video_stats->inbound.lossrate;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_jitter_loss_rate", "%d", in_jitter_loss_rate);
+		in_jitter_burst_rate = video_stats->inbound.burstrate;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_jitter_burst_rate", "%d", in_jitter_burst_rate);
+		in_mean_interval = video_stats->inbound.mean_interval;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_mean_interval", "%d", in_mean_interval);
+		in_flaw_total = (int)video_stats->inbound.flaws;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_flaw_total", "%d", in_flaw_total);
+		in_quality_percentage = video_stats->inbound.R;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_quality_percentage", "%d", in_quality_percentage);
+		in_mos = video_stats->inbound.mos;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_in_mos", "%d", in_mos);
+		out_raw_bytes = (int)video_stats->outbound.raw_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_out_raw_bytes", "%d", out_raw_bytes);
+		out_media_bytes = (int)video_stats->outbound.media_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_out_media_bytes", "%d", out_media_bytes);
+		out_packet_count = (int)video_stats->outbound.packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_out_packet_count", "%d", out_packet_count);
+		out_media_packet_count = (int)video_stats->outbound.media_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_out_media_packet_count", "%d", out_media_packet_count);
+		out_skip_packet_count = (int)video_stats->outbound.skip_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_out_skip_packet_count", "%d", out_skip_packet_count);
+		out_dtmf_packet_count = (int)video_stats->outbound.dtmf_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_out_dtmf_packet_count", "%d", out_dtmf_packet_count);
+		cng_packet_count = (int)video_stats->outbound.cng_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_cng_packet_count", "%d", cng_packet_count);
+		rtcp_packet_count = (int)video_stats->rtcp.packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_rtcp_packet_count", "%d", rtcp_packet_count);
+		rtcp_octet_count = (int)video_stats->rtcp.octet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "video_rtcp_octet_count", "%d", rtcp_octet_count);
+	}
+
+	if (text_stats) {
+		in_raw_bytes = (int)text_stats->inbound.raw_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_raw_bytes", "%d", in_raw_bytes);
+		in_media_bytes = (int)text_stats->inbound.media_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_media_bytes", "%d", in_media_bytes);
+		in_packet_count = (int)text_stats->inbound.packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_packet_count", "%d", in_packet_count);
+		in_media_packet_count = (int)text_stats->inbound.media_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_media_packet_count", "%d", in_media_packet_count);
+		in_skip_packet_count = (int)text_stats->inbound.skip_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_skip_packet_count", "%d", in_skip_packet_count);
+		in_jitter_packet_count = (int)text_stats->inbound.jb_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_jitter_packet_count", "%d", in_jitter_packet_count);
+		in_dtmf_packet_count = (int)text_stats->inbound.dtmf_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_dtmf_packet_count", "%d", in_dtmf_packet_count);
+		in_cng_packet_count = (int)text_stats->inbound.cng_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_cng_packet_count", "%d", in_cng_packet_count);
+		in_flush_packet_count = (int)text_stats->inbound.flush_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_flush_packet_count", "%d", in_flush_packet_count);
+		in_largest_jb_size = (int)text_stats->inbound.largest_jb_size;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_largest_jb_size", "%d", in_largest_jb_size);
+		in_jitter_min_variance = (int)text_stats->inbound.min_variance;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_jitter_min_variance", "%d", in_jitter_min_variance);
+		in_jitter_max_variance = (int)text_stats->inbound.max_variance;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_jitter_max_variance", "%d", in_jitter_max_variance);
+		in_jitter_loss_rate = (int)text_stats->inbound.lossrate;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_jitter_loss_rate", "%d", in_jitter_loss_rate);
+		in_jitter_burst_rate = text_stats->inbound.burstrate;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_jitter_burst_rate", "%d", in_jitter_burst_rate);
+		in_mean_interval = text_stats->inbound.mean_interval;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_mean_interval", "%d", in_mean_interval);
+		in_flaw_total = (int)text_stats->inbound.flaws;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_flaw_total", "%d", in_flaw_total);
+		in_quality_percentage = text_stats->inbound.R;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_quality_percentage", "%d", in_quality_percentage);
+		in_mos = text_stats->inbound.mos;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_in_mos", "%d", in_mos);
+		out_raw_bytes = (int)text_stats->outbound.raw_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_out_raw_bytes", "%d", out_raw_bytes);
+		out_media_bytes = (int)text_stats->outbound.media_bytes;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_out_media_bytes", "%d", out_media_bytes);
+		out_packet_count = (int)text_stats->outbound.packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_out_packet_count", "%d", out_packet_count);
+		out_media_packet_count = (int)text_stats->outbound.media_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_out_media_packet_count", "%d", out_media_packet_count);
+		out_skip_packet_count = (int)text_stats->outbound.skip_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_out_skip_packet_count", "%d", out_skip_packet_count);
+		out_dtmf_packet_count = (int)text_stats->outbound.dtmf_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_out_dtmf_packet_count", "%d", out_dtmf_packet_count);
+		cng_packet_count = (int)text_stats->outbound.cng_packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_cng_packet_count", "%d", cng_packet_count);
+		rtcp_packet_count = (int)text_stats->rtcp.packet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_rtcp_packet_count", "%d", rtcp_packet_count);
+		rtcp_octet_count = (int)text_stats->rtcp.octet_count;
+		switch_event_add_header(event, SWITCH_STACK_BOTTOM, "text_rtcp_octet_count", "%d", rtcp_octet_count);
+	}
+
+	switch_event_fire(&event);
+}
+
 static void switch_core_standard_on_hangup(switch_core_session_t *session)
 {
 	switch_caller_extension_t *extension;
 	int rec;
+	switch_rtp_stats_t *audio_stats = NULL;
+	switch_rtp_stats_t *video_stats = NULL;
+	switch_rtp_stats_t *text_stats = NULL;
+	const char* profile_name = switch_channel_get_variable(session->channel, "sofia_profile_name");
 
 	switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "%s Standard HANGUP, cause: %s\n",
 					  switch_channel_get_name(session->channel), switch_channel_cause2str(switch_channel_get_cause(session->channel)));
 
+	switch_core_media_set_stats(session);
+	audio_stats = switch_core_media_get_stats(session, SWITCH_MEDIA_TYPE_AUDIO, switch_core_session_get_pool(session));
+	video_stats = switch_core_media_get_stats(session, SWITCH_MEDIA_TYPE_VIDEO, switch_core_session_get_pool(session));
+	text_stats = switch_core_media_get_stats(session, SWITCH_MEDIA_TYPE_TEXT, switch_core_session_get_pool(session));
+
+	notify_rtp_statistics(profile_name, audio_stats, video_stats, text_stats);
+
 	if (switch_true(switch_channel_get_variable(session->channel, "log_audio_stats_on_hangup"))) {
-		switch_rtp_stats_t *audio_stats = NULL;
 
 		switch_core_media_set_stats(session);
 		audio_stats = switch_core_media_get_stats(session, SWITCH_MEDIA_TYPE_AUDIO, switch_core_session_get_pool(session));

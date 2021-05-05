@@ -106,7 +106,7 @@ typedef struct private_object private_object_t;
 
 #define MY_EVENT_BYE_RESPONSE "sofia::bye_response"
 
-#define MY_EVENT_SOFIA_STATISTICS "sofia::statistics"
+#define MY_EVENT_SOFIA_STATISTICS "sofia::call_statistics"
 
 #define MULTICAST_EVENT "multicast::event"
 #define SOFIA_REPLACES_HEADER "_sofia_replaces_"

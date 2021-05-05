@@ -10,17 +10,17 @@
 
 #include <switch.h>
 #include <prom.h>
+#include <prom_metric.h>
+#include <prom_metric_sample.h>
 #include <promhttp.h>
 
-#define HTTP_BUFF_SIZE (SWITCH_RTP_MAX_BUF_LEN - 32)
 #define KAZOO_NODES_COUNT "kazoo::nodes"
-#define MY_EVENT_SOFIA_STATISTICS "sofia::statistics"
+#define MY_EVENT_SOFIA_STATISTICS "sofia::call_statistics"
+#define MY_EVENT_CALL_RTP_STATISTICS "sofia::rtp_statistics"
 
-static prom_gauge_t *foo_gauge;
-static prom_gauge_t *foo_gauge_number;
 static prom_gauge_t *kazoo_nodes_gauge;
-
-static prom_gauge_t *sofia_stat_gauge;
+static prom_gauge_t *sofia_call_stat_gauge;
+static prom_gauge_t *sofia_rtp_stat_gauge;
 
 static struct MHD_Daemon *prometheus_daemon;
 
@@ -47,7 +47,7 @@ static void kazoo_nodes_count_handler(switch_event_t *event) {
 	}
 }
 
-static void sofia_profile_statistics_handler(switch_event_t *event) {
+static void sofia_profile_call_statistics_handler(switch_event_t *event) {
 	char *profile = switch_event_get_header(event, "profile_name");
 	char *calls_in = switch_event_get_header(event, "CALLS-IN");
 	char *failed_calls_in = switch_event_get_header(event, "FAILED-CALLS-IN");
@@ -61,10 +61,410 @@ static void sofia_profile_statistics_handler(switch_event_t *event) {
 			  switch_str_nil(calls_out),
 			  switch_str_nil(failed_calls_out));
 
-	prom_gauge_set(sofia_stat_gauge, atoi(calls_in), (const char*[]) { profile, "CALLS-IN" });
-	prom_gauge_set(sofia_stat_gauge, atoi(failed_calls_in), (const char*[]) { profile, "FAILED-CALLS-IN" });
-	prom_gauge_set(sofia_stat_gauge, atoi(calls_out), (const char*[]) { profile, "CALLS-OUT" });
-	prom_gauge_set(sofia_stat_gauge, atoi(failed_calls_out), (const char*[]) { profile, "FAILED-CALLS-OUT" });
+	if (!zstr(profile)) {
+		if (!zstr(calls_in))
+			prom_gauge_set(sofia_call_stat_gauge, atoi(calls_in), (const char*[]) { profile, "CALLS-IN" });
+		if (!zstr(failed_calls_in))
+			prom_gauge_set(sofia_call_stat_gauge, atoi(failed_calls_in), (const char*[]) { profile, "FAILED-CALLS-IN" });
+		if (!zstr(calls_out))
+			prom_gauge_set(sofia_call_stat_gauge, atoi(calls_out), (const char*[]) { profile, "CALLS-OUT" });
+		if (!zstr(failed_calls_out))
+			prom_gauge_set(sofia_call_stat_gauge, atoi(failed_calls_out), (const char*[]) { profile, "FAILED-CALLS-OUT" });
+	}
+}
+
+static void update_rtp_gauge_value(const char* profile, const char* media, const char* param_name, const char* param_value) {
+	if (!zstr(profile) && !zstr(media) && !zstr(param_name) && !zstr(param_value)) {
+		prom_metric_sample_t *sample = prom_metric_sample_from_labels(sofia_rtp_stat_gauge, (const char*[]) {profile, media, param_name});
+		int param_value_count = atoi(param_value);
+		double value = 0;
+		if (sample && !prom_metric_sample_get(sample, &value) && param_value_count > 0) {
+			prom_gauge_set(sofia_rtp_stat_gauge, value + param_value_count, (const char*[]) { profile, media, param_name });
+		}
+	}
+}
+
+static void update_if_more_than_max(const char* profile, const char* media, const char* param_name, const char* param_value) {
+	if (!zstr(profile) && !zstr(media) && !zstr(param_name) && !zstr(param_value)) {
+		prom_metric_sample_t *sample = prom_metric_sample_from_labels(sofia_rtp_stat_gauge, (const char*[]) {profile, media, param_name});
+		int param_value_count = atoi(param_value);
+		double value = 0;
+		if (sample && !prom_metric_sample_get(sample, &value) && param_value_count > 0 && param_value_count > value) {
+			prom_gauge_set(sofia_rtp_stat_gauge, param_value_count, (const char*[]) { profile, media, param_name });
+		}
+	}
+}
+
+static void update_if_less_than_min(const char* profile, const char* media, const char* param_name, const char* param_value) {
+	if (!zstr(profile) && !zstr(media) && !zstr(param_name) && !zstr(param_value)) {
+		prom_metric_sample_t *sample = prom_metric_sample_from_labels(sofia_rtp_stat_gauge, (const char*[]) {profile, media, param_name});
+		int param_value_count = atoi(param_value);
+		double value = 0;
+		if (sample && !prom_metric_sample_get(sample, &value) && param_value_count > 0 && param_value_count < value) {
+			prom_gauge_set(sofia_rtp_stat_gauge, param_value_count, (const char*[]) { profile, media, param_name });
+		}
+	}
+}
+
+static void sofia_profile_rtp_statistics_handler(switch_event_t *event) {
+	char *profile = switch_event_get_header(event, "profile_name");
+
+	char* in_raw_bytes = switch_event_get_header(event, "audio_in_raw_bytes");
+	char* in_media_bytes = switch_event_get_header(event, "audio_in_media_bytes");
+	char* in_packet_count = switch_event_get_header(event, "audio_in_packet_count");
+	char* in_media_packet_count = switch_event_get_header(event, "audio_in_media_packet_count");
+	char* in_skip_packet_count = switch_event_get_header(event, "audio_in_skip_packet_count");
+	char* in_jitter_packet_count = switch_event_get_header(event, "audio_in_jitter_packet_count");
+	char* in_dtmf_packet_count = switch_event_get_header(event, "audio_in_dtmf_packet_count");
+	char* in_cng_packet_count = switch_event_get_header(event, "audio_in_cng_packet_count");
+	char* in_flush_packet_count = switch_event_get_header(event, "audio_in_flush_packet_count");
+	char* in_largest_jb_size = switch_event_get_header(event, "audio_in_largest_jb_size");
+	char* in_jitter_min_variance = switch_event_get_header(event, "audio_in_jitter_min_variance");
+	char* in_jitter_max_variance = switch_event_get_header(event, "audio_in_jitter_max_variance");
+	char* in_jitter_loss_rate = switch_event_get_header(event, "audio_in_jitter_loss_rate");
+	char* in_jitter_burst_rate = switch_event_get_header(event, "audio_in_jitter_burst_rate");
+	char* in_mean_interval = switch_event_get_header(event, "audio_in_mean_interval");
+	char* in_flaw_total = switch_event_get_header(event, "audio_in_flaw_total");
+	char* in_quality_percentage = switch_event_get_header(event, "audio_in_quality_percentage");
+	char* in_mos = switch_event_get_header(event, "audio_in_mos");
+	char* out_raw_bytes = switch_event_get_header(event, "audio_out_raw_bytes");
+	char* out_media_bytes = switch_event_get_header(event, "audio_out_media_bytes");
+	char* out_packet_count = switch_event_get_header(event, "audio_out_packet_count");
+	char* out_media_packet_count = switch_event_get_header(event, "audio_out_media_packet_count");
+	char* out_skip_packet_count = switch_event_get_header(event, "audio_out_skip_packet_count");
+	char* out_dtmf_packet_count = switch_event_get_header(event, "audio_out_dtmf_packet_count");
+	char* cng_packet_count = switch_event_get_header(event, "audio_cng_packet_count");
+	char* rtcp_packet_count = switch_event_get_header(event, "audio_rtcp_packet_count");
+	char* rtcp_octet_count =  switch_event_get_header(event, "audio_rtcp_octet_count");
+
+	if (zstr(profile)) {
+		return;
+	}
+
+	switch_log_printf(SWITCH_CHANNEL_LOG,
+			SWITCH_LOG_DEBUG,
+			"%s Call audio statistics:\n"
+			"in_raw_bytes: %s\n"
+			"in_media_bytes: %s\n"
+			"in_packet_count: %s\n"
+			"in_media_packet_count: %s\n"
+			"in_skip_packet_count: %s\n"
+			"in_jitter_packet_count: %s\n"
+			"in_dtmf_packet_count: %s\n"
+			"in_cng_packet_count: %s\n"
+			"in_flush_packet_count: %s\n"
+			"in_largest_jb_size: %s\n\n"
+			"in_jitter_min_variance: %s\n"
+			"in_jitter_max_variance: %s\n"
+			"in_jitter_loss_rate: %s\n"
+			"in_jitter_burst_rate: %s\n"
+			"in_mean_interval: %s\n\n"
+			"in_flaw_total: %s\n"
+			"in_quality_percentage: %s\n"
+			"in_mos: %s\n\n"
+			"out_raw_bytes: %s\n"
+			"out_media_bytes: %s\n"
+			"out_packet_count: %s\n"
+			"out_media_packet_count: %s\n"
+			"out_skip_packet_count: %s\n"
+			"out_dtmf_packet_count: %s\n"
+			"out_cng_packet_count: %s\n\n"
+			"rtcp_packet_count: %s\n"
+			"rtcp_octet_count: %s\n",
+		profile,
+		  switch_str_nil(in_raw_bytes),
+		  switch_str_nil(in_media_bytes),
+		  switch_str_nil(in_packet_count),
+		  switch_str_nil(in_media_packet_count),
+		  switch_str_nil(in_skip_packet_count),
+		  switch_str_nil(in_jitter_packet_count),
+		  switch_str_nil(in_dtmf_packet_count),
+		  switch_str_nil(in_cng_packet_count),
+		  switch_str_nil(in_flush_packet_count),
+		  switch_str_nil(in_largest_jb_size),
+		  switch_str_nil(in_jitter_min_variance),
+		  switch_str_nil(in_jitter_max_variance),
+		  switch_str_nil(in_jitter_loss_rate),
+		  switch_str_nil(in_jitter_burst_rate),
+		  switch_str_nil(in_mean_interval),
+		  switch_str_nil(in_flaw_total),
+		  switch_str_nil(in_quality_percentage),
+		  switch_str_nil(in_mos),
+		  switch_str_nil(out_raw_bytes),
+		  switch_str_nil(out_media_bytes),
+		  switch_str_nil(out_packet_count),
+		  switch_str_nil(out_media_packet_count),
+		  switch_str_nil(out_skip_packet_count),
+		  switch_str_nil(out_dtmf_packet_count),
+		  switch_str_nil(cng_packet_count),
+		  switch_str_nil(rtcp_packet_count),
+		  switch_str_nil(rtcp_octet_count)
+			);
+
+	update_rtp_gauge_value(profile, "audio", "audio_in_raw_bytes", in_raw_bytes);
+	update_rtp_gauge_value(profile, "audio", "audio_in_media_bytes", in_media_bytes);
+	update_rtp_gauge_value(profile, "audio", "audio_in_packet_count", in_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_in_media_packet_count", in_media_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_in_skip_packet_count", in_skip_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_in_jitter_packet_count", in_jitter_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_in_dtmf_packet_count", in_dtmf_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_in_cng_packet_count", in_cng_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_in_flush_packet_count", in_flush_packet_count);
+	update_if_more_than_max(profile, "audio", "audio_in_largest_jb_size", in_largest_jb_size);
+	update_if_less_than_min(profile, "audio", "audio_in_jitter_min_variance", in_jitter_min_variance);
+	update_if_more_than_max(profile, "audio", "audio_in_jitter_max_variance", in_jitter_max_variance);
+	//TODO: these params are unclear how to process for taking an average value
+	//update_rtp_gauge_value(profile, "audio", "audio_in_jitter_loss_rate", in_jitter_loss_rate);
+	//update_rtp_gauge_value(profile, "audio", "audio_in_jitter_burst_rate", in_jitter_burst_rate);
+	//update_rtp_gauge_value(profile, "audio", "audio_in_mean_interval", in_mean_interval);
+	//update_rtp_gauge_value(profile, "audio", "audio_in_quality_percentage", in_quality_percentage);
+	//update_rtp_gauge_value(profile, "audio", "audio_in_mos", in_mos);
+	update_rtp_gauge_value(profile, "audio", "audio_in_flaw_total", in_flaw_total);
+	update_rtp_gauge_value(profile, "audio", "audio_out_raw_bytes", out_raw_bytes);
+	update_rtp_gauge_value(profile, "audio", "audio_out_media_bytes", out_media_bytes);
+	update_rtp_gauge_value(profile, "audio", "audio_out_packet_count", out_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_out_media_packet_count", out_media_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_out_skip_packet_count", out_skip_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_out_dtmf_packet_count", out_dtmf_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_cng_packet_count", cng_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_rtcp_packet_count", rtcp_packet_count);
+	update_rtp_gauge_value(profile, "audio", "audio_rtcp_octet_count", rtcp_octet_count);
+
+
+	in_raw_bytes = switch_event_get_header(event, "video_in_raw_bytes");
+	in_media_bytes = switch_event_get_header(event, "video_in_media_bytes");
+	in_packet_count = switch_event_get_header(event, "video_in_packet_count");
+	in_media_packet_count = switch_event_get_header(event, "video_in_media_packet_count");
+	in_skip_packet_count = switch_event_get_header(event, "video_in_skip_packet_count");
+	in_jitter_packet_count = switch_event_get_header(event, "video_in_jitter_packet_count");
+	in_dtmf_packet_count = switch_event_get_header(event, "video_in_dtmf_packet_count");
+	in_cng_packet_count = switch_event_get_header(event, "video_in_cng_packet_count");
+	in_flush_packet_count = switch_event_get_header(event, "video_in_flush_packet_count");
+	in_largest_jb_size = switch_event_get_header(event, "video_in_largest_jb_size");
+	in_jitter_min_variance = switch_event_get_header(event, "video_in_jitter_min_variance");
+	in_jitter_max_variance = switch_event_get_header(event, "video_in_jitter_max_variance");
+	in_jitter_loss_rate = switch_event_get_header(event, "video_in_jitter_loss_rate");
+	in_jitter_burst_rate = switch_event_get_header(event, "video_in_jitter_burst_rate");
+	in_mean_interval = switch_event_get_header(event, "video_in_mean_interval");
+	in_flaw_total = switch_event_get_header(event, "video_in_flaw_total");
+	in_quality_percentage = switch_event_get_header(event, "video_in_quality_percentage");
+	in_mos = switch_event_get_header(event, "video_in_mos");
+	out_raw_bytes = switch_event_get_header(event, "video_out_raw_bytes");
+	out_media_bytes = switch_event_get_header(event, "video_out_media_bytes");
+	out_packet_count = switch_event_get_header(event, "video_out_packet_count");
+	out_media_packet_count = switch_event_get_header(event, "video_out_media_packet_count");
+	out_skip_packet_count = switch_event_get_header(event, "video_out_skip_packet_count");
+	out_dtmf_packet_count = switch_event_get_header(event, "video_out_dtmf_packet_count");
+	cng_packet_count = switch_event_get_header(event, "video_cng_packet_count");
+	rtcp_packet_count = switch_event_get_header(event, "video_rtcp_packet_count");
+	rtcp_octet_count =  switch_event_get_header(event, "video_rtcp_octet_count");
+
+	switch_log_printf(SWITCH_CHANNEL_LOG,
+			SWITCH_LOG_DEBUG,
+			"%s Call video statistics:\n"
+			"in_raw_bytes: %s\n"
+			"in_media_bytes: %s\n"
+			"in_packet_count: %s\n"
+			"in_media_packet_count: %s\n"
+			"in_skip_packet_count: %s\n"
+			"in_jitter_packet_count: %s\n"
+			"in_dtmf_packet_count: %s\n"
+			"in_cng_packet_count: %s\n"
+			"in_flush_packet_count: %s\n"
+			"in_largest_jb_size: %s\n\n"
+			"in_jitter_min_variance: %s\n"
+			"in_jitter_max_variance: %s\n"
+			"in_jitter_loss_rate: %s\n"
+			"in_jitter_burst_rate: %s\n"
+			"in_mean_interval: %s\n\n"
+			"in_flaw_total: %s\n"
+			"in_quality_percentage: %s\n"
+			"in_mos: %s\n\n"
+			"out_raw_bytes: %s\n"
+			"out_media_bytes: %s\n"
+			"out_packet_count: %s\n"
+			"out_media_packet_count: %s\n"
+			"out_skip_packet_count: %s\n"
+			"out_dtmf_packet_count: %s\n"
+			"out_cng_packet_count: %s\n\n"
+			"rtcp_packet_count: %s\n"
+			"rtcp_octet_count: %s\n",
+		profile,
+		switch_str_nil(in_raw_bytes),
+		switch_str_nil(in_media_bytes),
+		switch_str_nil(in_packet_count),
+		switch_str_nil(in_media_packet_count),
+		switch_str_nil(in_skip_packet_count),
+		switch_str_nil(in_jitter_packet_count),
+		switch_str_nil(in_dtmf_packet_count),
+		switch_str_nil(in_cng_packet_count),
+		switch_str_nil(in_flush_packet_count),
+		switch_str_nil(in_largest_jb_size),
+		switch_str_nil(in_jitter_min_variance),
+		switch_str_nil(in_jitter_max_variance),
+		switch_str_nil(in_jitter_loss_rate),
+		switch_str_nil(in_jitter_burst_rate),
+		switch_str_nil(in_mean_interval),
+		switch_str_nil(in_flaw_total),
+		switch_str_nil(in_quality_percentage),
+		switch_str_nil(in_mos),
+		switch_str_nil(out_raw_bytes),
+		switch_str_nil(out_media_bytes),
+		switch_str_nil(out_packet_count),
+		switch_str_nil(out_media_packet_count),
+		switch_str_nil(out_skip_packet_count),
+		switch_str_nil(out_dtmf_packet_count),
+		switch_str_nil(cng_packet_count),
+		switch_str_nil(rtcp_packet_count),
+		switch_str_nil(rtcp_octet_count)
+			);
+
+	update_rtp_gauge_value(profile, "video", "video_in_raw_bytes", in_raw_bytes);
+	update_rtp_gauge_value(profile, "video", "video_in_media_bytes", in_media_bytes);
+	update_rtp_gauge_value(profile, "video", "video_in_packet_count", in_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_in_media_packet_count", in_media_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_in_skip_packet_count", in_skip_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_in_jitter_packet_count", in_jitter_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_in_dtmf_packet_count", in_dtmf_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_in_cng_packet_count", in_cng_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_in_flush_packet_count", in_flush_packet_count);
+	update_if_more_than_max(profile, "video", "video_in_largest_jb_size", in_largest_jb_size);
+	update_if_less_than_min(profile, "video", "video_in_jitter_min_variance", in_jitter_min_variance);
+	update_if_more_than_max(profile, "video", "video_in_jitter_max_variance", in_jitter_max_variance);
+	//TODO: these params are unclear how to process for taking an average value
+	//update_rtp_gauge_value(profile, "video", "video_in_jitter_loss_rate", in_jitter_loss_rate);
+	//update_rtp_gauge_value(profile, "video", "video_in_jitter_burst_rate", in_jitter_burst_rate);
+	//update_rtp_gauge_value(profile, "video", "video_in_mean_interval", in_mean_interval);
+	//update_rtp_gauge_value(profile, "video", "video_in_quality_percentage", in_quality_percentage);
+	//update_rtp_gauge_value(profile, "video", "video_in_mos", in_mos);
+	update_rtp_gauge_value(profile, "video", "video_in_flaw_total", in_flaw_total);
+	update_rtp_gauge_value(profile, "video", "video_out_raw_bytes", out_raw_bytes);
+	update_rtp_gauge_value(profile, "video", "video_out_media_bytes", out_media_bytes);
+	update_rtp_gauge_value(profile, "video", "video_out_packet_count", out_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_out_media_packet_count", out_media_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_out_skip_packet_count", out_skip_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_out_dtmf_packet_count", out_dtmf_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_cng_packet_count", cng_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_rtcp_packet_count", rtcp_packet_count);
+	update_rtp_gauge_value(profile, "video", "video_rtcp_octet_count", rtcp_octet_count);
+
+	in_raw_bytes = switch_event_get_header(event, "text_in_raw_bytes");
+	in_media_bytes = switch_event_get_header(event, "text_in_media_bytes");
+	in_packet_count = switch_event_get_header(event, "text_in_packet_count");
+	in_media_packet_count = switch_event_get_header(event, "text_in_media_packet_count");
+	in_skip_packet_count = switch_event_get_header(event, "text_in_skip_packet_count");
+	in_jitter_packet_count = switch_event_get_header(event, "text_in_jitter_packet_count");
+	in_dtmf_packet_count = switch_event_get_header(event, "text_in_dtmf_packet_count");
+	in_cng_packet_count = switch_event_get_header(event, "text_in_cng_packet_count");
+	in_flush_packet_count = switch_event_get_header(event, "text_in_flush_packet_count");
+	in_largest_jb_size = switch_event_get_header(event, "text_in_largest_jb_size");
+	in_jitter_min_variance = switch_event_get_header(event, "text_in_jitter_min_variance");
+	in_jitter_max_variance = switch_event_get_header(event, "text_in_jitter_max_variance");
+	in_jitter_loss_rate = switch_event_get_header(event, "text_in_jitter_loss_rate");
+	in_jitter_burst_rate = switch_event_get_header(event, "text_in_jitter_burst_rate");
+	in_mean_interval = switch_event_get_header(event, "text_in_mean_interval");
+	in_flaw_total = switch_event_get_header(event, "text_in_flaw_total");
+	in_quality_percentage = switch_event_get_header(event, "text_in_quality_percentage");
+	in_mos = switch_event_get_header(event, "text_in_mos");
+	out_raw_bytes = switch_event_get_header(event, "text_out_raw_bytes");
+	out_media_bytes = switch_event_get_header(event, "text_out_media_bytes");
+	out_packet_count = switch_event_get_header(event, "text_out_packet_count");
+	out_media_packet_count = switch_event_get_header(event, "text_out_media_packet_count");
+	out_skip_packet_count = switch_event_get_header(event, "text_out_skip_packet_count");
+	out_dtmf_packet_count = switch_event_get_header(event, "text_out_dtmf_packet_count");
+	cng_packet_count = switch_event_get_header(event, "text_cng_packet_count");
+	rtcp_packet_count = switch_event_get_header(event, "text_rtcp_packet_count");
+	rtcp_octet_count =  switch_event_get_header(event, "text_rtcp_octet_count");
+
+	switch_log_printf(SWITCH_CHANNEL_LOG,
+			SWITCH_LOG_DEBUG,
+			"%s Call text statistics:\n"
+			"in_raw_bytes: %s\n"
+			"in_media_bytes: %s\n"
+			"in_packet_count: %s\n"
+			"in_media_packet_count: %s\n"
+			"in_skip_packet_count: %s\n"
+			"in_jitter_packet_count: %s\n"
+			"in_dtmf_packet_count: %s\n"
+			"in_cng_packet_count: %s\n"
+			"in_flush_packet_count: %s\n"
+			"in_largest_jb_size: %s\n\n"
+			"in_jitter_min_variance: %s\n"
+			"in_jitter_max_variance: %s\n"
+			"in_jitter_loss_rate: %s\n"
+			"in_jitter_burst_rate: %s\n"
+			"in_mean_interval: %s\n\n"
+			"in_flaw_total: %s\n"
+			"in_quality_percentage: %s\n"
+			"in_mos: %s\n\n"
+			"out_raw_bytes: %s\n"
+			"out_media_bytes: %s\n"
+			"out_packet_count: %s\n"
+			"out_media_packet_count: %s\n"
+			"out_skip_packet_count: %s\n"
+			"out_dtmf_packet_count: %s\n"
+			"out_cng_packet_count: %s\n\n"
+			"rtcp_packet_count: %s\n"
+			"rtcp_octet_count: %s\n",
+		profile,
+		switch_str_nil(in_raw_bytes),
+		switch_str_nil(in_media_bytes),
+		switch_str_nil(in_packet_count),
+		switch_str_nil(in_media_packet_count),
+		switch_str_nil(in_skip_packet_count),
+		switch_str_nil(in_jitter_packet_count),
+		switch_str_nil(in_dtmf_packet_count),
+		switch_str_nil(in_cng_packet_count),
+		switch_str_nil(in_flush_packet_count),
+		switch_str_nil(in_largest_jb_size),
+		switch_str_nil(in_jitter_min_variance),
+		switch_str_nil(in_jitter_max_variance),
+		switch_str_nil(in_jitter_loss_rate),
+		switch_str_nil(in_jitter_burst_rate),
+		switch_str_nil(in_mean_interval),
+		switch_str_nil(in_flaw_total),
+		switch_str_nil(in_quality_percentage),
+		switch_str_nil(in_mos),
+		switch_str_nil(out_raw_bytes),
+		switch_str_nil(out_media_bytes),
+		switch_str_nil(out_packet_count),
+		switch_str_nil(out_media_packet_count),
+		switch_str_nil(out_skip_packet_count),
+		switch_str_nil(out_dtmf_packet_count),
+		switch_str_nil(cng_packet_count),
+		switch_str_nil(rtcp_packet_count),
+		switch_str_nil(rtcp_octet_count)
+			);
+
+	update_rtp_gauge_value(profile, "text", "text_in_raw_bytes", in_raw_bytes);
+	update_rtp_gauge_value(profile, "text", "text_in_media_bytes", in_media_bytes);
+	update_rtp_gauge_value(profile, "text", "text_in_packet_count", in_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_in_media_packet_count", in_media_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_in_skip_packet_count", in_skip_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_in_jitter_packet_count", in_jitter_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_in_dtmf_packet_count", in_dtmf_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_in_cng_packet_count", in_cng_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_in_flush_packet_count", in_flush_packet_count);
+	update_if_more_than_max(profile, "text", "text_in_largest_jb_size", in_largest_jb_size);
+	update_if_less_than_min(profile, "text", "text_in_jitter_min_variance", in_jitter_min_variance);
+	update_if_more_than_max(profile, "text", "text_in_jitter_max_variance", in_jitter_max_variance);
+	//TODO: these params are unclear how to process for taking an average value
+	//update_rtp_gauge_value(profile, "text", "text_in_jitter_loss_rate", in_jitter_loss_rate);
+	//update_rtp_gauge_value(profile, "text", "text_in_jitter_burst_rate", in_jitter_burst_rate);
+	//update_rtp_gauge_value(profile, "text", "text_in_mean_interval", in_mean_interval);
+	//update_rtp_gauge_value(profile, "text", "text_in_quality_percentage", in_quality_percentage);
+	//update_rtp_gauge_value(profile, "text", "text_in_mos", in_mos);
+	update_rtp_gauge_value(profile, "text", "text_in_flaw_total", in_flaw_total);
+	update_rtp_gauge_value(profile, "text", "text_out_raw_bytes", out_raw_bytes);
+	update_rtp_gauge_value(profile, "text", "text_out_media_bytes", out_media_bytes);
+	update_rtp_gauge_value(profile, "text", "text_out_packet_count", out_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_out_media_packet_count", out_media_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_out_skip_packet_count", out_skip_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_out_dtmf_packet_count", out_dtmf_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_cng_packet_count", cng_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_rtcp_packet_count", rtcp_packet_count);
+	update_rtp_gauge_value(profile, "text", "text_rtcp_octet_count", rtcp_octet_count);
+
 }
 
 static void set_global_ip(const char *string) {
@@ -128,37 +528,12 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "prometheus_init 2\n");
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "prometheus_init 3\n");
 
 	if (globals.port) {
-		const char* value_array[] = { "one", "two" };
 		globals.running = 1;
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "prometheus_init 4\n");
 		prom_collector_registry_default_init();
-		foo_gauge_number = prom_collector_registry_must_register_metric(prom_gauge_new("foo_gauge_number", "gauge for foo", 0, NULL));
-		foo_gauge = prom_collector_registry_must_register_metric(prom_gauge_new("foo", "foo is a gauge with labels", 2, value_array));
-		sofia_stat_gauge = prom_collector_registry_must_register_metric(prom_gauge_new("sofia_call_statistics", "sofia calls statistics", 2, (const char*[]) { "profile", "metric"}));
+		sofia_call_stat_gauge = prom_collector_registry_must_register_metric(prom_gauge_new("sofia_call_statistics", "sofia calls statistics", 2, (const char*[]) { "profile", "metric"}));
+		sofia_rtp_stat_gauge = prom_collector_registry_must_register_metric(prom_gauge_new("sofia_rtp_statistics", "sofia rtp statistics", 3, (const char*[]) { "profile", "media", "param"}));
 		kazoo_nodes_gauge = prom_collector_registry_must_register_metric(prom_gauge_new("kazoo_nodes_count", "Kazoo Nodes Count", 0, NULL));
-		prom_gauge_inc(foo_gauge, (const char*[]) { "bar1", "bang1" });
-		prom_gauge_inc(foo_gauge, (const char*[]) { "bar2", "bang2" });
-		prom_gauge_inc(foo_gauge, (const char*[]) { "bar3", "bang3" });
-		prom_gauge_inc(foo_gauge, (const char*[]) { "bar4", "bang4" });
-		prom_gauge_inc(foo_gauge, (const char*[]) { "bar5", "bang5" });
-		for (int i = 0; i < 12; i++) {
-		     prom_gauge_inc(foo_gauge_number, NULL);
-		}
-
-		prom_gauge_dec(foo_gauge, (const char*[]) { "bar4", "bang4" });
-		prom_gauge_dec(foo_gauge_number, NULL);
-
-		prom_gauge_add(foo_gauge, 22, (const char*[]) { "bar22", "bang22" });
-		prom_gauge_add(foo_gauge, 23, (const char*[]) { "bar23", "bang23" });
-		prom_gauge_add(foo_gauge_number, 22, NULL);
-		prom_gauge_add(foo_gauge_number, 23, NULL);
-
-
-		prom_gauge_sub(foo_gauge, 22, (const char*[]) { "bar22", "bang22" });
-		prom_gauge_sub(foo_gauge_number, 22, NULL);
-
-		prom_gauge_set(foo_gauge, 24, (const char*[]) { "bar4", "bang4" });
-		prom_gauge_set(foo_gauge_number, 24, NULL);
 
 		promhttp_set_active_collector_registry(NULL);
 		prometheus_daemon = promhttp_start_daemon(MHD_USE_SELECT_INTERNALLY, globals.port, NULL, NULL);
@@ -175,8 +550,6 @@ SWITCH_STANDARD_APP(prometheus_app)
 	switch_status_t status = prometheus_init();
 	const char* init_status = SWITCH_STATUS_SUCCESS == status ? "Success" : "Failure";
 	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "Prometheus initialization status '%s'\n", init_status);
-
-	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Prometheus initialization status '%s'\n", init_status);
 }
 
 /* Macro expands to: switch_status_t mod_prometheus_load(switch_loadable_module_interface_t **module_interface, switch_memory_pool_t *pool) */
@@ -194,8 +567,12 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "mod_prometheus_load 2\n
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't subscribe to kazoo statistics events!\n");
 	}
 
-	if (switch_event_bind(modname, SWITCH_EVENT_CUSTOM, MY_EVENT_SOFIA_STATISTICS, sofia_profile_statistics_handler, NULL) != SWITCH_STATUS_SUCCESS) {
-		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't subscribe to sofia statistics events!\n");
+	if (switch_event_bind(modname, SWITCH_EVENT_CUSTOM, MY_EVENT_SOFIA_STATISTICS, sofia_profile_call_statistics_handler, NULL) != SWITCH_STATUS_SUCCESS) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't subscribe to sofia calls statistics events!\n");
+	}
+
+	if (switch_event_bind(modname, SWITCH_EVENT_CUSTOM, MY_EVENT_CALL_RTP_STATISTICS, sofia_profile_rtp_statistics_handler, NULL) != SWITCH_STATUS_SUCCESS) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "Couldn't subscribe to rtp statistics events!\n");
 	}
 
 	prometheus_app(NULL, NULL);
@@ -209,11 +586,13 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "mod_prometheus_load 3\n
   Macro expands to: switch_status_t mod_prometheus_shutdown() */
 SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_prometheus_shutdown)
 {
-	switch_status_t st = SWITCH_STATUS_SUCCESS;
-
 	globals.running = 0;
 
 	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_NOTICE, "destroying thread\n");
+
+	switch_event_unbind_callback(sofia_profile_rtp_statistics_handler);
+	switch_event_unbind_callback(sofia_profile_call_statistics_handler);
+	switch_event_unbind_callback(kazoo_nodes_count_handler);
 
 	//TODO: remove
 	switch_safe_free(globals.ip);
@@ -224,7 +603,7 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_prometheus_shutdown)
 	// Stop the HTTP server
 	MHD_stop_daemon(prometheus_daemon);
 
-	return st;
+	return SWITCH_STATUS_SUCCESS;
 }
 
 
