@@ -6548,8 +6548,6 @@ SWITCH_MODULE_SHUTDOWN_FUNCTION(mod_sofia_shutdown)
 
 void sofia_notify_statistics_changed(sofia_profile_t* profile) {
 	switch_event_t* event = NULL;
-	ei_node_t *ei_node = NULL;
-	int nodes_count = 0;
 	char* calls_in = switch_core_sprintf(profile->pool, "%d", profile->ib_calls);
 	char* failed_calls_in = switch_core_sprintf(profile->pool, "%d", profile->ib_failed_calls);
 	char* calls_out = switch_core_sprintf(profile->pool, "%d", profile->ob_calls);
