@@ -20,6 +20,8 @@ static prom_gauge_t *foo_gauge;
 static prom_gauge_t *foo_gauge_number;
 static prom_gauge_t *kazoo_nodes_gauge;
 
+static prom_gauge_t *sofia_stat_gauge;
+
 static struct MHD_Daemon *prometheus_daemon;
 
 /* Prototypes */
@@ -58,6 +60,11 @@ static void sofia_profile_statistics_handler(switch_event_t *event) {
 			  switch_str_nil(failed_calls_in),
 			  switch_str_nil(calls_out),
 			  switch_str_nil(failed_calls_out));
+
+	prom_gauge_set(sofia_stat_gauge, atoi(calls_in), (const char*[]) { profile, "CALLS-IN" });
+	prom_gauge_set(sofia_stat_gauge, atoi(failed_calls_in), (const char*[]) { profile, "FAILED-CALLS-IN" });
+	prom_gauge_set(sofia_stat_gauge, atoi(calls_out), (const char*[]) { profile, "CALLS-OUT" });
+	prom_gauge_set(sofia_stat_gauge, atoi(failed_calls_out), (const char*[]) { profile, "FAILED-CALLS-OUT" });
 }
 
 static void set_global_ip(const char *string) {
@@ -127,6 +134,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "prometheus_init 4\n");
 		prom_collector_registry_default_init();
 		foo_gauge_number = prom_collector_registry_must_register_metric(prom_gauge_new("foo_gauge_number", "gauge for foo", 0, NULL));
 		foo_gauge = prom_collector_registry_must_register_metric(prom_gauge_new("foo", "foo is a gauge with labels", 2, value_array));
+		sofia_stat_gauge = prom_collector_registry_must_register_metric(prom_gauge_new("sofia_call_statistics", "sofia calls statistics", 2, (const char*[]) { "profile", "metric"}));
 		kazoo_nodes_gauge = prom_collector_registry_must_register_metric(prom_gauge_new("kazoo_nodes_count", "Kazoo Nodes Count", 0, NULL));
 		prom_gauge_inc(foo_gauge, (const char*[]) { "bar1", "bang1" });
 		prom_gauge_inc(foo_gauge, (const char*[]) { "bar2", "bang2" });
