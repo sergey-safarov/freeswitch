@@ -11581,7 +11581,7 @@ SWITCH_DECLARE(void) switch_core_media_gen_local_sdp(switch_core_session_t *sess
 
 
 					if (t_engine->t140_pt && t_engine->red_pt) {
-						switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf), "a=fmtp:%d %d/%d/%d\r\n", t_engine->red_pt, t_engine->t140_pt, t_engine->t140_pt, t_engine->t140_pt);
+						switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf), "a=fmtp:%d %d/%d/%d/%d/%d\r\n", t_engine->red_pt, t_engine->t140_pt, t_engine->t140_pt, t_engine->t140_pt, t_engine->t140_pt, t_engine->t140_pt);
 					}
 
 
