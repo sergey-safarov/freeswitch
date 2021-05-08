@@ -11451,7 +11451,6 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 	if (tech_pvt->caller_profile) {
 
 		int first_history_info = 1;
-		char* geolocation_array = NULL;
 
 		if (rpid) {
 			if (rpid->rpid_privacy) {
@@ -11531,15 +11530,6 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 				tech_pvt->x_freeswitch_support_remote = switch_core_session_strdup(session, un->un_value);
 			} else if (!strcasecmp(un->un_name, "Geolocation")) {
 				switch_channel_set_variable(channel, "sip_geolocation", un->un_value);
-
-				if (strstr(un->un_value,"cid:")) {
-					if (geolocation_array == NULL) {
-						geolocation_array = switch_core_session_sprintf(session, "%s", un->un_value);
-					}
-					else {
-						geolocation_array = switch_core_session_sprintf(session, "%s,%s", geolocation_array, un->un_value);
-					}
-				}
 			} else if (!strcasecmp(un->un_name, "Geolocation-Error")) {
 				switch_channel_set_variable(channel, "sip_geolocation_error", un->un_value);
 			} else if (!strcasecmp(un->un_name, "userLocation")) {
@@ -11567,9 +11557,6 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 			}
 		}
 
-		if (geolocation_array != NULL) {
-			switch_channel_set_variable(channel, "sip_extra_geolocation_h_Geolocation", geolocation_array);
-		}
 	}
 
 	tech_pvt->sofia_private = sofia_private;
