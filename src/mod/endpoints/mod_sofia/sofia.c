@@ -11529,7 +11529,7 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 			} else if (!strcasecmp(un->un_name, "X-FS-Support")) {
 				tech_pvt->x_freeswitch_support_remote = switch_core_session_strdup(session, un->un_value);
 			} else if (!strcasecmp(un->un_name, "Geolocation")) {
-				switch_channel_set_variable(channel, "sip_geolocation", un->un_value);
+				switch_channel_add_variable_var_check(channel, "sip_geolocation", un->un_value, SWITCH_FALSE, SWITCH_STACK_PUSH);
 			} else if (!strcasecmp(un->un_name, "Geolocation-Error")) {
 				switch_channel_set_variable(channel, "sip_geolocation_error", un->un_value);
 			} else if (!strcasecmp(un->un_name, "userLocation")) {
