@@ -11175,9 +11175,9 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 		msg_multipart_t *_mp = sip->sip_multipart;
 		switch_bool_t sdp_twice = SWITCH_FALSE;
 
-		if (_mp && _mp->mp_content_type && _mp->mp_content_type->c_type && !strcmp(_mp->mp_content_type->c_type, "application/sdp")) {
+		if (_mp && _mp->mp_content_type && _mp->mp_content_type->c_type && !strcasecmp(_mp->mp_content_type->c_type, "application/sdp")) {
 			for (; _mp; _mp = _mp->mp_next) {
-				if (_mp && _mp->mp_content_type && _mp->mp_content_type->c_type && !strcmp(_mp->mp_content_type->c_type, "application/sdp")) {
+				if (_mp && _mp->mp_content_type && _mp->mp_content_type->c_type && !strcasecmp(_mp->mp_content_type->c_type, "application/sdp")) {
 					sdp_twice = SWITCH_TRUE;
 					break;
 				}
