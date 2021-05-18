@@ -5968,6 +5968,17 @@ SWITCH_DECLARE(uint8_t) switch_core_media_negotiate_sdp(switch_core_session_t *s
 				pmap->remote_sdp_port = (switch_port_t) m->m_port;
 				if (map->rm_fmtp) {
 					pmap->rm_fmtp = switch_core_session_strdup(session, (char *) map->rm_fmtp);
+					if (!zstr(pmap->rm_fmtp)) {
+						char* ftmp_value = pmap->rm_fmtp;
+						int redundancy_level = 1;
+						for (int index=0; ftmp_value[index]; ++index) {
+							if (ftmp_value[index] == '/') {
+							    ++redundancy_level;
+							}
+						}
+						switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "RTT redundancy_level=[%d]\n", redundancy_level);
+						switch_channel_set_variable_printf(session->channel, "rtt_redundancy_level", "%d", redundancy_level);
+					}
 				}
 
 
