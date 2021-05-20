@@ -387,6 +387,29 @@ static void _switch_core_media_pass_zrtp_hash2(switch_core_session_t *aleg_sessi
 	}
 }
 
+static int get_rtt_redundancy_level(switch_core_session_t *session)
+{
+	switch_media_handle_t *smh;
+	int redundancy_level = 5;
+	const char* redundancy_level_str = NULL;
+
+	switch_assert(session);
+
+	redundancy_level_str = switch_channel_get_variable(session->channel, "rtt_redundancy_level");
+	if (!zstr(redundancy_level_str)) {
+		int red_level = atoi(redundancy_level_str);
+		if (red_level > 1 && red_level <= 8) {
+			redundancy_level = red_level;
+		}
+	} else {
+		if ((smh = session->media_handle)) {
+			redundancy_level = smh->mparams->rtt_redundancy_level;
+		}
+	}
+
+	return redundancy_level;
+}
+
 SWITCH_DECLARE(uint32_t) switch_core_media_get_video_fps(switch_core_session_t *session)
 {
 	switch_media_handle_t *smh;
@@ -2699,9 +2722,10 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_read_lock_unlock(switch_core_s
 
 
 //?
-SWITCH_DECLARE(switch_status_t) switch_rtp_text_factory_create(switch_rtp_text_factory_t **tfP, switch_memory_pool_t *pool)
+SWITCH_DECLARE(switch_status_t) switch_rtp_text_factory_create(switch_rtp_text_factory_t **tfP, switch_core_session_t *session)
 {
 	int x;
+	switch_memory_pool_t *pool = switch_core_session_get_pool(session);
 
 	*tfP = switch_core_alloc(pool, sizeof(**tfP));
 
@@ -2712,7 +2736,7 @@ SWITCH_DECLARE(switch_status_t) switch_rtp_text_factory_create(switch_rtp_text_f
 	(*tfP)->text_write_frame.data = (switch_byte_t *)(*tfP)->text_write_frame.packet + 12;
 	(*tfP)->text_write_frame.buflen = SWITCH_RTP_MAX_BUF_LEN - 12;
 
-	(*tfP)->red_max = 5;
+	(*tfP)->red_max = get_rtt_redundancy_level(session);
 	(*tfP)->red_bufsize = SWITCH_RTP_MAX_BUF_LEN;
 
 	switch_core_timer_init(&(*tfP)->timer, "soft", TEXT_TIMER_MS, TEXT_TIMER_SAMPLES, pool);
@@ -9199,7 +9223,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_activate_rtp(switch_core_sessi
 
 
 				if (!t_engine->tf) {
-					switch_rtp_text_factory_create(&t_engine->tf, switch_core_session_get_pool(session));
+					switch_rtp_text_factory_create(&t_engine->tf, session);
 				}
 
 				switch_rtp_set_video_buffer_size(t_engine->rtp_session, 2, 2048);
@@ -11592,7 +11616,14 @@ SWITCH_DECLARE(void) switch_core_media_gen_local_sdp(switch_core_session_t *sess
 
 
 					if (t_engine->t140_pt && t_engine->red_pt) {
-						switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf), "a=fmtp:%d %d/%d/%d/%d/%d\r\n", t_engine->red_pt, t_engine->t140_pt, t_engine->t140_pt, t_engine->t140_pt, t_engine->t140_pt, t_engine->t140_pt);
+						char* red_str = "";
+						int redundancy_level = get_rtt_redundancy_level(session);
+						switch_log_printf(SWITCH_CHANNEL_CHANNEL_LOG(session->channel), SWITCH_LOG_DEBUG, "RTT redundancy_level=[%d]\n", redundancy_level);
+						for (int index=0; index < redundancy_level-1; ++index) {
+							red_str = switch_core_session_sprintf(session, "%s%d/", red_str, t_engine->t140_pt);
+						}
+						red_str = switch_core_session_sprintf(session, "%s%d", red_str, t_engine->t140_pt);
+						switch_snprintf(buf + strlen(buf), SDPBUFLEN - strlen(buf), "a=fmtp:%d %s\r\n", t_engine->red_pt, red_str);
 					}
 
 

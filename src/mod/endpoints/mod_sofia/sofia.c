@@ -4702,6 +4702,7 @@ switch_status_t config_sofia(sofia_config_t reload, char *profile_name)
 						profile->domain_name = switch_core_strdup(profile->pool, xprofiledomain);
 					}
 				}
+				profile->rtt_redundancy_level = 5;
 
 				for (param = switch_xml_child(settings, "param"); param; param = param->next) {
 					char *var = (char *) switch_xml_attr_soft(param, "name");
@@ -6047,6 +6048,11 @@ switch_status_t config_sofia(sofia_config_t reload, char *profile_name)
 						profile->proxy_notify_events = switch_core_strdup(profile->pool, val);
 					} else if (!strcasecmp(var, "proxy-info-content-types")) {
 						profile->proxy_info_content_types = switch_core_strdup(profile->pool, val);
+					} else if (!strcasecmp(var, "rtt-redundancy-level") && !zstr(val)) {
+						int red_level = atoi(val);
+						if (red_level > 1 && red_level <= 8) {
+							profile->rtt_redundancy_level = red_level;
+						}
 					}
 				}
 

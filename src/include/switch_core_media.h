@@ -174,6 +174,8 @@ typedef struct switch_core_media_params_s {
 
 	switch_thread_t *video_write_thread;
 
+        uint8_t rtt_redundancy_level;
+
 } switch_core_media_params_t;
 
 static inline const char *switch_media_type2str(switch_media_type_t type)
@@ -382,7 +384,7 @@ SWITCH_DECLARE(switch_status_t) switch_core_session_read_text_frame(switch_core_
 SWITCH_DECLARE(switch_status_t) switch_core_session_write_text_frame(switch_core_session_t *session, switch_frame_t *frame, switch_io_flag_t flags,
 																	 int stream_id);
 
-SWITCH_DECLARE(switch_status_t) switch_rtp_text_factory_create(switch_rtp_text_factory_t **tfP, switch_memory_pool_t *pool);
+SWITCH_DECLARE(switch_status_t) switch_rtp_text_factory_create(switch_rtp_text_factory_t **tfP, switch_core_session_t *session);
 SWITCH_DECLARE(switch_status_t) switch_rtp_text_factory_destroy(switch_rtp_text_factory_t **tfP);
 
 SWITCH_DECLARE(switch_status_t) switch_core_session_print(switch_core_session_t *session, const char *data);
