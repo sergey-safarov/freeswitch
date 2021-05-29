@@ -5954,6 +5954,9 @@ SWITCH_DECLARE(uint8_t) switch_core_media_negotiate_sdp(switch_core_session_t *s
 			payload_map_t *red_pmap = NULL;
 
 			switch_channel_set_flag(session->channel, CF_RTT);
+			if (smh->mparams->rtt_bom_enabled) {
+				switch_channel_set_flag(session->channel, CF_TEXT_SEND_BOM);
+			}
 
 			connection = sdp->sdp_connection;
 			if (m->m_connections) {
@@ -7322,7 +7325,12 @@ static void *SWITCH_THREAD_FUNC text_helper_thread(switch_thread_t *thread, void
 	switch_media_handle_t *smh;
 	switch_rtp_engine_t *t_engine = NULL;
 	unsigned char CR[] = TEXT_UNICODE_LINEFEED;
+	unsigned char BOM[] = TEXT_UNICODE_BOM;
 	switch_frame_t cr_frame = { 0 };
+	switch_frame_t bom_frame = { 0 };
+	switch_time_t now;
+	switch_time_t last_time_sent;
+	uint32_t bom_period;
 
 
 	session = mh->session;
@@ -7347,10 +7355,16 @@ static void *SWITCH_THREAD_FUNC text_helper_thread(switch_thread_t *thread, void
 	cr_frame.data = CR;
 	cr_frame.datalen = 3;
 
+	bom_frame.data = BOM;
+	bom_frame.datalen = 3;
+
+
 	t_engine = &smh->engines[SWITCH_MEDIA_TYPE_TEXT];
 	t_engine->thread_id = switch_thread_self();
 
 	mh->up = 1;
+
+	bom_period = smh->mparams->rtt_bom_period * 1000;
 
 	switch_core_media_check_dtls(session, SWITCH_MEDIA_TYPE_TEXT);
 
@@ -7360,6 +7374,7 @@ static void *SWITCH_THREAD_FUNC text_helper_thread(switch_thread_t *thread, void
 		switch_core_session_write_text_frame(session, &cr_frame, 0, 0);
 	}
 
+	last_time_sent = switch_micro_time_now();
 	while (switch_channel_up_nosig(channel)) {
 
 		if (t_engine->engine_function) {
@@ -7396,10 +7411,17 @@ static void *SWITCH_THREAD_FUNC text_helper_thread(switch_thread_t *thread, void
 					switch_core_session_write_text_frame(session, read_frame, 0, 0);
 				}
 			}
+
+			if (switch_channel_test_flag(session->channel, CF_TEXT_SEND_BOM)) {
+				now = switch_micro_time_now();
+
+				if (now - last_time_sent >= bom_period) {
+					switch_core_session_write_text_frame(session, &bom_frame, 0, 0);
+					last_time_sent = now;
+				}
+			}
 		}
-
 		switch_core_session_write_text_frame(session, NULL, 0, 0);
-
 
 	}
 
