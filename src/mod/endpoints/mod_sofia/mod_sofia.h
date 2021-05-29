@@ -801,7 +801,9 @@ struct sofia_profile {
 	char *rfc7989_filter;
 	char *acl_inbound_x_token_header;
 	char *acl_proxy_x_token_header;
-        uint8_t rtt_redundancy_level;
+	uint8_t rtt_redundancy_level;
+	int rtt_bom_enabled;
+	uint32_t rtt_bom_period; //ms
 };
 
 

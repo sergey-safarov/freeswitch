@@ -184,6 +184,8 @@ void sofia_glue_attach_private(switch_core_session_t *session, sofia_profile_t *
 	tech_pvt->mparams.rtp_timeout_sec = profile->rtp_timeout_sec;
 	tech_pvt->mparams.rtp_hold_timeout_sec = profile->rtp_hold_timeout_sec;
 	tech_pvt->mparams.rtt_redundancy_level = profile->rtt_redundancy_level;
+	tech_pvt->mparams.rtt_bom_enabled = profile->rtt_bom_enabled;
+	tech_pvt->mparams.rtt_bom_period = profile->rtt_bom_period;
 
 	if (profile->rtp_digit_delay) {
 		tech_pvt->mparams.dtmf_delay = profile->rtp_digit_delay;

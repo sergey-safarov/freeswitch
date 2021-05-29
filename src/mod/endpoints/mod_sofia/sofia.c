@@ -4704,6 +4704,8 @@ switch_status_t config_sofia(sofia_config_t reload, char *profile_name)
 					}
 				}
 				profile->rtt_redundancy_level = 5;
+				profile->rtt_bom_enabled = 1;
+				profile->rtt_bom_period = 400;
 
 				for (param = switch_xml_child(settings, "param"); param; param = param->next) {
 					char *var = (char *) switch_xml_attr_soft(param, "name");
@@ -6053,6 +6055,13 @@ switch_status_t config_sofia(sofia_config_t reload, char *profile_name)
 						int red_level = atoi(val);
 						if (red_level > 1 && red_level <= 8) {
 							profile->rtt_redundancy_level = red_level;
+						}
+					} else if (!strcasecmp(var, "rtt-bom-enabled") && !zstr(val)) {
+						profile->rtt_bom_enabled = switch_true(val) ? 1 : 0;
+					} else if (!strcasecmp(var, "rtt-bom-period") && !zstr(val)) {
+						int rtt_bom_period = atoi(val);
+						if (rtt_bom_period > 0) {
+							profile->rtt_bom_period = rtt_bom_period;
 						}
 					}
 				}

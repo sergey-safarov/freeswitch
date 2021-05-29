@@ -174,7 +174,9 @@ typedef struct switch_core_media_params_s {
 
 	switch_thread_t *video_write_thread;
 
-        uint8_t rtt_redundancy_level;
+	uint8_t rtt_redundancy_level;
+	int rtt_bom_enabled;
+	uint32_t rtt_bom_period; //ms
 
 } switch_core_media_params_t;
 
