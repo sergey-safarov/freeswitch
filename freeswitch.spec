@@ -145,7 +145,7 @@ BuildRequires: openssl-devel >= 1.0.1e
 BuildRequires: sofia-sip-devel >= 1.12.12
 BuildRequires: spandsp3-devel >= 3.0
 BuildRequires: pcre-devel 
-BuildRequires: speex-devel 
+BuildRequires: speex-devel speexdsp-devel
 BuildRequires: sqlite-devel >= 3.6.20
 BuildRequires: libtiff-devel
 BuildRequires: libedit-devel
