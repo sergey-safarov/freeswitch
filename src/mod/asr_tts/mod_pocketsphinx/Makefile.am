@@ -27,7 +27,7 @@ $(SPHINXBASE_DIR):
 
 $(SPHINXBASE_BUILDDIR)/Makefile: $(SPHINXBASE_DIR)
 	mkdir -p $(SPHINXBASE_BUILDDIR)
-	(cd $(SPHINXBASE_BUILDDIR) && $(DEFAULT_VARS) $(SPHINXBASE_DIR)/configure $(DEFAULT_ARGS) --srcdir=$(SPHINXBASE_DIR) --without-python CFLAGS=)
+	(cd $(SPHINXBASE_BUILDDIR) && autoreconf -i --force && $(DEFAULT_VARS) $(SPHINXBASE_DIR)/configure $(DEFAULT_ARGS) --srcdir=$(SPHINXBASE_DIR) --without-python CFLAGS=)
 	$(TOUCH_TARGET)
 
 $(SPHINXBASE_BUILDDIR)/buildstamp: $(SPHINXBASE_BUILDDIR)/Makefile
