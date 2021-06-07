@@ -609,16 +609,6 @@ BuildRequires:  flite-devel >= 2.0.0
 %description asrtts-flite
 Provides FreeSWITCH mod_flite, a interface to the flite text to speech engine
 
-%package asrtts-pocketsphinx
-Summary:	FreeSWITCH mod_pocketsphinx
-Group:          System/Libraries
-Requires:       %{name} = %{version}-%{release}
-BuildRequires:  bison
-
-%description asrtts-pocketsphinx
-Provides FreeSWITCH mod_pocketsphinx, a interface to the OpenSource 
-Pocketsphinx speech recognition engine
-
 %package asrtts-tts-commandline
 Summary:	FreeSWITCH mod_tts_commandline
 Group:          System/Libraries
@@ -1486,7 +1476,7 @@ APPLICATIONS_MODULES="$APPLICATION_MODULES_AC $APPLICATION_MODULES_DE $APPLICATI
 #				Automatic Speech Recognition and Text To Speech Modules
 #
 ######################################################################################################################
-ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_pocketsphinx asr_tts/mod_tts_commandline asr_tts/mod_unimrcp"
+ASR_TTS_MODULES="asr_tts/mod_flite asr_tts/mod_tts_commandline asr_tts/mod_unimrcp"
 
 ######################################################################################################################
 #
@@ -2192,9 +2182,6 @@ fi
 ######################################################################################################################
 %files asrtts-flite
 %{MODINSTDIR}/mod_flite.so*
-
-%files asrtts-pocketsphinx
-%{MODINSTDIR}/mod_pocketsphinx.so*
 
 %files asrtts-tts-commandline
 %{MODINSTDIR}/mod_tts_commandline.so*
