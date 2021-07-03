@@ -3311,7 +3311,7 @@ SWITCH_DECLARE(switch_status_t) switch_ivr_originate(switch_core_session_t *sess
 					ringback_data = NULL;
 				}
 			}
-
+            ringback_data = NULL;
 
 #if 0
 			/* changing behaviour ignore_early_media=true must also be explicitly set for previous behaviour */
