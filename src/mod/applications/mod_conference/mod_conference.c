@@ -1624,7 +1624,7 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 
 
 	if (conference_utils_test_flag(conference, CFLAG_RFC4579)) {
-		char *dialstr = switch_mprintf("{sip_invite_contact_params=~isfocus}%s", bridgeto);
+		char *dialstr = switch_mprintf("{sip_invite_contact_params=~isfocus,ignore_early_media=true}%s", bridgeto);
 		status = switch_ivr_originate(session, &peer_session, cause, dialstr, timeout, NULL, cid_name, cid_num, NULL, var_event, SOF_NO_LIMITS, cancel_cause, NULL);
 		switch_safe_free(dialstr);
 	} else {
