@@ -120,6 +120,7 @@ static switch_status_t create_session(switch_core_session_t **new_session, const
 	tech_pvt->session = session;
 	tech_pvt->channel = channel;
 	sofia_glue_attach_private(session, profile, tech_pvt, channel_name);
+	switch_mutex_lock(tech_pvt->sofia_mutex);
 	switch_channel_set_state(channel, CS_INIT);
 
 	if (switch_core_session_thread_launch(session) != SWITCH_STATUS_SUCCESS) {
@@ -9656,6 +9657,7 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 					const char* from_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) from);
 					const char* to_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) to);
 					const char* sip_refer_host = switch_str_nil(sip->sip_refer_to->r_url->url_host);
+					private_object_t *tech_pvt = (private_object_t *) switch_core_session_get_private(b_session);
 
 					if (!zstr(profile->name)) {
 						switch_channel_set_variable(channel, SOFIA_REFER_FROM_PROFILE_VARIABLE, profile->name);
@@ -9700,6 +9702,7 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 					switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
 					switch_channel_process_export(channel, b_channel, var_event, "conference_auto_refer_export_vars");
 
+					switch_mutex_unlock(tech_pvt->sofia_mutex);
 					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Created session for outbound channel '%s' for a call to '%s'\n", channel_name, full_ref_to);
 					switch_channel_mark_answered(b_channel);
 				}
