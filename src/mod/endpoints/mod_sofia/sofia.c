@@ -11977,8 +11977,8 @@ void sofia_handle_sip_i_options(int status,
 	uint32_t sess_max = switch_core_session_limit(0);
 
 	if (sofia_test_pflag(profile, PFLAG_OPTIONS_RESPOND_503_ON_BUSY) &&
-			(sess_count >= sess_max || !sofia_test_pflag(profile, PFLAG_RUNNING) || !switch_core_ready_inbound())) {
-		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Test Max-1 %s\n", sofia_private->uuid);
+			(sess_count >= sess_max || !sofia_test_pflag(profile, PFLAG_RUNNING) || !switch_core_ready_inbound() || switch_core_options_on_pause())) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Test Max-1 %s\n", (sofia_private ? switch_str_nil(sofia_private->uuid) : "null"));
 		nua_respond(nh, 503, "Maximum Calls In Progress", NUTAG_WITH_THIS_MSG(de->data->e_msg), SIPTAG_RETRY_AFTER_STR("300"), TAG_END());
 	} else {
 		switch_assert(sip);

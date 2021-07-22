@@ -2798,6 +2798,13 @@ SWITCH_DECLARE(int32_t) switch_core_session_ctl(switch_session_ctl_t cmd, void *
 			switch_clear_flag((&runtime), SCF_NO_NEW_OUTBOUND_SESSIONS);
 		}
 		break;
+	case SCSC_PAUSE_OPTIONS:
+		if (oldintval) {
+			switch_set_flag((&runtime), SCF_DISABLE_SIP_OPTIONS);
+		} else {
+			switch_clear_flag((&runtime), SCF_DISABLE_SIP_OPTIONS);
+		}
+		break;
 	case SCSC_HUPALL:
 		switch_core_session_hupall(SWITCH_CAUSE_MANAGER_REQUEST);
 		break;
@@ -2875,6 +2882,9 @@ SWITCH_DECLARE(int32_t) switch_core_session_ctl(switch_session_ctl_t cmd, void *
 		break;
 	case SCSC_PAUSE_OUTBOUND_CHECK:
 		newintval = !!switch_test_flag((&runtime), SCF_NO_NEW_OUTBOUND_SESSIONS);
+		break;
+	case SCSC_PAUSE_OPTIONS_CHECK:
+		newintval = !!switch_test_flag((&runtime), SCF_DISABLE_SIP_OPTIONS);
 		break;
 	case SCSC_READY_CHECK:
 		newintval = switch_core_ready();
@@ -3005,6 +3015,11 @@ SWITCH_DECLARE(switch_bool_t) switch_core_ready_inbound(void)
 SWITCH_DECLARE(switch_bool_t) switch_core_ready_outbound(void)
 {
 	return (switch_test_flag((&runtime), SCF_SHUTTING_DOWN) || switch_test_flag((&runtime), SCF_NO_NEW_OUTBOUND_SESSIONS)) ? SWITCH_FALSE : SWITCH_TRUE;
+}
+
+SWITCH_DECLARE(switch_bool_t) switch_core_options_on_pause(void)
+{
+    return (switch_test_flag((&runtime), SCF_SHUTTING_DOWN) || switch_test_flag((&runtime), SCF_DISABLE_SIP_OPTIONS)) ? SWITCH_TRUE : SWITCH_FALSE;
 }
 
 void switch_core_sqldb_destroy()
