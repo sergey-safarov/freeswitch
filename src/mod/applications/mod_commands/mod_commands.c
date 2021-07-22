@@ -2417,7 +2417,7 @@ SWITCH_STANDARD_API(uptime_function)
 	return SWITCH_STATUS_SUCCESS;
 }
 
-#define CTL_SYNTAX "[recover|send_sighup|hupall|pause [inbound|outbound]|resume [inbound|outbound]|shutdown [cancel|elegant|asap|now|restart]|sps|sps_peak_reset|sync_clock|sync_clock_when_idle|reclaim_mem|max_sessions|min_dtmf_duration [num]|max_dtmf_duration [num]|default_dtmf_duration [num]|min_idle_cpu|loglevel [level]|debug_level [level]]"
+#define CTL_SYNTAX "[recover|send_sighup|hupall|pause [inbound|outbound|options]|resume [inbound|outbound|options]|shutdown [cancel|elegant|asap|now|restart]|sps|sps_peak_reset|sync_clock|sync_clock_when_idle|reclaim_mem|max_sessions|min_dtmf_duration [num]|max_dtmf_duration [num]|default_dtmf_duration [num]|min_idle_cpu|loglevel [level]|debug_level [level]]"
 SWITCH_STANDARD_API(ctl_function)
 {
 	int argc;
@@ -2454,6 +2454,8 @@ SWITCH_STANDARD_API(ctl_function)
 					command = SCSC_PAUSE_INBOUND;
 				} else if (!strcasecmp(argv[1], "outbound")) {
 					command = SCSC_PAUSE_OUTBOUND;
+				} else if (!strcasecmp(argv[1], "options")) {
+					command = SCSC_PAUSE_OPTIONS;
 				}
 			}
 			switch_core_session_ctl(command, &arg);
@@ -2470,6 +2472,8 @@ SWITCH_STANDARD_API(ctl_function)
 					command = SCSC_PAUSE_INBOUND;
 				} else if (!strcasecmp(argv[1], "outbound")) {
 					command = SCSC_PAUSE_OUTBOUND;
+				} else if (!strcasecmp(argv[1], "options")) {
+					command = SCSC_PAUSE_OPTIONS;
 				}
 			}
 			switch_core_session_ctl(command, &arg);
@@ -2518,6 +2522,8 @@ SWITCH_STANDARD_API(ctl_function)
 					command = SCSC_PAUSE_INBOUND_CHECK;
 				} else if (!strcasecmp(argv[1], "outbound")) {
 					command = SCSC_PAUSE_OUTBOUND_CHECK;
+				} else if (!strcasecmp(argv[1], "options")) {
+					command = SCSC_PAUSE_OPTIONS_CHECK;
 				}
 			}
 			switch_core_session_ctl(command, &arg);
@@ -7639,10 +7645,12 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_commands_load)
 	switch_console_set_complete("add fsctl pause");
 	switch_console_set_complete("add fsctl pause inbound");
 	switch_console_set_complete("add fsctl pause outbound");
+	switch_console_set_complete("add fsctl pause options");
 	switch_console_set_complete("add fsctl reclaim_mem");
 	switch_console_set_complete("add fsctl resume");
 	switch_console_set_complete("add fsctl resume inbound");
 	switch_console_set_complete("add fsctl resume outbound");
+	switch_console_set_complete("add fsctl resume options");
 	switch_console_set_complete("add fsctl calibrate_clock");
 	switch_console_set_complete("add fsctl crash");
 	switch_console_set_complete("add fsctl verbose_events");
@@ -7650,6 +7658,7 @@ SWITCH_MODULE_LOAD_FUNCTION(mod_commands_load)
 	switch_console_set_complete("add fsctl pause_check");
 	switch_console_set_complete("add fsctl pause_check inbound");
 	switch_console_set_complete("add fsctl pause_check outbound");
+	switch_console_set_complete("add fsctl pause_check options");
 	switch_console_set_complete("add fsctl ready_check");
 	switch_console_set_complete("add fsctl recover");
 	switch_console_set_complete("add fsctl shutdown_check");

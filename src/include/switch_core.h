@@ -2306,6 +2306,11 @@ SWITCH_DECLARE(switch_bool_t) switch_core_ready_inbound(void);
 SWITCH_DECLARE(switch_bool_t) switch_core_ready_outbound(void);
 
 /*!
+  \brief Determines if the core is ready to reply on SIP OPTIONS
+  \return SWITCH_TRUE or SWITCH_FALSE
+*/
+SWITCH_DECLARE(switch_bool_t) switch_core_options_on_pause(void);
+/*!
   \brief return core flags
   \return core flags
 */
