@@ -3403,6 +3403,12 @@ SWITCH_DECLARE(switch_status_t) switch_core_media_read_frame(switch_core_session
 					engine->tf->text_frame.datalen = strlen(engine->tf->text_frame.data);
 				}
 
+			} else if (engine->read_frame.datalen == 1 && p[0] < 128) {
+				engine->tf->text_frame.data = engine->read_frame.data;
+				engine->tf->text_frame.datalen = 1;
+				engine->tf->text_frame.payload = p[0];
+				engine->tf->text_frame.datalen = 1;
+				engine->tf->red_level = 1;
 			} else {
 				if (!(engine->tf->text_frame.data = get_rtt_payload(engine->read_frame.data,
 																	engine->tf->text_frame.datalen,
