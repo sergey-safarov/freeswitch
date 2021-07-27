@@ -466,6 +466,16 @@ Provides FreeSWITCH mod_nibblebill, provides a credit/debit module for
 FreeSWITCH to allow real-time debiting of credit or cash from a database 
 while calls are in progress.
 
+%package application-prometheus
+Summary:	FreeSWITCH mod_prometheus
+Group:          System/Libraries
+Requires:       %{name} = %{version}-%{release}
+BuildRequires:  prometheus-client-c-devel
+
+%description application-prometheus
+Provides FreeSWITCH mod_prometheus, statistic exporter in Promethus format
+
+
 %package application-rad_auth
 Summary:	FreeSWITCH mod_rad_auth
 Group:          System/Libraries
@@ -1450,7 +1460,7 @@ APPLICATION_MODULES_AC="applications/mod_abstraction applications/mod_avmd appli
 			applications/mod_commands applications/mod_conference applications/mod_curl"
 APPLICATION_MODULES_DE="applications/mod_db applications/mod_directory applications/mod_distributor \
 			applications/mod_dptools applications/mod_easyroute applications/mod_enum applications/mod_esf \
-			applications/mod_expr "
+			applications/mod_expr applications/mod_prometheus"
 
 %if %{build_mod_av}
 APPLICATION_MODULES_AC+=" applications/mod_av"
@@ -1969,6 +1979,7 @@ fi
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/post_load_modules.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/pre_load_modules.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/presence_map.conf.xml
+%config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/prometheus.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/redis.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/rss.conf.xml
 %config(noreplace) %attr(0640, freeswitch, daemon) %{sysconfdir}/autoload_configs/rtmp.conf.xml
@@ -2132,6 +2143,9 @@ fi
 
 %files application-nibblebill
 %{MODINSTDIR}/mod_nibblebill.so*
+
+%files application-prometheus
+%{MODINSTDIR}/mod_prometheus.so*
 
 %files application-rad_auth
 %{MODINSTDIR}/mod_rad_auth.so*
