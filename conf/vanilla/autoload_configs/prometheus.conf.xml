@@ -1,0 +1,8 @@
+<configuration name="prometheus.conf" description="Prometheus config file">
+  <settings>
+    <param name="listen-ip" value="::"/>
+    <param name="listen-port" value="9141"/>
+    <param name="debug" value="true"/>
+  </settings>
+</configuration>
+
