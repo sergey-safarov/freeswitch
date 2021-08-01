@@ -1791,6 +1791,12 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 			*call->conference_domain++ = '\0';
 		}
 	}
+	else if (conference && conference->name) {
+		call->conference_name = strdup(conference->name);
+		if ((call->conference_domain = strchr(call->conference_name, '@'))) {
+			*call->conference_domain++ = '\0';
+		}
+	}
 
 	if (conference == NULL && !zstr(call->conference_name) && (call->conference = conference_find(call->conference_name, call->conference_domain))) {
 		switch_thread_rwlock_unlock(call->conference->rwlock);
@@ -1827,6 +1833,79 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 	}
 
 	if (bridgeto) {
+		char* pbeg = NULL;
+		char* pend = NULL;
+		char sip_call_id[512] = {0};
+		char conference_track_status[512] = {0};
+		char sip_refer_contact[512] = {0};
+		char sip_refer_to_uri[512] = {0};
+		char sip_refer_from_profile[512] = {0};
+		char sip_refer_from[512] = {0};
+		char sip_refer_to[512] = {0};
+		const char* sip_call_id_header = "sip_refer_call_id=";
+		const char* conference_track_status_header = "conference_track_status=";
+		const char* sip_refer_contact_header = "sip_refer_contact=";
+		const char* sip_refer_to_uri_header = "sip_refer_to_uri=";
+		const char* sip_refer_from_profile_header = "sip_refer_from_profile=";
+		const char* sip_refer_from_header = "sip_refer_from=";
+		const char* sip_refer_to_header = "sip_refer_to=";
+
+		if((pbeg=strstr(bridgeto,sip_call_id_header)) && (pend=strstr(pbeg+strlen(sip_call_id_header),"!"))) {
+			memcpy(sip_call_id, pbeg + strlen(sip_call_id_header), (size_t)(pend - pbeg) - strlen(sip_call_id_header));
+		}
+
+		if((pbeg=strstr(bridgeto,conference_track_status_header)) && (pend=strstr(pbeg+strlen(conference_track_status_header),"!"))) {
+			memcpy(conference_track_status, pbeg + strlen(conference_track_status_header), (size_t)(pend - pbeg) - strlen(conference_track_status_header));
+		}
+
+		if((pbeg=strstr(bridgeto,sip_refer_contact_header)) && (pend=strstr(pbeg+strlen(sip_refer_contact_header),"!"))) {
+			memcpy(sip_refer_contact, pbeg + strlen(sip_refer_contact_header), (size_t)(pend - pbeg) - strlen(sip_refer_contact_header));
+		}
+
+		if((pbeg=strstr(bridgeto,sip_refer_to_uri_header)) && (pend=strstr(pbeg+strlen(sip_refer_to_uri_header),"!"))) {
+			memcpy(sip_refer_to_uri, pbeg + strlen(sip_refer_to_uri_header), (size_t)(pend - pbeg) - strlen(sip_refer_to_uri_header));
+		}
+
+		if((pbeg=strstr(bridgeto,sip_refer_from_profile_header)) && (pend=strstr(pbeg+strlen(sip_refer_from_profile_header),"!"))) {
+			memcpy(sip_refer_from_profile, pbeg + strlen(sip_refer_from_profile_header), (size_t)(pend - pbeg) - strlen(sip_refer_from_profile_header));
+		}
+
+		if((pbeg=strstr(bridgeto,sip_refer_from_header)) && (pend=strstr(pbeg+strlen(sip_refer_from_header),"!"))) {
+			memcpy(sip_refer_from, pbeg + strlen(sip_refer_from_header), (size_t)(pend - pbeg) - strlen(sip_refer_from_header));
+		}
+
+		if((pbeg=strstr(bridgeto,sip_refer_to_header)) && (pend=strstr(pbeg+strlen(sip_refer_to_header),"!"))) {
+			memcpy(sip_refer_to, pbeg + strlen(sip_refer_to_header), (size_t)(pend - pbeg) - strlen(sip_refer_to_header));
+		}
+
+		if (!zstr(sip_call_id)) {
+			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_call_id", sip_call_id);
+		}
+
+		if (!zstr(conference_track_status)) {
+			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "conference_track_status", conference_track_status);
+		}
+
+		if (!zstr(sip_refer_contact)) {
+			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_refer_contact", sip_refer_contact);
+		}
+
+		if (!zstr(sip_refer_to_uri)) {
+			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_refer_to_uri", sip_refer_to_uri);
+		}
+
+		if (!zstr(sip_refer_from_profile)) {
+			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_refer_from_profile", sip_refer_from_profile);
+		}
+
+		if (!zstr(sip_refer_from)) {
+			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_refer_from", sip_refer_from);
+		}
+
+		if (!zstr(sip_refer_to)) {
+			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_refer_to", sip_refer_to);
+		}
+
 		call->bridgeto = strdup(bridgeto);
 	}
 	if (flags) {

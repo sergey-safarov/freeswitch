@@ -9544,11 +9544,11 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 		const char *br = switch_channel_get_partner_uuid(channel);
 		switch_core_session_t *b_session = NULL;
 		const char* conf_name = switch_channel_get_variable(tech_pvt->channel, "conference_name");
+		const char* contact_user = switch_channel_get_variable(tech_pvt->channel, "sip_contact_user");
 
 		switch_channel_set_variable_printf(channel, "transfer_to", "blind:%s", br ? br : exten);
 		switch_channel_set_variable_printf(channel, "transfer_destination", "blind:%s", exten);
-
-		if (!zstr(br) && (b_session = switch_core_session_locate(br)) && zstr(conf_name)) {
+		if (!zstr(br) && (b_session = switch_core_session_locate(br)) && zstr(conf_name) && zstr(contact_user)) {
 			const char *var;
 			switch_channel_t *b_channel = switch_core_session_get_channel(b_session);
 			switch_event_t *event = NULL;
@@ -9700,7 +9700,10 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 					switch_channel_set_variable(channel, "conference_track_status", "true");
 					switch_channel_set_variable(b_channel, "conference_track_status", "true");
 
+					switch_channel_set_variable(channel, "sip_refer_call_id", sip->sip_call_id->i_id);
+					switch_channel_set_variable(b_channel, "sip_refer_call_id", sip->sip_call_id->i_id);
 					switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
+
 					switch_channel_process_export(channel, b_channel, var_event, "conference_auto_refer_export_vars");
 
 					switch_mutex_unlock(tech_pvt->sofia_mutex);
