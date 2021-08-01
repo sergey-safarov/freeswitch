@@ -1730,13 +1730,14 @@ void *SWITCH_THREAD_FUNC conference_outcall_run(switch_thread_t *thread, void *o
 	if (call) {
 		switch_call_cause_t cause;
 		switch_event_t *event;
+		switch_status_t status = SWITCH_STATUS_SUCCESS;
 
 
-		conference_outcall(call->conference, call->conference_name,
+		status = conference_outcall(call->conference, call->conference_name,
 						   call->session, call->bridgeto, call->timeout,
 						   call->flags, call->cid_name, call->cid_num, call->profile, &cause, call->cancel_cause, call->var_event, &peer_uuid);
 
-		if (call->conference && test_eflag(call->conference, EFLAG_BGDIAL_RESULT) &&
+		if (SWITCH_STATUS_SUCCESS == status && call->conference && test_eflag(call->conference, EFLAG_BGDIAL_RESULT) &&
 			switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, CONF_EVENT_MAINT) == SWITCH_STATUS_SUCCESS) {
 			conference_event_add_data(call->conference, event);
 			switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Action", "bgdial-result");
