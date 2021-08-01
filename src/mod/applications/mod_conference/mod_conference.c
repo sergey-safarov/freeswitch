@@ -869,7 +869,7 @@ void *SWITCH_THREAD_FUNC conference_thread_run(switch_thread_t *thread, void *ob
 	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Write Lock ON\n");
 	switch_thread_rwlock_wrlock(conference->rwlock);
 	switch_thread_rwlock_unlock(conference->rwlock);
-	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Write Lock OFF\n");
+	switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Write Lock OFF: %s\n", conference->name);
 
 	if (conference->la) {
 		switch_live_array_destroy(&conference->la);
@@ -909,7 +909,9 @@ void *SWITCH_THREAD_FUNC conference_thread_run(switch_thread_t *thread, void *ob
 	}
 
 	switch_mutex_lock(conference->flag_mutex);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "1 destroy conference: %s\n", conference->name);
 	switch_event_destroy(&conference->variables);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "2 destroy conference: %s\n", conference->name);
 	switch_mutex_unlock(conference->flag_mutex);
 
 	if (conference->pool) {
@@ -1570,8 +1572,10 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 	const char *record_route = NULL;
 	const char *outgoing_contact_uri = NULL;
 
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "conference_outcall: var_event=[%p], conference_track_status=%s\n", (void*)var_event, var_event==NULL ? "NULL" : switch_event_get_header(var_event, "conference_track_status"));
 	if (var_event && switch_true(switch_event_get_header(var_event, "conference_track_status"))) {
 		track++;
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "conference_outcall: track=%d\n", track);
 		sip_refer_contact = switch_event_get_header(var_event, "sip_refer_contact");
 		sip_refer_from = switch_event_get_header(var_event, "sip_refer_from");
 		sip_refer_to = switch_event_get_header(var_event, "sip_refer_to_uri");
@@ -1613,6 +1617,7 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 	}
 
 	if (session != NULL) {
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "session != NULL\n");
 		caller_channel = switch_core_session_get_channel(session);
 	}
 
@@ -1629,6 +1634,7 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 	switch_mutex_lock(conference->mutex);
 	conference->originating++;
 	switch_mutex_unlock(conference->mutex);
+
 
 	if (track) {
 switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "conference_outcall: send_notify 100_trying\n");
@@ -1655,6 +1661,8 @@ switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "confer
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Cannot create outgoing channel, cause: %s\n",
 						  switch_channel_cause2str(*cause));
 		if (caller_channel) {
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Cannot create outgoing channel, caller_channel: %s\n",
+				  switch_channel_get_name(caller_channel));
 			switch_channel_hangup(caller_channel, *cause);
 		}
 
@@ -1666,6 +1674,7 @@ switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "confer
 	}
 
 	if (track) {
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "conference_outcall: send_notify 200_ok\n");
 		conference_send_notify(conference, "SIP/2.0 200 OK\r\n", _call_id, SWITCH_FALSE, var_event);
 	}
 
@@ -1750,12 +1759,25 @@ void *SWITCH_THREAD_FUNC conference_outcall_run(switch_thread_t *thread, void *o
 		switch_status_t status = SWITCH_STATUS_SUCCESS;
 
 
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_run: sip_refer_contact: %s\n", switch_event_get_header(call->var_event, "sip_refer_contact"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_run: sip_refer_from: %s\n", switch_event_get_header(call->var_event, "sip_refer_from"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_run: sip_refer_to: %s\n", switch_event_get_header(call->var_event, "sip_refer_to"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_run: sip_refer_from_profile: %s\n", switch_event_get_header(call->var_event, "sip_refer_from_profile"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_run: sip_invite_record_route: %s\n", switch_event_get_header(call->var_event, "sip_invite_record_route"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_run: sip_outgoing_contact_uri: %s\n", switch_event_get_header(call->var_event, "sip_outgoing_contact_uri"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_run: sip_refer_to_uri: %s\n", switch_event_get_header(call->var_event, "sip_refer_to_uri"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_outcall_run: sip_call_id: %s\n", switch_event_get_header(call->var_event, "sip_call_id"));
+
+
 		status = conference_outcall(call->conference, call->conference_name,
 						   call->session, call->bridgeto, call->timeout,
 						   call->flags, call->cid_name, call->cid_num, call->profile, &cause, call->cancel_cause, call->var_event, &peer_uuid);
 
 		if (SWITCH_STATUS_SUCCESS == status && call->conference && test_eflag(call->conference, EFLAG_BGDIAL_RESULT) &&
 			switch_event_create_subclass(&event, SWITCH_EVENT_CUSTOM, CONF_EVENT_MAINT) == SWITCH_STATUS_SUCCESS) {
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(call->session), SWITCH_LOG_ERROR, "conference_outcall_run: 1 conference_name: %s\n", call->conference_name);
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(call->session), SWITCH_LOG_ERROR, "conference_outcall_run: 2 conference_name: %s\n", call->conference->name);
+
 			conference_event_add_data(call->conference, event);
 			switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Action", "bgdial-result");
 			switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "Result", switch_channel_cause2str(cause));
@@ -1804,6 +1826,7 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 	call->cancel_cause = cancel_cause;
 
 	if (conference_name) {
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "2 conference_outcall_bg conference_name: [%s]\n", switch_str_nil(conference_name));
 		call->conference_name = strdup(conference_name);
 		if ((call->conference_domain = strchr(call->conference_name, '@'))) {
 			*call->conference_domain++ = '\0';
@@ -1834,13 +1857,26 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 	if (var_event) {
 		call->var_event = *var_event;
 		var_event = NULL;
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: 1\n");
 	} else if (call->conference && call->conference->outcall_export_member_id && (export_vars_member = conference_member_get(call->conference, call->conference->outcall_export_member_id))) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: sip_refer_contact: %s\n", switch_channel_get_variable(export_vars_member->channel, "sip_refer_contact"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: sip_refer_from: %s\n", switch_channel_get_variable(export_vars_member->channel, "sip_refer_from"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: sip_refer_to: %s\n", switch_channel_get_variable(export_vars_member->channel, "sip_refer_to"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: sip_refer_from_profile: %s\n", switch_channel_get_variable(export_vars_member->channel, "sip_refer_from_profile"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: sip_invite_record_route: %s\n", switch_channel_get_variable(export_vars_member->channel, "sip_invite_record_route"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: sip_outgoing_contact_uri: %s\n", switch_channel_get_variable(export_vars_member->channel, "sip_outgoing_contact_uri"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: sip_refer_to_uri: %s\n", switch_channel_get_variable(export_vars_member->channel, "sip_refer_to_uri"));
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: sip_call_id: %s\n", switch_channel_get_variable(export_vars_member->channel, "sip_call_id"));
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: switch_channel_get_name: %s\n", switch_channel_get_name(export_vars_member->channel));
+
 		switch_event_create(&call->var_event, SWITCH_EVENT_CHANNEL_DATA);
+//		switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "conference_name", call->conference_name);
 		switch_channel_process_export(export_vars_member->channel, NULL, call->var_event, "conference_auto_outcall_export_vars");
 		switch_channel_process_export(export_vars_member->channel, NULL, call->var_event, "conference_auto_refer_export_vars");
 		switch_event_del_header(call->var_event, "conference_auto_outcall_export_vars");
 	} else {
 		switch_event_create_plain(&call->var_event, SWITCH_EVENT_GENERAL);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "mod_conference: 2\n");
 	}
 
 	if (conference) {
@@ -1910,6 +1946,14 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 		if((pbeg=strstr(bridgeto,sip_refer_to_header)) && (pend=strstr(pbeg+strlen(sip_refer_to_header),"!"))) {
 			memcpy(sip_refer_to, pbeg + strlen(sip_refer_to_header), (size_t)(pend - pbeg) - strlen(sip_refer_to_header));
 		}
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 mod_conference: sip_call_id: %s\n", sip_call_id);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 mod_conference: sip_refer_contact: %s\n", sip_refer_contact);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 mod_conference: sip_refer_from: %s\n", sip_refer_from);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 mod_conference: sip_refer_to: %s\n", sip_refer_to);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 mod_conference: sip_refer_from_profile: %s\n", sip_refer_from_profile);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 mod_conference: sip_refer_to_uri: %s\n", sip_refer_to_uri);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 mod_conference: sip_invite_record_route: %s\n", sip_invite_record_route);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "111 mod_conference: sip_outgoing_contact_uri: %s\n", sip_outgoing_contact_uri);
 
 		if((pbeg=strstr(bridgeto,sip_invite_record_route_header)) && (pend=strstr(pbeg+strlen(sip_invite_record_route_header),"!"))) {
 			memcpy(sip_invite_record_route, pbeg + strlen(sip_invite_record_route_header), (size_t)(pend - pbeg) - strlen(sip_invite_record_route_header));
@@ -2856,6 +2900,7 @@ conference_obj_t *conference_find(char *name, char *domain)
 void conference_set_variable(conference_obj_t *conference, const char *var, const char *val)
 {
 	switch_mutex_lock(conference->flag_mutex);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_set_variable conference: %s\n", conference->name);
 	switch_event_add_header_string(conference->variables, SWITCH_STACK_BOTTOM, var, val);
 	switch_mutex_unlock(conference->flag_mutex);
 }
@@ -2865,6 +2910,7 @@ const char *conference_get_variable(conference_obj_t *conference, const char *va
 	const char *val;
 
 	switch_mutex_lock(conference->flag_mutex);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_get_variable conference: %s\n", conference->name);
 	val = switch_event_get_header(conference->variables, var);
 	switch_mutex_unlock(conference->flag_mutex);
 
@@ -3406,6 +3452,7 @@ conference_obj_t *conference_new(char *name, conference_xml_cfg_t cfg, switch_co
 	conference->broadcast_chat_messages = broadcast_chat_messages;
 	conference->video_quality = conference_video_quality;
 	conference->auto_kps_debounce = auto_kps_debounce;
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "conference_new conference: %s\n", switch_str_nil(conference->name));
 	switch_event_create_plain(&conference->variables, SWITCH_EVENT_CHANNEL_DATA);
 	conference->conference_video_mode = conference_video_mode;
 	conference->video_codec_config_profile_name = switch_core_strdup(conference->pool, video_codec_config_profile_name);

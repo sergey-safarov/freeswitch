@@ -1348,6 +1348,7 @@ void conference_loop_output(conference_member_t *member)
 	/* Start the input thread */
 	conference_loop_launch_input(member, switch_core_session_get_pool(member->session));
 
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Channel 'conference_auto_outcall_export_vars'=[%s]\n", switch_channel_get_variable(channel, "conference_auto_outcall_export_vars"));
 	if (switch_channel_get_variable(channel, "conference_auto_outcall_export_vars")) {
 		member->conference->outcall_export_member_id = member->id;
 		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_INFO, "Channel has defined variable 'conference_auto_outcall_export_vars', vars exported from member: [%i]\n", member->conference->outcall_export_member_id);

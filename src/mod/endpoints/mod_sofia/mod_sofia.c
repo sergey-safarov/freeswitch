@@ -369,7 +369,7 @@ switch_status_t sofia_on_destroy(switch_core_session_t *session)
 			msg_ref_destroy(tech_pvt->proxy_refer_msg);
 			tech_pvt->proxy_refer_msg = NULL;
 		}
-
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "%s SOFIA DESTROY 1; respond_phrase: %s\n", switch_channel_get_name(channel), switch_str_nil(tech_pvt->respond_phrase));
 		if (tech_pvt->respond_phrase) {
 			switch_yield(100000);
 		}
@@ -525,6 +525,7 @@ switch_status_t sofia_on_hangup(switch_core_session_t *session)
 					switch_channel_set_variable(channel, "sip_invite_failure_phrase", "CANCEL");
 				}
 				if (!sofia_test_flag(tech_pvt, TFLAG_BYE)) {
+//tech_pvt->respond_phrase = "canceling";
 					nua_cancel(tech_pvt->nh,
 							   SIPTAG_CONTACT(SIP_NONE),
 							   TAG_IF(call_info, SIPTAG_CALL_INFO_STR(call_info)),
@@ -5463,6 +5464,10 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler n
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: dst->route: %s\n", dst->route);
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: dst->to: %s\n", dst->to);
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: dst->contact: %s\n", dst->contact);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: sip_outgoing_contact_uri: %s\n", switch_str_nil(sip_outgoing_contact_uri));
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: no_sub_state: %s\n", no_sub_state);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: sub_state: %s\n", sub_state);
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  333: sip_sub_st: %s\n", sip_sub_st);
 
 					nua_notify(nh,
 							   NUTAG_NEWSUB(1), TAG_IF(sip_sub_st, SIPTAG_SUBSCRIPTION_STATE_STR(sip_sub_st)),
