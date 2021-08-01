@@ -1974,6 +1974,7 @@ static void our_sofia_event_callback(nua_event_t event,
 		break;
 	case nua_i_refer:
 		if (session) {
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1 nua_i_refer sip_call_id='%s'\n", switch_channel_get_variable(switch_core_session_get_channel(session), "sip_call_id"));
 			sofia_handle_sip_i_refer(nua, profile, nh, session, sip, de, tags);
 		} else if (sip) {
 			const char *req_user = NULL, *req_host = NULL, *action = NULL, *ref_by_user = NULL, *ref_to_user = NULL, *ref_to_host = NULL;
@@ -2561,6 +2562,7 @@ void sofia_event_callback(nua_event_t event,
 
 		if (!sofia_private) {
 			if (sess_count >= sess_max || !sofia_test_pflag(profile, PFLAG_RUNNING) || !switch_core_ready_inbound()) {
+			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Test Max-1 %s\n", sofia_private->uuid);
 				nua_respond(nh, 503, "Maximum Calls In Progress", SIPTAG_RETRY_AFTER_STR("300"), NUTAG_WITH_THIS(nua), TAG_END());
 				goto end;
 			}
@@ -2684,6 +2686,7 @@ void sofia_event_callback(nua_event_t event,
 
 			set_call_id(tech_pvt, sip);
 		} else {
+			switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Test Max-2 %s\n", sofia_private->uuid);
 			nua_respond(nh, 503, "Maximum Calls In Progress", SIPTAG_RETRY_AFTER_STR("300"), TAG_END());
 			nua_destroy_event(de->event);
 			su_free(nua_handle_get_home(nh), de);
@@ -2706,6 +2709,7 @@ void sofia_event_callback(nua_event_t event,
 				nua_handle_bind(nh, NULL);
 				sofia_private_free(sofia_private);
 				switch_core_session_destroy(&session);
+				switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Test Max-3 %s\n", sofia_private->uuid);
 				nua_respond(nh, 503, "Maximum Calls In Progress", SIPTAG_RETRY_AFTER_STR("300"), TAG_END());
 			}
 			switch_mutex_lock(profile->flag_mutex);
@@ -8878,6 +8882,10 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 	const char* to_user = NULL;
 	const char* to_host = NULL;
 
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1 sofia_handle_sip_i_refer sip_call_id='%s'\n", switch_channel_get_variable(channel_a, "sip_call_id"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "2 sofia_handle_sip_i_refer tech_pvt->sip_call_id='%s'\n", switch_channel_get_variable(tech_pvt->channel, "sip_call_id"));
+
+
 	if (!(profile->mflags & MFLAG_REFER)) {
 		nua_respond(nh, SIP_403_FORBIDDEN, NUTAG_WITH_THIS_MSG(de->data->e_msg), TAG_END());
 		goto done;
@@ -9548,31 +9556,47 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "Missing Refer-To\n");
 		goto done;
 	}
-
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1 exten: %s\n", switch_str_nil(exten));
 	if (exten) {
 		switch_channel_t *channel = switch_core_session_get_channel(session);
 		const char *br = switch_channel_get_partner_uuid(channel);
 		switch_core_session_t *b_session = NULL;
 		const char* conf_name = switch_channel_get_variable(tech_pvt->channel, "conference_name");
 		const char* contact_user = switch_channel_get_variable(tech_pvt->channel, "sip_contact_user");
+		const char* is_loopback = switch_channel_get_variable(tech_pvt->channel, "is_loopback");
 
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "0 channel sip_call_id='%s'\n", switch_channel_get_variable(channel, "sip_call_id"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "0 tech_pvt->channel sip_call_id='%s'\n", switch_channel_get_variable(tech_pvt->channel, "sip_call_id"));
+
+
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.01 is_loopback: %s\n", switch_str_nil(is_loopback));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.02 switch_channel_get_uuid(channel): %s\n", switch_str_nil(switch_channel_get_uuid(channel)));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.03 switch_channel_get_uuid(tech_pvt->channel): %s\n", switch_str_nil(switch_channel_get_uuid(tech_pvt->channel)));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.04 switch_channel_get_partner_uuid(channel): %s\n", switch_str_nil(switch_channel_get_partner_uuid(channel)));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.05 switch_channel_get_partner_uuid(tech_pvt->channel): %s\n", switch_str_nil(switch_channel_get_partner_uuid(tech_pvt->channel)));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.06 channel conference_name: %s\n", switch_str_nil(switch_channel_get_variable(channel, "conference_name")));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.07 tech_pvt->channel conference_name: %s\n", switch_str_nil(switch_channel_get_variable(tech_pvt->channel, "conference_name")));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.08 channel sip_contact_user: %s\n", switch_str_nil(switch_channel_get_variable(channel, "conference_name")));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.09 tech_pvt->channel sip_contact_user: %s\n", switch_str_nil(switch_channel_get_variable(tech_pvt->channel, "sip_contact_user")));
 		switch_channel_set_variable_printf(channel, "transfer_to", "blind:%s", br ? br : exten);
 		switch_channel_set_variable_printf(channel, "transfer_destination", "blind:%s", exten);
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1.1 exten: %s; br: %s\n", switch_str_nil(exten), switch_str_nil(br));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "2 exten: %s; conference_name: %s\n", switch_str_nil(exten), switch_str_nil(conf_name));
 		if (!zstr(br) && (b_session = switch_core_session_locate(br)) && zstr(conf_name) && zstr(contact_user)) {
 			const char *var;
 			switch_channel_t *b_channel = switch_core_session_get_channel(b_session);
 			switch_event_t *event = NULL;
-
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "3 exten: %s\n", switch_str_nil(exten));
 			switch_channel_set_variable(channel, "transfer_fallback_extension", from->a_user);
 			if (!zstr(full_ref_by)) {
 				switch_channel_set_variable(b_channel, SOFIA_SIP_HEADER_PREFIX "Referred-By", full_ref_by);
 			}
 
-                        if (!zstr(full_ref_to)) {
-                                switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
-                        }
+			if (!zstr(full_ref_to)) {
+				switch_channel_set_variable(b_channel, SOFIA_REFER_TO_VARIABLE, full_ref_to);
+			}
 
-                        if (switch_true(switch_channel_get_variable(channel, "recording_follow_transfer"))) {
+			if (switch_true(switch_channel_get_variable(channel, "recording_follow_transfer"))) {
 				switch_ivr_transfer_recordings(session, b_session);
 			}
 
@@ -9589,10 +9613,11 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 				switch_channel_set_variable(channel, "park_timeout", "600:blind_transfer");
 				switch_channel_set_state(channel, CS_PARK);
 			} else {
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "4 NOTIFY exten: %s\n", switch_str_nil(exten));
 				nua_notify(tech_pvt->nh, NUTAG_NEWSUB(1), SIPTAG_CONTENT_TYPE_STR("message/sipfrag;version=2.0"),
 						   NUTAG_SUBSTATE(nua_substate_terminated),
 						   SIPTAG_SUBSCRIPTION_STATE_STR("terminated;reason=noresource"),
-						   SIPTAG_PAYLOAD_STR("SIP/2.0 200 OK\r\n"), SIPTAG_EVENT_STR(etmp), 
+						   SIPTAG_PAYLOAD_STR("SIP/2.0 200 OK\r\n"), SIPTAG_EVENT_STR(etmp),
 						   TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)),
 						   TAG_END());
 			}
@@ -9717,9 +9742,24 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 
 					switch_channel_set_variable(channel, "sip_refer_call_id", sip->sip_call_id->i_id);
 					switch_channel_set_variable(b_channel, "sip_refer_call_id", sip->sip_call_id->i_id);
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "0 sip_refer_call_id='%s'\n", switch_channel_get_variable(channel, "sip_refer_call_id"));
 					switch_event_create(&var_event, SWITCH_EVENT_CHANNEL_DATA);
-
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1 channel sip_call_id='%s'\n", switch_channel_get_variable(channel, "sip_call_id"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1 b_channel sip_call_id='%s'\n", switch_channel_get_variable(b_channel, "sip_call_id"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1 tech_pvt->channel sip_call_id='%s'\n", switch_channel_get_variable(tech_pvt->channel, "sip_call_id"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1 channel conference_name='%s'\n", switch_channel_get_variable(channel, "conference_name"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1 b_channel conference_name='%s'\n", switch_channel_get_variable(b_channel, "conference_name"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "1 tech_pvt->channel conference_name='%s'\n", switch_channel_get_variable(tech_pvt->channel, "conference_name"));
 					switch_channel_process_export(channel, b_channel, var_event, "conference_auto_refer_export_vars");
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "2 channel sip_call_id='%s'\n", switch_channel_get_variable(channel, "sip_call_id"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "2 b_channel sip_call_id='%s'\n", switch_channel_get_variable(b_channel, "sip_call_id"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "2 tech_pvt->channel sip_call_id='%s'\n", switch_channel_get_variable(tech_pvt->channel, "sip_call_id"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "2 channel conference_name='%s'\n", switch_channel_get_variable(channel, "conference_name"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "2 b_channel conference_name='%s'\n", switch_channel_get_variable(b_channel, "conference_name"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "2 tech_pvt->channel conference_name='%s'\n", switch_channel_get_variable(tech_pvt->channel, "conference_name"));
+
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "channel sip_invite_record_route='%s'\n", switch_channel_get_variable(channel, "sip_invite_record_route"));
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "b_channel sip_invite_record_route='%s'\n", switch_channel_get_variable(b_channel, "sip_invite_record_route"));
 
 					switch_mutex_unlock(tech_pvt->sofia_mutex);
 					switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "Created session for outbound channel '%s' for a call to '%s'\n", channel_name, full_ref_to);
@@ -10459,6 +10499,7 @@ void sofia_handle_sip_i_invite(switch_core_session_t *session, nua_t *nua, sofia
 	}
 
 	if (!session || (sess_count >= sess_max || !sofia_test_pflag(profile, PFLAG_RUNNING))) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Test Max-4 %s\n", sofia_private->uuid);
 		nua_respond(nh, 503, "Maximum Calls In Progress", SIPTAG_RETRY_AFTER_STR("300"),
 					TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)), TAG_END());
 		goto fail;
@@ -11937,6 +11978,7 @@ void sofia_handle_sip_i_options(int status,
 
 	if (sofia_test_pflag(profile, PFLAG_OPTIONS_RESPOND_503_ON_BUSY) &&
 			(sess_count >= sess_max || !sofia_test_pflag(profile, PFLAG_RUNNING) || !switch_core_ready_inbound())) {
+		switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "Test Max-1 %s\n", sofia_private->uuid);
 		nua_respond(nh, 503, "Maximum Calls In Progress", NUTAG_WITH_THIS_MSG(de->data->e_msg), SIPTAG_RETRY_AFTER_STR("300"), TAG_END());
 	} else {
 		switch_assert(sip);

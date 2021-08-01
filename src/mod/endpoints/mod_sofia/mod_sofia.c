@@ -369,7 +369,7 @@ switch_status_t sofia_on_destroy(switch_core_session_t *session)
 			msg_ref_destroy(tech_pvt->proxy_refer_msg);
 			tech_pvt->proxy_refer_msg = NULL;
 		}
-
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "%s SOFIA DESTROY 1; respond_phrase: %s\n", switch_channel_get_name(channel), switch_str_nil(tech_pvt->respond_phrase));
 		if (tech_pvt->respond_phrase) {
 			switch_yield(100000);
 		}
@@ -525,6 +525,7 @@ switch_status_t sofia_on_hangup(switch_core_session_t *session)
 					switch_channel_set_variable(channel, "sip_invite_failure_phrase", "CANCEL");
 				}
 				if (!sofia_test_flag(tech_pvt, TFLAG_BYE)) {
+//tech_pvt->respond_phrase = "canceling";
 					nua_cancel(tech_pvt->nh,
 							   SIPTAG_CONTACT(SIP_NONE),
 							   TAG_IF(call_info, SIPTAG_CALL_INFO_STR(call_info)),

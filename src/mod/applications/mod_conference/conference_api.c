@@ -3634,8 +3634,10 @@ switch_status_t conference_api_sub_bgdial(conference_obj_t *conference, switch_s
 	switch_uuid_format(uuid_str, &uuid);
 
 	if (conference) {
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR,	"argv[2]='%s' ; argv[3]='%s' ; argv[4]='%s' ; uuid_str='%s'\n", argv[2], argv[3], argv[4], uuid_str);
 		conference_outcall_bg(conference, NULL, NULL, argv[2], 60, NULL, argv[4], argv[3], uuid_str, NULL, NULL, NULL);
 	} else {
+switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR,	"argv[0]='%s' ; argv[2]='%s' ; argv[3]='%s' ; argv[4]='%s' ; uuid_str='%s'\n", argv[0], argv[2], argv[3], argv[4], uuid_str);
 		conference_outcall_bg(NULL, argv[0], NULL, argv[2], 60, NULL, argv[4], argv[3], uuid_str, NULL, NULL, NULL);
 	}
 
