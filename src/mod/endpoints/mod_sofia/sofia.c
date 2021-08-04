@@ -9659,6 +9659,11 @@ void sofia_handle_sip_i_refer(nua_t *nua, sofia_profile_t *profile, nua_handle_t
 					const char* to_uri = sip_header_as_string(nua_handle_home(tech_pvt->nh), (void *) to);
 					const char* sip_refer_host = switch_str_nil(sip->sip_refer_to->r_url->url_host);
 					private_object_t *tech_pvt = (private_object_t *) switch_core_session_get_private(b_session);
+					const char* sip_invite_record_route = switch_channel_get_variable(channel, "sip_invite_record_route");
+
+					if (!zstr(sip_invite_record_route)) {
+						switch_channel_set_variable(b_channel, "sip_invite_record_route", sip_invite_record_route);
+					}
 
 					if (!zstr(profile->name)) {
 						switch_channel_set_variable(channel, SOFIA_REFER_FROM_PROFILE_VARIABLE, profile->name);

@@ -1835,13 +1835,6 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 	if (bridgeto) {
 		char* pbeg = NULL;
 		char* pend = NULL;
-		char sip_call_id[512] = {0};
-		char conference_track_status[512] = {0};
-		char sip_refer_contact[512] = {0};
-		char sip_refer_to_uri[512] = {0};
-		char sip_refer_from_profile[512] = {0};
-		char sip_refer_from[512] = {0};
-		char sip_refer_to[512] = {0};
 		const char* sip_call_id_header = "sip_refer_call_id=";
 		const char* conference_track_status_header = "conference_track_status=";
 		const char* sip_refer_contact_header = "sip_refer_contact=";
@@ -1849,6 +1842,25 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 		const char* sip_refer_from_profile_header = "sip_refer_from_profile=";
 		const char* sip_refer_from_header = "sip_refer_from=";
 		const char* sip_refer_to_header = "sip_refer_to=";
+		const char* sip_invite_record_route_header = "sip_invite_record_route=";
+
+		char* sip_call_id = (char*)switch_core_alloc(pool, 4096);
+		char* conference_track_status = (char*)switch_core_alloc(pool, 4096);
+		char* sip_refer_contact = (char*)switch_core_alloc(pool, 4096);
+		char* sip_refer_to_uri = (char*)switch_core_alloc(pool, 4096);
+		char* sip_refer_from_profile = (char*)switch_core_alloc(pool, 4096);
+		char* sip_refer_from = (char*)switch_core_alloc(pool, 4096);
+		char* sip_refer_to = (char*)switch_core_alloc(pool, 4096);
+		char* sip_invite_record_route = (char*)switch_core_alloc(pool, 4096);
+
+		memset(sip_call_id, 0 ,4096);
+		memset(conference_track_status, 0 ,4096);
+		memset(sip_refer_contact, 0 ,4096);
+		memset(sip_refer_to_uri, 0 ,4096);
+		memset(sip_refer_from_profile, 0 ,4096);
+		memset(sip_refer_from, 0 ,4096);
+		memset(sip_refer_to, 0 ,4096);
+		memset(sip_invite_record_route, 0 ,4096);
 
 		if((pbeg=strstr(bridgeto,sip_call_id_header)) && (pend=strstr(pbeg+strlen(sip_call_id_header),"!"))) {
 			memcpy(sip_call_id, pbeg + strlen(sip_call_id_header), (size_t)(pend - pbeg) - strlen(sip_call_id_header));
@@ -1878,6 +1890,10 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 			memcpy(sip_refer_to, pbeg + strlen(sip_refer_to_header), (size_t)(pend - pbeg) - strlen(sip_refer_to_header));
 		}
 
+		if((pbeg=strstr(bridgeto,sip_invite_record_route_header)) && (pend=strstr(pbeg+strlen(sip_invite_record_route_header),"!"))) {
+			memcpy(sip_invite_record_route, pbeg + strlen(sip_invite_record_route_header), (size_t)(pend - pbeg) - strlen(sip_invite_record_route_header));
+		}
+
 		if (!zstr(sip_call_id)) {
 			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_call_id", sip_call_id);
 		}
@@ -1904,6 +1920,10 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 
 		if (!zstr(sip_refer_to)) {
 			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_refer_to", sip_refer_to);
+		}
+
+		if (!zstr(sip_invite_record_route)) {
+			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", sip_invite_record_route);
 		}
 
 		call->bridgeto = strdup(bridgeto);
