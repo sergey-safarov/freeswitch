@@ -171,6 +171,7 @@ void conference_send_notify(conference_obj_t *conference, const char *status, co
 	char* contact_uri = NULL;
 	char* body = NULL;
 	char* record_route = NULL;
+	char* outgoing_contact_uri = NULL;
 	char* _call_id = NULL;
 
 	if (!conference_utils_test_flag(conference, CFLAG_RFC4579)) {
@@ -184,6 +185,7 @@ void conference_send_notify(conference_obj_t *conference, const char *status, co
 	    contact_uri = switch_event_get_header(source_event, "contact-uri");
 	    profile_name = switch_event_get_header(source_event, "profile");
 	    record_route = switch_event_get_header(source_event, "sip_invite_record_route");
+	    outgoing_contact_uri = switch_event_get_header(source_event, "sip_outgoing_contact_uri");
 	}
 
 	if (!(name = conference->name)) {
@@ -209,6 +211,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_send_notify:
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "from-uri", switch_str_nil(from_uri));
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "profile", switch_str_nil(profile_name));
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", switch_str_nil(record_route));
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "sip_outgoing_contact_uri", switch_str_nil(outgoing_contact_uri));
 
 		if (final) {
 			switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "final", "true");
@@ -1559,6 +1562,7 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 	const char *profile_name = NULL;
 	const char *_call_id = NULL;
 	const char *record_route = NULL;
+	const char *outgoing_contact_uri = NULL;
 
 	if (var_event && switch_true(switch_event_get_header(var_event, "conference_track_status"))) {
 		track++;
@@ -1568,12 +1572,14 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 		profile_name = switch_event_get_header(var_event, "sip_refer_from_profile");
 		_call_id = switch_event_get_header(var_event, "sip_call_id");
 		record_route = switch_event_get_header(var_event, "sip_invite_record_route");
+		outgoing_contact_uri = switch_event_get_header(var_event, "sip_outgoing_contact_uri");
 
 		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "contact-uri", switch_str_nil(sip_refer_contact));
 		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "to-uri", switch_str_nil(sip_refer_from));
 		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "from-uri", switch_str_nil(sip_refer_to));
 		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "profile", switch_str_nil(profile_name));
 		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", switch_str_nil(record_route));
+		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "sip_outgoing_contact_uri", switch_str_nil(outgoing_contact_uri));
 		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "call-id", switch_str_nil(_call_id));
 	}
 
@@ -1844,6 +1850,7 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 		const char* sip_refer_from_header = "sip_refer_from=";
 		const char* sip_refer_to_header = "sip_refer_to=";
 		const char* sip_invite_record_route_header = "sip_invite_record_route=";
+		const char* sip_outgoing_contact_uri_header = "sip_outgoing_contact_uri=";
 
 		char* sip_call_id = (char*)switch_core_alloc(pool, 4096);
 		char* conference_track_status = (char*)switch_core_alloc(pool, 4096);
@@ -1853,15 +1860,17 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 		char* sip_refer_from = (char*)switch_core_alloc(pool, 4096);
 		char* sip_refer_to = (char*)switch_core_alloc(pool, 4096);
 		char* sip_invite_record_route = (char*)switch_core_alloc(pool, 4096);
+		char* sip_outgoing_contact_uri = (char*)switch_core_alloc(pool, 4096);
 
-		memset(sip_call_id, 0 ,4096);
-		memset(conference_track_status, 0 ,4096);
-		memset(sip_refer_contact, 0 ,4096);
-		memset(sip_refer_to_uri, 0 ,4096);
-		memset(sip_refer_from_profile, 0 ,4096);
-		memset(sip_refer_from, 0 ,4096);
-		memset(sip_refer_to, 0 ,4096);
-		memset(sip_invite_record_route, 0 ,4096);
+		memset(sip_call_id, 0, 4096);
+		memset(conference_track_status, 0, 4096);
+		memset(sip_refer_contact, 0, 4096);
+		memset(sip_refer_to_uri, 0, 4096);
+		memset(sip_refer_from_profile, 0, 4096);
+		memset(sip_refer_from, 0, 4096);
+		memset(sip_refer_to, 0, 4096);
+		memset(sip_invite_record_route, 0, 4096);
+		memset(sip_outgoing_contact_uri, 0, 4096);
 
 		if((pbeg=strstr(bridgeto,sip_call_id_header)) && (pend=strstr(pbeg+strlen(sip_call_id_header),"!"))) {
 			memcpy(sip_call_id, pbeg + strlen(sip_call_id_header), (size_t)(pend - pbeg) - strlen(sip_call_id_header));
@@ -1895,6 +1904,10 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 			memcpy(sip_invite_record_route, pbeg + strlen(sip_invite_record_route_header), (size_t)(pend - pbeg) - strlen(sip_invite_record_route_header));
 		}
 
+		if((pbeg=strstr(bridgeto,sip_outgoing_contact_uri_header)) && (pend=strstr(pbeg+strlen(sip_outgoing_contact_uri_header),"!"))) {
+			memcpy(sip_outgoing_contact_uri, pbeg + strlen(sip_outgoing_contact_uri_header), (size_t)(pend - pbeg) - strlen(sip_outgoing_contact_uri_header));
+		}
+
 		if (!zstr(sip_call_id)) {
 			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_call_id", sip_call_id);
 		}
@@ -1925,6 +1938,10 @@ switch_status_t conference_outcall_bg(conference_obj_t *conference,
 
 		if (!zstr(sip_invite_record_route)) {
 			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", sip_invite_record_route);
+		}
+
+		if (!zstr(sip_outgoing_contact_uri)) {
+			switch_event_add_header_string(call->var_event, SWITCH_STACK_BOTTOM, "sip_outgoing_contact_uri", sip_outgoing_contact_uri);
 		}
 
 		call->bridgeto = strdup(bridgeto);
