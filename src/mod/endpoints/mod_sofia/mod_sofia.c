@@ -5355,6 +5355,7 @@ void general_event_handler(switch_event_t *event)
 			const char *contact_uri = switch_event_get_header(event, "contact-uri");
 			const char *no_sub_state = switch_event_get_header(event, "no-sub-state");
 			const char *sip_invite_record_route = switch_event_get_header(event, "sip_invite_record_route");
+			const char *sip_outgoing_contact_uri = switch_event_get_header(event, "sip_outgoing_contact_uri");
 
 			sofia_profile_t *profile;
 
@@ -5438,7 +5439,7 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "target route_uri:'%s'\n
 									NUTAG_URL(dst->contact),
 									SIPTAG_FROM_STR(from_uri),
 									SIPTAG_TO_STR(to_uri),
-									SIPTAG_CONTACT_STR(profile->url),
+									SIPTAG_CONTACT_STR((!zstr(sip_outgoing_contact_uri) ? sip_outgoing_contact_uri : profile->url)),
 									TAG_END());
 
 					nua_handle_bind(nh, &mod_sofia_globals.destroy_private);
