@@ -173,6 +173,8 @@ void conference_send_notify(conference_obj_t *conference, const char *status, co
 	char* record_route = NULL;
 	char* outgoing_contact_uri = NULL;
 	char* _call_id = NULL;
+	char* no_sub_state = NULL;
+	char* sub_state = NULL;
 
 	if (!conference_utils_test_flag(conference, CFLAG_RFC4579)) {
 		return;
@@ -186,6 +188,8 @@ void conference_send_notify(conference_obj_t *conference, const char *status, co
 	    profile_name = switch_event_get_header(source_event, "profile");
 	    record_route = switch_event_get_header(source_event, "sip_invite_record_route");
 	    outgoing_contact_uri = switch_event_get_header(source_event, "sip_outgoing_contact_uri");
+	    no_sub_state = switch_event_get_header(source_event, "no-sub-state");
+	    sub_state = switch_event_get_header(source_event, "sub-state");
 	}
 
 	if (!(name = conference->name)) {
@@ -212,6 +216,8 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_DEBUG, "conference_send_notify:
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "profile", switch_str_nil(profile_name));
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "sip_invite_record_route", switch_str_nil(record_route));
 		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "sip_outgoing_contact_uri", switch_str_nil(outgoing_contact_uri));
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "no-sub-state", switch_str_nil(no_sub_state));
+		switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "sub-state", switch_str_nil(sub_state));
 
 		if (final) {
 			switch_event_add_header_string(event, SWITCH_STACK_BOTTOM, "final", "true");
@@ -1625,7 +1631,12 @@ switch_status_t conference_outcall(conference_obj_t *conference,
 	switch_mutex_unlock(conference->mutex);
 
 	if (track) {
+switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_ERROR, "conference_outcall: send_notify 100_trying\n");
+		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "sub-state", "active;expires=60");
+		switch_event_add_header_string(var_event, SWITCH_STACK_BOTTOM, "no-sub-state", "true");
 		conference_send_notify(conference, "SIP/2.0 100 Trying\r\n", _call_id, SWITCH_FALSE, var_event);
+		switch_event_del_header(var_event, "sub-state");
+		switch_event_del_header(var_event, "no-sub-state");
 	}
 
 

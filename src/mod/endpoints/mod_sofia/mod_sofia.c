@@ -5354,6 +5354,7 @@ void general_event_handler(switch_event_t *event)
 			const char *extra_headers = switch_event_get_header(event, "extra-headers");
 			const char *contact_uri = switch_event_get_header(event, "contact-uri");
 			const char *no_sub_state = switch_event_get_header(event, "no-sub-state");
+			const char *sub_state = switch_event_get_header(event, "sub-state");
 			const char *sip_invite_record_route = switch_event_get_header(event, "sip_invite_record_route");
 			const char *sip_outgoing_contact_uri = switch_event_get_header(event, "sip_outgoing_contact_uri");
 
@@ -5446,6 +5447,9 @@ switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "target route_uri:'%s'\n
 
 					if (!switch_true(no_sub_state)) {
 						sip_sub_st = "terminated;reason=noresource";
+					}
+					else if (!zstr(sub_state)) {
+						sip_sub_st = strdup(sub_state);
 					}
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  222 body: %s\n", body);
 switch_log_printf(SWITCH_CHANNEL_LOG, SWITCH_LOG_ERROR, "general_event_handler notify  111\n");
