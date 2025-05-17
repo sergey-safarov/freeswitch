@@ -57,16 +57,17 @@ extra_files_debian() {
     cat << EOF
 /etc
 /bin
-/bin/busybox
+/usr/bin/busybox
 /usr/bin
 /usr/bin/epmd
 /usr/lib
 /usr/lib/erlang
 /usr/lib/erlang/bin
 /usr/lib/erlang/bin/epmd
-/usr/lib/erlang/erts-6.2
-/usr/lib/erlang/erts-6.2/bin
-/usr/lib/erlang/erts-6.2/bin/epmd
+/usr/lib/erlang/erts-13.1.5
+/usr/lib/erlang/erts-13.1.5/bin
+/usr/lib/erlang/erts-13.1.5/bin/epmd
+/usr/lib64
 EOF
 }
 
@@ -140,7 +141,8 @@ tar_files() {
 make_image_tar() {
     local CURDIR=`pwd`
     cd $BUILD_ROOT
-    tar xzf $TMP_TAR
+    tar xzf $TMP_TAR 2> /dev/null
+    tar xz --overwrite -f $TMP_TAR
     find usr/share/freeswitch/conf/* -maxdepth 0 -type d -not -name vanilla -exec rm -Rf {} \;
     # Patching config file
     patch -p 1 < $CURDIR/freeswitch-config.patch
